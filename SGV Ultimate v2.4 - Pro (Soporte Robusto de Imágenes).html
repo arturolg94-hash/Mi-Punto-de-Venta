@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGV Ultimate v2.4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        .app-tab { display: none; }
+        .app-tab.active { display: block; }
+        .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; }
+        .btn-pago-active { background-color: #4f46e5 !important; color: white !important; border-color: #4f46e5 !important; }
+        #barraProgreso { transition: width 0.2s ease-out; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans text-[14px]">
+
+    <div id="loginScreen" class="flex-1 flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="bg-indigo-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"><span class="text-3xl">🚀</span></div>
+                <h1 class="text-2xl font-black text-indigo-600 italic uppercase">SGV CONTROL</h1>
+                <p class="text-slate-400 text-xs mt-2 font-medium">Gestión Inteligente de Inventario</p>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="gasUrlInput" class="w-full px-6 py-4 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="URL de Google Script">
+                <input type="text" id="userInput" class="w-full px-6 py-4 border rounded-2xl outline-none" placeholder="Usuario" value="admin">
+                <input type="password" id="passInput" class="w-full px-6 py-4 border rounded-2xl outline-none" placeholder="Contraseña" value="admin123">
+                <button onclick="intentarLogin()" class="w-full bg-indigo-600 text-white font-bold py-5 rounded-2xl shadow-xl transform active:scale-95 transition-all">INICIAR SESIÓN</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="appScreen" class="hidden flex-1 flex flex-col">
+        <header class="bg-indigo-600 text-white p-5 flex justify-between items-center sticky top-0 z-50 shadow-md">
+            <div><h1 class="font-black italic text-lg uppercase tracking-tighter">SGV PRO</h1><p id="userBanner" class="text-[9px] font-bold opacity-70"></p></div>
+            <button onclick="logout()" class="text-[10px] font-bold bg-indigo-500 px-3 py-2 rounded-xl">SALIR</button>
+        </header>
+
+        <main class="flex-1 p-4 max-w-4xl w-full mx-auto pb-32">
+            
+            <div id="tab-vender" class="app-tab active space-y-4">
+                <div class="bg-white p-6 rounded-[2rem] border shadow-sm space-y-4">
+                    <div id="reader-vender" class="rounded-2xl overflow-hidden hidden border-4 border-indigo-50"></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="buscarCodigoInput" placeholder="Código o Nombre..." class="flex-1 px-5 py-3 border rounded-2xl text-sm outline-none focus:border-indigo-500">
+                        <button onclick="toggleScanner('vender')" class="bg-slate-100 p-3 rounded-2xl border">📷</button>
+                        <button onclick="buscarProducto()" class="bg-indigo-600 text-white px-5 py-3 rounded-2xl font-bold text-xs uppercase">Añadir</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-[2rem] border shadow-sm space-y-5">
+                    <div id="carritoContenedor" class="space-y-2 min-h-[40px]"></div>
+                    <div class="border-t pt-5 space-y-4">
+                        <div class="flex gap-2 bg-slate-50 p-2 rounded-2xl">
+                            <button onclick="setTipoPago('contado')" id="btnContado" class="flex-1 py-3 rounded-xl border bg-white font-bold text-xs btn-pago-active">CONTADO</button>
+                            <button onclick="setTipoPago('pagos')" id="btnPagos" class="flex-1 py-3 rounded-xl border bg-white font-bold text-xs">A PAGOS</button>
+                        </div>
+                        <div id="areaRecargo" class="hidden flex justify-between items-center bg-indigo-50 p-3 rounded-xl">
+                            <span class="text-[10px] font-black text-indigo-600 uppercase">Recargo (%)</span>
+                            <input type="number" id="recargoVentaInput" value="15" onchange="calcularTotalVenta()" class="w-16 text-right font-bold bg-transparent outline-none">
+                        </div>
+                        <div class="flex justify-between items-end px-2">
+                            <span class="text-slate-400 font-bold uppercase text-[10px]">Monto Total</span>
+                            <span id="totalCarrito" class="text-3xl font-black text-indigo-600 tracking-tighter">$0.00</span>
+                        </div>
+                        <input type="text" id="clienteNombre" placeholder="Nombre del cliente" class="w-full px-5 py-4 border rounded-2xl bg-slate-50 outline-none">
+                        <button onclick="procesarVenta()" class="w-full bg-emerald-600 text-white py-5 rounded-[1.8rem] font-black shadow-lg uppercase tracking-widest text-xs transition-all transform active:scale-95">Registrar Venta</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-inventario" class="app-tab space-y-4">
+                <div class="flex justify-between items-center px-2">
+                    <h2 class="font-black text-xl text-slate-800 uppercase italic tracking-tighter">Inventario</h2>
+                    <button onclick="abrirModalProducto()" class="bg-indigo-600 text-white text-[10px] font-black px-6 py-3 rounded-2xl shadow-md">+ NUEVO</button>
+                </div>
+                <div id="listaInventario" class="grid gap-3"></div>
+            </div>
+
+            <div id="tab-config" class="app-tab space-y-4">
+                <h2 class="font-black text-xl text-slate-800 uppercase px-2">Usuarios</h2>
+                <div class="bg-white p-8 rounded-[2.5rem] border shadow-sm space-y-4">
+                    <input type="text" id="nuevoUser" placeholder="Usuario" class="w-full px-5 py-3 border rounded-2xl text-sm outline-none">
+                    <input type="password" id="nuevoPass" placeholder="Contraseña" class="w-full px-5 py-3 border rounded-2xl text-sm outline-none">
+                    <select id="nuevoRol" class="w-full px-5 py-3 border rounded-2xl text-sm bg-white font-bold outline-none">
+                        <option value="Vendedor">Vendedor</option>
+                        <option value="Admin">Administrador</option>
+                    </select>
+                    <button onclick="guardarUsuario()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">Crear Cuenta</button>
+                </div>
+            </div>
+        </main>
+
+        <nav class="bg-white border-t border-slate-100 fixed bottom-0 left-0 right-0 h-24 flex items-center justify-around z-50 px-6">
+            <button onclick="switchTab('vender')" class="nav-btn flex flex-col items-center flex-1 py-2 text-slate-300" id="btn-vender">
+                <span class="text-2xl mb-1">🛒</span><span class="text-[9px] font-black uppercase">Ventas</span>
+            </button>
+            <button onclick="switchTab('inventario')" class="nav-btn flex flex-col items-center flex-1 py-2 text-slate-300" id="btn-inventario">
+                <span class="text-2xl mb-1">📦</span><span class="text-[9px] font-black uppercase">Stock</span>
+            </button>
+            <button id="nav-config" onclick="switchTab('config')" class="nav-btn flex flex-col items-center flex-1 py-2 text-slate-300 hidden" id="btn-config">
+                <span class="text-2xl mb-1">⚙️</span><span class="text-[9px] font-black uppercase">Admin</span>
+            </button>
+        </nav>
+    </div>
+
+    <div id="modalProducto" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-[100] backdrop-blur-md">
+        <div class="bg-white p-8 rounded-[3rem] w-full max-w-md space-y-4 shadow-2xl overflow-y-auto max-h-[95vh] border border-white/20">
+            <div class="flex justify-between items-center">
+                <h3 class="font-black text-indigo-600 uppercase tracking-widest text-sm" id="modalTitulo">Gestionar Producto</h3>
+                <button onclick="cerrarModal()" class="text-slate-300 text-2xl font-bold transition">✕</button>
+            </div>
+            
+            <div id="reader-modal" class="rounded-2xl overflow-hidden hidden border-4 border-indigo-50"></div>
+            
+            <div class="flex gap-2">
+                <input type="text" id="prodCodigo" placeholder="Escanear Código..." class="flex-1 px-5 py-4 border rounded-2xl text-sm font-black bg-slate-50 outline-none" onchange="verificarExistente()">
+                <button onclick="toggleScanner('modal')" class="bg-slate-100 px-6 rounded-2xl border">📷</button>
+            </div>
+
+            <div class="space-y-4">
+                <input type="text" id="prodNombre" placeholder="Nombre del artículo" class="w-full px-5 py-4 border rounded-2xl text-sm font-bold bg-white outline-none">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[9px] font-black text-slate-400 uppercase ml-3 mb-1 block">Stock (+)</label>
+                        <input type="number" id="prodStock" placeholder="0" class="w-full px-5 py-4 border rounded-2xl text-sm font-black outline-none bg-white border-slate-100 shadow-inner">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black text-slate-400 uppercase ml-3 mb-1 block">Precio Contado</label>
+                        <input type="number" id="prodPrecio" placeholder="0.00" class="w-full px-5 py-4 border rounded-2xl text-sm font-black outline-none bg-white border-slate-100 shadow-inner">
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-2 border-dashed border-slate-200 p-5 rounded-[2rem] bg-slate-50 space-y-4 text-center">
+                <div id="previewImagen" class="flex justify-center hidden">
+                    <img id="imgActual" src="" class="h-32 w-32 object-cover rounded-[2rem] border-4 border-white shadow-xl">
+                </div>
+
+                <div id="progresoContenedor" class="hidden space-y-2">
+                    <div class="flex justify-between text-[10px] font-black text-indigo-600 uppercase tracking-widest px-1">
+                        <span id="textoStatus">Procesando...</span><span id="porcentajeTexto">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                        <div id="barraProgreso" class="bg-indigo-600 h-full rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="document.getElementById('inputCamara').click()" class="bg-white border-2 py-3 rounded-2xl text-[10px] font-black shadow-sm">📸 CÁMARA</button>
+                    <button onclick="document.getElementById('inputGaleria').click()" class="bg-white border-2 py-3 rounded-2xl text-[10px] font-black shadow-sm">🖼️ GALERÍA</button>
+                </div>
+                <input type="file" id="inputCamara" accept="image/*" capture="environment" class="hidden" onchange="comprimirYSubir(this)">
+                <input type="file" id="inputGaleria" accept="image/*" class="hidden" onchange="comprimirYSubir(this)">
+                <input type="hidden" id="prodFoto">
+            </div>
+
+            <button onclick="guardarProducto()" class="w-full bg-indigo-600 text-white py-5 rounded-[1.8rem] font-black shadow-lg uppercase text-xs tracking-widest transition-all transform active:scale-95">Guardar Cambios</button>
+        </div>
+    </div>
+
+    <script>
+        let db = { inventario: [], usuarios: [] };
+        let gasUrl = ""; let usuarioActual = null; let carrito = [];
+        let scannerVender = null; let scannerModal = null;
+        let tipoPagoActual = 'contado';
+
+        function intentarLogin() {
+            gasUrl = document.getElementById("gasUrlInput").value.trim();
+            if(!gasUrl) return alert("Pega la URL del Script");
+            localStorage.setItem("sgv_url", gasUrl);
+            fetch(`${gasUrl}?action=obtenerDatos`).then(r => r.json()).then(data => {
+                const user = document.getElementById("userInput").value;
+                const pass = document.getElementById("passInput").value;
+                const found = data.usuarios.find(u => u.Usuario == user && u.Contraseña == pass);
+                if (found) { 
+                    db = data; usuarioActual = found;
+                    document.getElementById("loginScreen").classList.add("hidden");
+                    document.getElementById("appScreen").classList.remove("hidden");
+                    document.getElementById("userBanner").innerText = `${found.Usuario} | ${found.Rol}`;
+                    if(found.Rol === 'Admin') document.getElementById("nav-config").classList.remove("hidden");
+                    switchTab('vender'); renderInventario();
+                } else alert("Datos de acceso incorrectos");
+            }).catch(e => alert("Error de conexión. Verifica la URL."));
+        }
+
+        function switchTab(t) {
+            document.querySelectorAll('.app-tab').forEach(e => e.classList.remove('active'));
+            document.getElementById('tab-'+t).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('nav-active'));
+            document.getElementById('btn-'+t)?.classList.add('nav-active');
+        }
+
+        // --- SUBIDA DE IMÁGENES REFORZADA ---
+        function comprimirYSubir(input) {
+            if (!input.files[0]) return;
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            const contenedor = document.getElementById("progresoContenedor");
+            const barra = document.getElementById("barraProgreso");
+            const textoStatus = document.getElementById("textoStatus");
+            const porcentajeTexto = document.getElementById("porcentajeTexto");
+            
+            contenedor.classList.remove("hidden");
+            barra.style.width = "5%";
+            porcentajeTexto.innerText = "5%";
+            textoStatus.innerText = "Leyendo archivo...";
+
+            reader.onerror = () => { alert("Error al leer el archivo"); contenedor.classList.add("hidden"); };
+            
+            reader.onload = (e) => {
+                // Si el archivo es menor a 150KB, enviarlo directo sin procesar canvas
+                if (file.size < 150000) {
+                    textoStatus.innerText = "Archivo ligero, enviando...";
+                    enviarAGoogle(e.target.result, file.type);
+                    return;
+                }
+
+                textoStatus.innerText = "Comprimiendo...";
+                const img = new Image();
+                img.src = e.target.result;
+                
+                img.onerror = () => {
+                    textoStatus.innerText = "Fallo al procesar, enviando original...";
+                    enviarAGoogle(e.target.result, file.type);
+                };
+
+                img.onload = () => {
+                    try {
+                        const MAX_WIDTH = 800;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+
+                        const canvas = document.createElement("canvas");
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+                        enviarAGoogle(dataUrl, "image/jpeg");
+                    } catch (err) {
+                        enviarAGoogle(e.target.result, file.type);
+                    }
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function enviarAGoogle(base64DataUrl, mimeType) {
+            const barra = document.getElementById("barraProgreso");
+            const textoStatus = document.getElementById("textoStatus");
+            const porcentajeTexto = document.getElementById("porcentajeTexto");
+            
+            const base64 = base64DataUrl.split(",")[1];
+            const payload = JSON.stringify({ 
+                action: "subirImagen", 
+                data: { base64: base64, mimeType: mimeType, nombreArchivo: "prod_" + Date.now() + ".jpg" } 
+            });
+
+            const xhr = new XMLHttpRequest();
+            xhr.upload.onprogress = (ev) => {
+                if (ev.lengthComputable) {
+                    const porc = Math.round((ev.loaded / ev.total) * 100);
+                    barra.style.width = porc + "%";
+                    porcentajeTexto.innerText = porc + "%";
+                    textoStatus.innerText = porc < 100 ? "Subiendo..." : "Procesando...";
+                }
+            };
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    try {
+                        const res = JSON.parse(xhr.responseText);
+                        if (res.status === "success") {
+                            document.getElementById("prodFoto").value = res.url;
+                            document.getElementById("imgActual").src = res.url;
+                            document.getElementById("previewImagen").classList.remove("hidden");
+                            textoStatus.innerText = "¡LISTO!";
+                            setTimeout(() => document.getElementById("progresoContenedor").classList.add("hidden"), 1000);
+                        } else alert("Error de Google: " + res.message);
+                    } catch(e) { alert("Error al procesar respuesta"); }
+                }
+            };
+            
+            xhr.onerror = () => alert("Error de red al subir");
+            xhr.open("POST", gasUrl, true);
+            xhr.setRequestHeader("Content-Type", "text/plain");
+            xhr.send(payload);
+        }
+
+        function verificarExistente() {
+            const cod = document.getElementById("prodCodigo").value.trim();
+            const p = db.inventario.find(p => p.Código.toString().trim() == cod);
+            if (p) {
+                document.getElementById("prodNombre").value = p.Nombre || "";
+                document.getElementById("prodPrecio").value = p.PrecioVenta || 0;
+                document.getElementById("prodFoto").value = p.FotoURL || "";
+                if(p.FotoURL) { 
+                    document.getElementById("previewImagen").classList.remove("hidden"); 
+                    document.getElementById("imgActual").src = p.FotoURL; 
+                }
+                document.getElementById("modalTitulo").innerText = "Surtir Stock Actual";
+            }
+        }
+
+        function guardarProducto() {
+            const cod = document.getElementById("prodCodigo").value.trim();
+            const cantN = parseInt(document.getElementById("prodStock").value) || 0;
+            const exist = db.inventario.find(p => p.Código.toString().trim() == cod);
+            const data = {
+                codigo: cod, nombre: document.getElementById("prodNombre").value,
+                cantidad: exist ? (parseInt(exist.Cantidad) + cantN) : cantN,
+                precioVenta: parseFloat(document.getElementById("prodPrecio").value),
+                fotoUrl: document.getElementById("prodFoto").value,
+                recargoPagos: exist ? exist.RecargoPagos : 15
+            };
+            fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "actualizarInventario", data: data }) }).then(() => { cerrarModal(); refresh(); });
+        }
+
+        function renderInventario() {
+            document.getElementById("listaInventario").innerHTML = db.inventario.map(p => `
+                <div class="bg-white p-5 rounded-[2.5rem] border flex items-center gap-5 shadow-sm transition hover:shadow-md">
+                    <img src="${p.FotoURL || 'https://via.placeholder.com/100'}" class="w-16 h-16 object-cover rounded-2xl bg-slate-50 border">
+                    <div class="flex-1">
+                        <p class="font-black text-sm text-slate-800 uppercase tracking-tighter">${p.Nombre}</p>
+                        <div class="flex gap-2 mt-2">
+                            <span class="text-[9px] font-black bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full border border-indigo-100 uppercase">Stock: ${p.Cantidad}</span>
+                            <span class="text-[9px] font-black bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100 uppercase">$${p.PrecioVenta}</span>
+                        </div>
+                    </div>
+                    <button onclick="cargarParaEditar('${p.Código}')" class="bg-slate-50 text-indigo-600 p-3 rounded-2xl border border-indigo-100 hover:bg-indigo-600 hover:text-white transition">✏️</button>
+                </div>`).join('');
+        }
+
+        function buscarProducto() {
+            const term = document.getElementById("buscarCodigoInput").value.trim();
+            const p = db.inventario.find(i => i.Código.toString().trim() == term || i.Nombre.toLowerCase().includes(term.toLowerCase()));
+            if(p) {
+                if(p.Cantidad <= 0) return alert("Producto sin existencias");
+                const enC = carrito.find(c => c.codigo == p.Código);
+                if(enC) { if(enC.cantidad + 1 > p.Cantidad) return alert("Máximo stock alcanzado"); enC.cantidad++; } 
+                else carrito.push({ codigo: p.Código, nombre: p.Nombre, precio: p.PrecioVenta, cantidad: 1 });
+                renderCarrito(); document.getElementById("buscarCodigoInput").value = "";
+            } else alert("Producto no localizado");
+        }
+
+        function renderCarrito() {
+            const cont = document.getElementById("carritoContenedor");
+            if(carrito.length === 0) cont.innerHTML = `<p class="text-center text-slate-300 text-[10px] font-bold uppercase py-4 italic tracking-widest">Carrito Vacío</p>`;
+            else {
+                cont.innerHTML = carrito.map(i => `
+                    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border text-sm font-bold border-slate-100">
+                        <div class="flex flex-col"><span class="uppercase text-xs text-slate-700 tracking-tighter">${i.nombre}</span><span class="text-[9px] text-slate-400">$${i.precio} x ${i.cantidad}</span></div>
+                        <div class="flex items-center gap-3"><b class="text-indigo-600">$${(i.precio*i.cantidad).toFixed(2)}</b><button onclick="eliminarCarrito('${i.codigo}')" class="text-red-400 ml-2">✕</button></div>
+                    </div>`).join('');
+            }
+            calcularTotalVenta();
+        }
+
+        function eliminarCarrito(c) { carrito = carrito.filter(i => i.codigo !== c); renderCarrito(); }
+        function procesarVenta() {
+            if(carrito.length === 0) return;
+            const data = {
+                vendedor: usuarioActual.Usuario, clienteNombre: document.getElementById("clienteNombre").value || "Gral",
+                productos: carrito, total: parseFloat(document.getElementById("totalCarrito").innerText.replace("$","")), 
+                metodoPago: tipoPagoActual === 'contado' ? 'Contado' : `Pagos`
+            };
+            fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "registrarVenta", data: data }) }).then(() => { 
+                alert("Venta registrada con éxito"); carrito = []; renderCarrito(); refresh(); document.getElementById("clienteNombre").value = "";
+            });
+        }
+        function setTipoPago(t) { tipoPagoActual = t; document.getElementById("btnContado").classList.toggle("btn-pago-active", t==='contado'); document.getElementById("btnPagos").classList.toggle("btn-pago-active", t==='pagos'); document.getElementById("areaRecargo").classList.toggle("hidden", t==='contado'); calcularTotalVenta(); }
+        function calcularTotalVenta() { let sub = carrito.reduce((a,i)=>a+(i.precio*i.cantidad),0); let tot = sub; if(tipoPagoActual==='pagos') tot = sub + (sub*(parseFloat(document.getElementById("recargoVentaInput").value)/100)); document.getElementById("totalCarrito").innerText = `$${tot.toFixed(2)}`; }
+        function toggleScanner(m) { const cId = m === 'vender' ? "reader-vender" : "reader-modal"; const div = document.getElementById(cId); if (div.classList.contains("hidden")) { div.classList.remove("hidden"); const s = new Html5Qrcode(cId); if (m === 'vender') scannerVender = s; else scannerModal = s; s.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (t) => { if (m === 'vender') { document.getElementById("buscarCodigoInput").value = t; buscarProducto(); } else { document.getElementById("prodCodigo").value = t; verificarExistente(); } toggleScanner(m); }); } else { div.classList.add("hidden"); const s = m === 'vender' ? scannerVender : scannerModal; if(s) { s.stop().then(() => s.clear()); } } }
+        function refresh() { fetch(`${gasUrl}?action=obtenerDatos`).then(r => r.json()).then(d => { db = d; renderInventario(); }); }
+        function cerrarModal() { document.getElementById("modalProducto").classList.replace("flex", "hidden"); if(scannerModal) { scannerModal.stop().then(() => scannerModal.clear()); } }
+        function abrirModalProducto() { document.getElementById("modalProducto").classList.replace("hidden", "flex"); document.getElementById("modalTitulo").innerText = "Registrar Entrada"; document.getElementById("prodCodigo").value = ""; document.getElementById("prodNombre").value = ""; document.getElementById("prodStock").value = ""; document.getElementById("prodPrecio").value = ""; document.getElementById("prodFoto").value = ""; document.getElementById("previewImagen").classList.add("hidden"); }
+        function cargarParaEditar(c) { abrirModalProducto(); document.getElementById("prodCodigo").value = c; verificarExistente(); }
+        function logout() { localStorage.removeItem("sgv_url"); location.reload(); }
+        function guardarUsuario() { if(!document.getElementById("nuevoUser").value) return alert("Completa los datos"); const d = { usuario: document.getElementById("nuevoUser").value, password: document.getElementById("nuevoPass").value, rol: document.getElementById("nuevoRol").value }; fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "crearUsuario", data: d }) }).then(() => { alert("Usuario Creado"); refresh(); }); }
+        window.onload = () => { if(localStorage.getItem("sgv_url")) document.getElementById("gasUrlInput").value = localStorage.getItem("sgv_url"); };
+    </script>
+</body>
+</html>
