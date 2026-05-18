@@ -3,175 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGV PRO v3.13.1 - Reportes Interactivos</title>
+    <title>SGV PRO v3.28 - Producción</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .app-tab { display: none; }
         .app-tab.active { display: block; }
-        .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; }
+        .nav-btn-active { color: #4f46e5; border-top: 3px solid #4f46e5; }
         .btn-modo-active { background-color: #4f46e5 !important; color: white !important; }
         #canvasRecibo { width: 320px; background: white; padding: 25px; color: black; font-family: 'Courier New', Courier, monospace; border: 1px solid #eee; }
         #reciboInvisible { position: absolute; left: -9999px; top: 0; }
         .history-dot { position: relative; padding-left: 20px; }
         .history-dot::before { content: ''; position: absolute; left: 0; top: 6px; width: 8px; height: 8px; background: #4f46e5; border-radius: 50%; }
-        .prod-item-click:active { background-color: #f1f5f9; transform: scale(0.98); }
+        .reader-container { width: 100%; max-width: 400px; margin: auto; overflow: hidden; border-radius: 20px; display: none; border: 2px solid #6366f1; }
+        .input-label { font-size: 9px; font-weight: 900; color: #6366f1; text-transform: uppercase; margin-left: 10px; margin-bottom: 2px; display: block; }
+        .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-left-color: #ffffff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
 
+    <div id="loaderOverlay" class="fixed inset-0 bg-indigo-900/90 z-[9999] hidden flex-col items-center justify-center backdrop-blur-sm transition-all">
+        <div class="spinner mb-4"></div>
+        <p id="loaderText" class="text-white font-black text-xs uppercase tracking-widest animate-pulse">Procesando...</p>
+    </div>
+
+    <div id="toastMsg" class="fixed bottom-28 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full font-black text-[10px] uppercase shadow-2xl transition-all duration-300 translate-y-full opacity-0 z-[1000] pointer-events-none">Mensaje</div>
+
     <div id="loginScreen" class="flex-1 flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border">
-            <h1 class="text-3xl font-black text-indigo-600 mb-8 italic uppercase tracking-tighter">SGV PRO v3.13.1</h1>
+            <h1 class="text-4xl font-black text-indigo-600 mb-2 italic uppercase tracking-tighter">SGV PRO</h1>
+            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-8">Gestión de Ventas</p>
             <div class="space-y-4">
-                <input type="text" id="gasUrlInput" class="w-full px-6 py-4 border rounded-2xl outline-none" placeholder="URL Script de Google">
-                <input type="text" id="userInput" class="w-full px-6 py-4 border rounded-2xl outline-none" placeholder="Usuario" value="admin">
-                <input type="password" id="passInput" class="w-full px-6 py-4 border rounded-2xl outline-none" placeholder="Contraseña" value="admin123">
-                <button onclick="intentarLogin()" class="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all">ACCEDER</button>
+                <input type="text" id="userInput" class="w-full px-6 py-4 border rounded-2xl outline-none font-bold text-center" placeholder="Usuario">
+                <input type="password" id="passInput" class="w-full px-6 py-4 border rounded-2xl outline-none font-bold text-center" placeholder="Contraseña">
+                <button onclick="intentarLogin()" class="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl transition-all active:scale-95 tracking-widest uppercase">Entrar</button>
             </div>
         </div>
     </div>
 
     <div id="appScreen" class="hidden flex-1 flex flex-col">
-        <header class="bg-indigo-600 text-white p-5 flex justify-between items-center sticky top-0 z-50 shadow-lg">
-            <h1 class="font-black text-xl italic tracking-tighter">SGV PRO</h1>
-            <button onclick="logout()" class="text-[10px] font-bold bg-indigo-500 px-4 py-2 rounded-xl">SALIR</button>
+        <header class="bg-indigo-600 text-white p-5 flex justify-between items-center sticky top-0 z-50 shadow-md">
+            <div class="flex items-center gap-3">
+                <h1 class="font-black text-xl italic tracking-tighter">SGV PRO</h1>
+                <span id="labelUsuarioAdmin" class="bg-indigo-800 px-3 py-1 rounded-full text-[9px] font-black uppercase hidden shadow-inner">ADMIN</span>
+            </div>
+            <button onclick="logout()" class="text-[10px] font-bold bg-indigo-500 px-4 py-2 rounded-xl text-white shadow-sm active:scale-90">SALIR</button>
         </header>
 
         <main class="flex-1 p-4 max-w-4xl w-full mx-auto pb-32">
             
+            <div id="tab-dashboard" class="app-tab space-y-4">
+                <div class="flex justify-between items-center px-2">
+                    <h2 class="font-black text-2xl uppercase italic">Dashboard BI</h2>
+                    <button onclick="abrirModalGasto()" class="bg-red-500 text-white text-[9px] font-black px-4 py-2 rounded-xl shadow-lg">+ GASTO</button>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center">
+                        <span class="input-label">Ventas (30d)</span>
+                        <b id="dashVentasTotal" class="text-xl text-indigo-600 font-black">$0.00</b>
+                    </div>
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center">
+                        <span class="input-label">Utilidad Aprox</span>
+                        <b id="dashUtilidad" class="text-xl text-emerald-600 font-black">$0.00</b>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-[2.5rem] border shadow-sm"><canvas id="chartVentas"></canvas></div>
+                <div class="bg-white p-5 rounded-[2.5rem] border shadow-sm"><canvas id="chartVendedores"></canvas></div>
+            </div>
+
             <div id="tab-vender" class="app-tab active space-y-4">
                 <div class="flex gap-2 bg-white p-2 rounded-2xl shadow-sm border">
-                    <button onclick="setModoOperacion('nueva')" id="btnModoNueva" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active">Nueva Venta</button>
-                    <button onclick="setModoOperacion('pago')" id="btnModoPago" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400">Registrar Pago</button>
+                    <button onclick="setModoOperacion('nueva')" id="btnModoNueva" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active transition-all">Nueva Venta</button>
+                    <button onclick="setModoOperacion('pago')" id="btnModoPago" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400 transition-all">Registrar Pago</button>
                 </div>
 
                 <div id="areaNuevaVenta" class="space-y-4">
-                    <div class="bg-white p-6 rounded-[2rem] border shadow-sm flex gap-2">
-                        <input type="text" id="buscarCodigoInput" placeholder="Código o Nombre..." class="flex-1 px-5 py-3 border rounded-2xl outline-none">
-                        <button onclick="buscarProducto()" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase italic">Añadir</button>
+                    <div class="bg-white p-4 rounded-[2rem] border shadow-sm space-y-3">
+                        <div class="flex gap-2">
+                            <input type="text" id="buscarCodigoInput" placeholder="Escanear o buscar..." class="flex-1 px-5 py-3 border rounded-2xl outline-none">
+                            <button onclick="buscarProducto()" class="bg-indigo-600 text-white px-5 py-3 rounded-2xl font-black text-xs uppercase italic active:scale-95 transition-all">Añadir</button>
+                            <button onclick="toggleScanner('vender')" class="bg-slate-100 p-3 rounded-2xl border active:scale-95 transition-all">📷</button>
+                        </div>
+                        <div id="reader-vender" class="reader-container"></div>
                     </div>
                     <div id="carritoContenedor" class="space-y-3"></div>
                     <div class="bg-white p-6 rounded-[2.5rem] border shadow-sm space-y-5 text-center">
                         <div class="flex justify-between items-center px-4">
-                            <span class="text-[10px] font-black text-slate-400 uppercase italic">Método</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase italic">Forma de Pago</span>
                             <div class="flex gap-2">
                                 <button onclick="setMetodoVenta('contado')" id="btnMetContado" class="px-4 py-2 rounded-xl border font-black text-[9px] bg-indigo-600 text-white uppercase transition-all">Contado</button>
                                 <button onclick="setMetodoVenta('pagos')" id="btnMetPagos" class="px-4 py-2 rounded-xl border font-black text-[9px] bg-white text-slate-400 uppercase transition-all">A Pagos</button>
                             </div>
                         </div>
                         <div id="seccionQuincenas" class="hidden border-t pt-4 flex justify-between items-center px-4">
-                            <span class="text-[10px] font-black text-indigo-600 uppercase italic">Plazo (Q)</span>
+                            <span class="text-[10px] font-black text-indigo-600 uppercase italic">Quincenas</span>
                             <div class="flex items-center gap-3">
-                                <button onclick="cambiarPlazo(-1)" class="w-8 h-8 bg-slate-100 rounded-full font-black">-</button>
+                                <button onclick="cambiarPlazo(-1)" class="w-8 h-8 bg-slate-100 rounded-full font-black active:scale-90">-</button>
                                 <span id="txtPlazo" class="font-black text-lg">4</span>
-                                <button onclick="cambiarPlazo(1)" class="w-8 h-8 bg-slate-100 rounded-full font-black">+</button>
+                                <button onclick="cambiarPlazo(1)" class="w-8 h-8 bg-slate-100 rounded-full font-black active:scale-90">+</button>
                             </div>
                         </div>
                         <div class="border-t pt-5 space-y-4 px-2">
                             <span id="totalVentaTxt" class="text-4xl font-black text-indigo-600 tracking-tighter">$0.00</span>
-                            <input type="text" id="clienteNombre" placeholder="Nombre del cliente" class="w-full px-6 py-4 border rounded-2xl outline-none bg-slate-50 text-sm font-bold">
-                            <div id="contenedorAbonoInicial" class="hidden">
-                                <input type="number" id="montoPagado" placeholder="Abono hoy" class="w-full px-6 py-4 border rounded-2xl bg-emerald-50 font-black text-emerald-700">
-                            </div>
-                            <button onclick="confirmarOperacion()" class="w-full bg-emerald-600 text-white py-5 rounded-[1.8rem] font-black uppercase shadow-xl active:scale-95 transition-all">Finalizar</button>
+                            <input type="text" id="clienteNombre" placeholder="Nombre del Comprador" class="w-full px-6 py-4 border rounded-2xl bg-slate-50 outline-none font-bold">
+                            <div id="contenedorAbonoInicial" class="hidden"><input type="number" id="montoPagado" placeholder="¿Cuánto entrega hoy?" class="w-full px-6 py-4 border rounded-2xl bg-emerald-50 font-black text-emerald-700"></div>
+                            <button onclick="confirmarOperacion()" class="w-full bg-emerald-600 text-white py-5 rounded-[1.8rem] font-black uppercase shadow-xl active:scale-95 transition-all">Generar Venta</button>
                         </div>
                     </div>
                 </div>
 
-                <div id="areaAbono" class="hidden space-y-4 animate-fade-in">
-                    <input type="text" id="inputBusquedaPendiente" oninput="renderListaPendientes()" placeholder="Buscar deudor..." class="w-full px-5 py-4 border rounded-2xl bg-white shadow-sm outline-none">
+                <div id="areaAbono" class="hidden space-y-4">
+                    <input type="text" id="inputBusquedaPendiente" oninput="renderListaPendientes()" placeholder="Buscar cliente deudor..." class="w-full px-5 py-4 border rounded-2xl bg-white shadow-sm outline-none">
                     <div id="listaPendientes" class="space-y-3"></div>
                 </div>
             </div>
 
             <div id="tab-inventario" class="app-tab space-y-4">
                 <div class="flex justify-between items-center px-2">
-                    <h2 class="font-black text-2xl text-slate-800 uppercase italic">Stock Actual</h2>
-                    <button onclick="abrirModalProducto()" class="bg-indigo-600 text-white text-[10px] font-black px-6 py-3 rounded-2xl shadow-lg">+ NUEVO</button>
+                    <h2 class="font-black text-2xl text-slate-800 uppercase italic">Almacén</h2>
+                    <button onclick="abrirModalProducto()" class="bg-indigo-600 text-white text-[10px] font-black px-6 py-3 rounded-2xl shadow-lg active:scale-95 transition-all">+ ENTRADA</button>
                 </div>
-                <input type="text" id="filtroStock" oninput="renderInventario()" placeholder="Filtrar por nombre..." class="w-full px-5 py-3 border rounded-xl bg-white outline-none">
+                <input type="text" id="filtroStock" oninput="renderInventario()" placeholder="Filtrar stock..." class="w-full px-5 py-3 border rounded-xl bg-white outline-none shadow-sm">
                 <div id="listaInventario" class="grid gap-3"></div>
             </div>
 
             <div id="tab-reportes" class="app-tab space-y-4">
-                <h2 class="font-black text-2xl text-slate-800 uppercase px-2 italic text-center">Actividad y Pagos</h2>
-                <div class="bg-white p-5 rounded-[2rem] border shadow-sm grid grid-cols-2 gap-3">
-                    <input type="date" id="fInicio" onchange="renderVentas()" class="px-4 py-2 bg-slate-50 border rounded-xl text-xs outline-none">
-                    <input type="date" id="fFin" onchange="renderVentas()" class="px-4 py-2 bg-slate-50 border rounded-xl text-xs outline-none">
+                <h2 class="font-black text-2xl text-slate-800 uppercase px-2 italic text-center">Trazabilidad</h2>
+                <div class="bg-white p-5 rounded-[2rem] border shadow-sm grid grid-cols-2 gap-3 mb-4">
+                    <div><span class="input-label">Desde</span><input type="date" id="fInicio" onchange="renderVentas()" class="w-full px-4 py-3 bg-slate-50 border rounded-xl text-xs outline-none"></div>
+                    <div><span class="input-label">Hasta</span><input type="date" id="fFin" onchange="renderVentas()" class="w-full px-4 py-3 bg-slate-50 border rounded-xl text-xs outline-none"></div>
+                    <div class="col-span-2 grid grid-cols-2 gap-3 mt-2 border-t pt-3">
+                        <input type="text" id="filtroCliRep" oninput="renderVentas()" placeholder="Filtro Cliente" class="px-4 py-2 bg-slate-50 border rounded-xl text-[10px] outline-none">
+                        <input type="text" id="filtroVenRep" oninput="renderVentas()" placeholder="Filtro Vendedor" class="px-4 py-2 bg-slate-50 border rounded-xl text-[10px] outline-none">
+                    </div>
                 </div>
                 <div id="listaVentas" class="space-y-4 pb-12"></div>
             </div>
+
+            <div id="tab-usuarios" class="app-tab space-y-4">
+                <div class="flex justify-between items-center px-2">
+                    <h2 class="font-black text-2xl text-slate-800 uppercase italic">Usuarios</h2>
+                    <button id="btnNuevoUsuario" onclick="abrirModalAdminUsuario('crear')" class="hidden bg-indigo-600 text-white text-[10px] font-black px-6 py-3 rounded-2xl shadow-lg active:scale-95 transition-all">+ USUARIO</button>
+                </div>
+                <div id="listaUsuarios" class="space-y-3"></div>
+            </div>
         </main>
 
-        <nav class="bg-white border-t fixed bottom-0 left-0 right-0 h-24 flex items-center justify-around z-50 px-4 shadow-2xl">
-            <button onclick="switchTab('vender')" class="nav-btn flex flex-col items-center flex-1" id="btn-vender">🛒<span class="text-[9px] font-black uppercase mt-1">Ventas</span></button>
-            <button onclick="switchTab('inventario')" class="nav-btn flex flex-col items-center flex-1" id="btn-inventario">📦<span class="text-[9px] font-black uppercase mt-1">Inventario</span></button>
-            <button onclick="switchTab('reportes')" class="nav-btn flex flex-col items-center flex-1" id="btn-reportes">📊<span class="text-[9px] font-black uppercase mt-1">Reportes</span></button>
+        <nav class="bg-white border-t fixed bottom-0 left-0 right-0 h-24 flex items-center justify-around z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] px-2">
+            <button onclick="switchTab('dashboard')" class="nav-btn hidden flex-col items-center flex-1 transition-all" id="btn-dashboard">📈<span class="text-[9px] font-black uppercase mt-1">BI</span></button>
+            <button onclick="switchTab('vender')" class="nav-btn flex flex-col items-center flex-1 transition-all" id="btn-vender">🛒<span class="text-[9px] font-black uppercase mt-1">Ventas</span></button>
+            <button onclick="switchTab('inventario')" class="nav-btn flex flex-col items-center flex-1 transition-all" id="btn-inventario">📦<span class="text-[9px] font-black uppercase mt-1">Stock</span></button>
+            <button onclick="switchTab('reportes')" class="nav-btn flex flex-col items-center flex-1 transition-all" id="btn-reportes">📊<span class="text-[9px] font-black uppercase mt-1">Reportes</span></button>
+            <button onclick="switchTab('usuarios')" class="nav-btn flex flex-col items-center flex-1 transition-all" id="btn-usuarios">👥<span class="text-[9px] font-black uppercase mt-1">Usuarios</span></button>
         </nav>
     </div>
 
-    <div id="modalInfoProducto" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-[250] backdrop-blur-sm">
-        <div class="bg-white p-6 rounded-[2rem] w-full max-w-sm space-y-4 shadow-2xl border text-center">
-            <div id="infoDetalleProducto"></div>
-            <button onclick="cerrarModalInfo()" class="w-full bg-slate-100 py-4 rounded-2xl font-black text-[10px] text-slate-400 uppercase tracking-widest">Cerrar</button>
+    <div id="modalGasto" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[180] backdrop-blur-md">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-4 border shadow-2xl relative">
+            <button onclick="document.getElementById('modalGasto').classList.replace('flex','hidden')" class="absolute top-6 right-8 text-slate-300 hover:text-red-500 font-black text-2xl">×</button>
+            <h3 class="font-black text-red-600 uppercase text-xs italic mb-2">Registrar Gasto</h3>
+            <div><span class="input-label">Categoría</span><select id="gastoCat" class="w-full px-4 py-3 border rounded-xl outline-none font-bold bg-slate-50"><option>Renta</option><option>Servicios</option><option>Publicidad</option><option>Sueldos</option><option>Otros</option></select></div>
+            <div><span class="input-label">Monto</span><input type="number" id="gastoMonto" class="w-full px-4 py-3 border rounded-xl outline-none font-black text-red-600 bg-red-50 text-xl" placeholder="$0.00"></div>
+            <div><span class="input-label">Descripción</span><input type="text" id="gastoDesc" class="w-full px-4 py-3 border rounded-xl outline-none font-bold" placeholder="¿En qué se gastó?"></div>
+            <button onclick="guardarGasto()" class="w-full bg-red-600 text-white font-black py-4 rounded-2xl uppercase shadow-lg active:scale-95 transition-all">Guardar Gasto</button>
         </div>
     </div>
 
-    <div id="modalAbonarAhora" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[150] backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-6 shadow-2xl text-center border">
-            <div id="infoCuentaSeleccionada"></div>
-            <input type="number" id="montoAbonoManual" placeholder="Monto del abono" class="w-full px-6 py-5 border rounded-2xl font-black bg-indigo-50 text-indigo-600 text-center outline-none text-xl shadow-inner">
-            <div class="flex gap-2">
-                <button onclick="ejecutarAbonoSeleccionado()" class="flex-1 bg-emerald-600 text-white py-5 rounded-2xl font-black uppercase text-[10px]">Registrar Pago</button>
-                <button onclick="cerrarModalAbono()" class="px-5 bg-slate-100 py-5 rounded-2xl font-black text-[10px] text-slate-400">Cerrar</button>
+    <div id="modalDetalleVenta" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[160] backdrop-blur-md">
+        <div class="bg-white p-6 rounded-[2.5rem] w-full max-w-md space-y-4 border shadow-2xl overflow-y-auto max-h-[90vh] relative text-sm">
+            <button onclick="document.getElementById('modalDetalleVenta').classList.replace('flex','hidden')" class="absolute top-6 right-8 text-slate-300 hover:text-red-500 font-black text-2xl">×</button>
+            <h3 class="font-black text-indigo-600 uppercase text-xs italic mb-2">Información de Venta</h3>
+            <div id="contenidoDetalleVenta"></div>
+            
+            <div id="seccionEdicionVentaAdmin" class="hidden border-2 border-indigo-100 bg-indigo-50 rounded-2xl p-4 mt-4 shadow-inner">
+                <p class="font-black text-[10px] text-indigo-600 uppercase text-center mb-3">Edición Individual (Admin)</p>
+                <div class="mb-3"><span class="input-label">Ajustar Plazo (Quincenas)</span><input type="number" id="editVentaQuincenas" class="w-full px-3 py-2 border rounded-xl font-black outline-none text-xs"></div>
+                <div id="editVentaProductos" class="space-y-2 mb-4"></div>
+                <button onclick="guardarEdicionVenta()" class="w-full bg-indigo-600 text-white font-black py-3 rounded-xl uppercase text-[10px] shadow-md active:scale-95 transition-all">Recalcular y Guardar</button>
+            </div>
+            <button onclick="document.getElementById('modalDetalleVenta').classList.replace('flex','hidden')" class="w-full bg-slate-100 text-slate-400 font-black py-4 rounded-[1.5rem] uppercase text-[10px] tracking-widest mt-4 active:scale-95 transition-all">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="modalAdminUsuario" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[160] backdrop-blur-md">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-xs space-y-4 border shadow-2xl relative text-center">
+            <button onclick="document.getElementById('modalAdminUsuario').classList.replace('flex','hidden')" class="absolute top-6 right-6 text-slate-300 hover:text-red-500 font-black text-xl">×</button>
+            <h3 id="tituloAdminUsuario" class="font-black text-indigo-600 uppercase text-xs italic mb-2">Usuario</h3>
+            <input type="hidden" id="usrIdOriginal">
+            <div class="space-y-3">
+                <div><span class="input-label text-left">Usuario</span><input type="text" id="usrNombre" class="w-full px-4 py-3 border rounded-xl outline-none font-bold"></div>
+                <div><span class="input-label text-left">Contraseña</span><input type="password" id="usrPass" class="w-full px-4 py-3 border rounded-xl outline-none font-bold"></div>
+                <div id="boxUsrRol"><span class="input-label text-left">Rol</span>
+                    <select id="usrRol" class="w-full px-4 py-3 border rounded-xl outline-none font-bold bg-white">
+                        <option value="Vendedor">Vendedor</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-2 pt-4">
+                <button id="btnEliminarUsr" onclick="ejecutarAdminUsuario('eliminar')" class="hidden bg-red-100 text-red-600 font-black py-3 px-4 rounded-xl text-[10px] uppercase active:scale-95 transition-all">Eliminar</button>
+                <button onclick="ejecutarAdminUsuario('guardar')" class="flex-1 bg-indigo-600 text-white font-black py-3 rounded-xl text-[10px] uppercase active:scale-95 transition-all shadow-md">Guardar</button>
             </div>
         </div>
     </div>
-
-    <div id="modalRecibo" class="fixed inset-0 bg-black/95 hidden items-center justify-center p-4 z-[200]">
-        <div class="flex flex-col items-center gap-6">
-            <div id="previewReciboContenedor" class="rounded-xl shadow-2xl bg-white border-4 border-white"><img id="imgReciboFinal" src="" class="max-w-[320px] w-full rounded-lg"></div>
-            <div class="flex gap-2 w-full max-w-sm">
-                <button onclick="descargarRecibo()" class="flex-1 bg-green-600 text-white py-5 rounded-2xl font-black uppercase text-[10px]">Descargar 📥</button>
-                <button onclick="cerrarRecibo()" class="px-6 bg-slate-100 py-5 rounded-2xl font-black text-[10px] uppercase text-slate-400">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="reciboInvisible"><div id="canvasRecibo"></div></div>
 
     <div id="modalProducto" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-[100] backdrop-blur-md">
-        <div class="bg-white p-8 rounded-[3rem] w-full max-w-md space-y-4 border shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h3 class="font-black text-indigo-600 uppercase text-xs italic tracking-widest">Almacén Central</h3>
-            <input type="text" id="prodCodigo" placeholder="Código..." class="w-full px-5 py-4 border rounded-2xl font-black bg-slate-50 outline-none" onchange="verificarExistente()">
-            <input type="text" id="prodNombre" placeholder="Nombre..." class="w-full px-5 py-4 border rounded-2xl font-bold">
-            <div class="grid grid-cols-2 gap-3">
-                <input type="number" id="prodStock" placeholder="Stock" class="px-5 py-4 border rounded-2xl font-black bg-slate-50 outline-none">
-                <input type="number" id="prodPrecio" placeholder="Precio" class="px-5 py-4 border rounded-2xl font-black bg-slate-50 outline-none">
+        <div class="bg-white p-8 rounded-[3rem] w-full max-w-md space-y-4 border shadow-2xl overflow-y-auto max-h-[90vh] relative">
+            <button onclick="cerrarModal()" class="absolute top-6 right-8 text-slate-300 hover:text-red-500 font-black text-2xl">×</button>
+            <h3 class="font-black text-indigo-600 uppercase text-xs italic mb-4">Registro de Mercancía</h3>
+            <div><span class="input-label">Código</span><div class="flex gap-2"><input type="text" id="prodCodigo" class="flex-1 px-5 py-4 border rounded-2xl font-black bg-slate-50 outline-none" onchange="verificarExistente()"><button onclick="toggleScanner('stock')" class="bg-white border px-4 rounded-2xl shadow-sm active:scale-95 transition-all">📷</button></div></div>
+            <div id="reader-stock" class="reader-container"></div>
+            <div id="infoStockActual" class="hidden bg-indigo-50 p-4 rounded-2xl mb-3 text-[10px] grid grid-cols-3 text-center border border-indigo-100 shadow-inner">
+                <div><span class="font-black text-indigo-400 block uppercase mb-1">Stock Act.</span><b id="txtStockActual" class="text-sm">0</b></div>
+                <div id="infoCostoVisible"><span class="font-black text-indigo-400 block uppercase mb-1">Costo Prom.</span><b id="txtCostoActual" class="text-sm text-indigo-600">$0.00</b></div>
+                <div><span class="font-black text-indigo-400 block uppercase mb-1">Precio Act.</span><b id="txtPrecioActual" class="text-sm">$0.00</b></div>
             </div>
-            <input type="number" id="prodRecargo" placeholder="% Recargo Crédito" class="w-full px-5 py-4 border rounded-2xl font-black text-indigo-600 bg-indigo-50">
+            <div><span class="input-label">Nombre del Producto</span><input type="text" id="prodNombre" class="w-full px-5 py-4 border rounded-2xl font-bold outline-none"></div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><span class="input-label">Cant. a Sumar</span><input type="number" id="prodCantidadNueva" class="w-full px-5 py-4 border rounded-2xl font-black bg-indigo-50 text-indigo-600 outline-none" placeholder="Ingreso"></div>
+                <div id="cajaCosto"><span class="input-label">Costo Compra</span><input type="number" id="prodCostoCompra" class="w-full px-5 py-4 border rounded-2xl font-black bg-slate-50 outline-none" placeholder="Costo nuevo"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><span class="input-label">Precio Venta</span><input type="number" id="prodPrecioVenta" class="w-full px-5 py-4 border rounded-2xl font-black bg-emerald-50 text-emerald-700 outline-none"></div>
+                <div id="cajaRecargo"><span class="input-label">% Recargo Pago</span><input type="number" id="prodRecargo" value="15" class="w-full px-5 py-4 border rounded-2xl font-black bg-slate-50 outline-none"></div>
+            </div>
             <div class="border-2 border-dashed p-4 rounded-[2rem] text-center bg-slate-50">
                 <div id="previewImagen" class="hidden mb-3"><img id="imgActual" src="" class="h-24 w-24 object-cover mx-auto rounded-3xl shadow-lg border-4 border-white"></div>
-                <button onclick="document.getElementById('inputCamara').click()" class="bg-white border px-6 py-3 rounded-2xl text-[10px] font-black shadow-sm">CAPTURAR FOTO</button>
+                <button onclick="document.getElementById('inputCamara').click()" class="bg-white border px-6 py-3 rounded-2xl text-[10px] font-black shadow-sm uppercase italic active:scale-95 transition-all">Cargar Foto</button>
                 <input type="file" id="inputCamara" accept="image/*" capture="environment" class="hidden" onchange="seleccionarFoto(this)">
                 <input type="hidden" id="prodFoto">
             </div>
-            <button onclick="guardarTodoElProducto()" class="w-full bg-indigo-600 text-white py-5 rounded-[2rem] font-black uppercase text-xs shadow-xl">Guardar</button>
+            <button onclick="guardarTodoElProducto()" class="w-full bg-indigo-600 text-white py-5 rounded-[2rem] font-black uppercase text-xs shadow-xl active:scale-95 transition-all">Guardar en Sistema</button>
         </div>
     </div>
 
-    <script>
-        let db = { inventario: [], usuarios: [], ventas: [] };
-        let gasUrl = ""; let usuarioActual = null; let carrito = [];
-        let modoOperacion = 'nueva'; let metodoVenta = 'contado'; let plazoQuincenas = 4;
-        let cuentaParaAbonar = null;
+    <div id="modalRecibo" class="fixed inset-0 bg-black/95 hidden items-center justify-center p-4 z-[200] backdrop-blur-sm"><div class="flex flex-col items-center gap-6"><div id="previewReciboContenedor" class="rounded-xl shadow-2xl bg-white border-4 border-white overflow-hidden"><img id="imgReciboFinal" src="" class="max-w-[320px] w-full"></div><div class="flex gap-2 w-full max-w-sm"><button onclick="descargarRecibo()" class="flex-1 bg-green-600 text-white py-5 rounded-2xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">Descargar 📥</button><button onclick="document.getElementById('modalRecibo').classList.add('hidden')" class="px-6 bg-slate-100 py-5 rounded-2xl font-black text-[10px] text-slate-400 active:scale-95 transition-all">Cerrar</button></div></div></div>
+    <div id="reciboInvisible"><div id="canvasRecibo"></div></div>
+    
+    <div id="modalAbonarAhora" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[150] backdrop-blur-sm"><div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-6 shadow-2xl text-center"><div id="infoCuentaSeleccionada"></div><input type="number" id="montoAbonoManual" placeholder="Monto del abono" class="w-full px-6 py-5 border rounded-2xl font-black bg-indigo-50 text-indigo-600 text-center text-xl outline-none shadow-inner"><div class="flex gap-2"><button onclick="ejecutarAbonoSeleccionado()" class="flex-1 bg-emerald-600 text-white py-5 rounded-2xl font-black uppercase text-[10px] active:scale-95 transition-all shadow-md">Pagar</button><button onclick="document.getElementById('modalAbonarAhora').classList.replace('flex','hidden')" class="px-5 bg-slate-100 py-5 rounded-2xl font-black text-[10px] text-slate-400 active:scale-95 transition-all">Cerrar</button></div></div></div>
 
+    <script>
+        // CONFIGURACIÓN DE PRODUCCIÓN - URL INTEGRADOR
+        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSQmbPXOTyridxt7XghAYqHKo-hojXEKy3SIcJxsigg6gPeRQBnAx6DEKmUn61wB1N/exec";
+        
+        let db = { inventario: [], usuarios: [], ventas: [], detalles: [], gastos: [] };
+        let gasUrl = APP_SCRIPT_URL; 
+        let usuarioActual = null; let carrito = [];
+        let modoOperacion = 'nueva'; let metodoVenta = 'contado'; let plazoQuincenas = 4;
+        let cuentaParaAbonar = null; let scannerVender, scannerStock;
+        let ventaEdicionActual = null; 
+        let chartVentas, chartVendedores;
+
+        // --- SISTEMA DE CARGA (LOADER) Y TOAST ---
+        function showLoader(text = "Procesando...") { document.getElementById("loaderText").innerText = text; document.getElementById("loaderOverlay").classList.replace("hidden", "flex"); }
+        function hideLoader() { document.getElementById("loaderOverlay").classList.replace("flex", "hidden"); }
+        function showToast(msg) { const t = document.getElementById("toastMsg"); t.innerText = msg; t.classList.remove("translate-y-full", "opacity-0"); setTimeout(() => t.classList.add("translate-y-full", "opacity-0"), 2000); }
+
+        // --- LOGIN E INICIO ---
         function intentarLogin() {
-            gasUrl = document.getElementById("gasUrlInput").value.trim();
-            localStorage.setItem("sgv_url", gasUrl);
+            if (!gasUrl) return alert("Error interno de configuración de URL");
+            showLoader("Autenticando de forma segura...");
             fetch(`${gasUrl}?action=obtenerDatos`).then(r => r.json()).then(data => {
+                hideLoader();
+                if(data.status === "error") return alert("Error de conexión: " + data.message);
                 const user = document.getElementById("userInput").value;
                 const pass = document.getElementById("passInput").value;
                 const found = data.usuarios.find(u => u.Usuario == user && u.Contraseña == pass);
@@ -179,25 +276,121 @@
                     db = data; usuarioActual = found;
                     document.getElementById("loginScreen").classList.add("hidden");
                     document.getElementById("appScreen").classList.remove("hidden");
-                    refresh();
-                } else alert("Error de acceso.");
-            }).catch(e => alert("Error conectando con el servidor."));
+                    if(usuarioActual.Rol === 'Admin') {
+                        document.getElementById("labelUsuarioAdmin").classList.remove("hidden");
+                        document.getElementById("btnNuevoUsuario").classList.remove("hidden");
+                        document.getElementById("btn-dashboard").classList.replace("hidden", "flex");
+                    }
+                    refresh(true);
+                } else alert("Usuario o contraseña incorrectos");
+            }).catch(e => { hideLoader(); alert("Fallo de conexión con el servidor."); });
         }
 
-        // --- FUNCIONES DE NAVEGACIÓN ---
         function switchTab(t) { 
             document.querySelectorAll('.app-tab').forEach(e => e.classList.remove('active')); 
             document.getElementById('tab-'+t).classList.add('active'); 
-            document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('text-indigo-600'));
-            document.getElementById('btn-'+t).classList.add('text-indigo-600');
+            document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('nav-btn-active'));
+            document.getElementById('btn-'+t).classList.add('nav-btn-active');
             if(t==='reportes') renderVentas(); 
             if(t==='inventario') renderInventario();
+            if(t==='usuarios') renderUsuarios();
+            if(t==='dashboard') renderDashboard();
         }
 
+        // --- DASHBOARD BI Y GASTOS ---
+        function renderDashboard() {
+            const hoy = new Date();
+            const ventasPeriodo = db.ventas.filter(v => (hoy - new Date(v.Fecha)) / (1000*60*60*24) <= 30);
+            const totalV = ventasPeriodo.reduce((a, b) => a + Number(b.Total), 0);
+            const gastosPeriodo = db.gastos.filter(g => (hoy - new Date(g.Fecha)) / (1000*60*60*24) <= 30);
+            const totalG = gastosPeriodo.reduce((a, b) => a + Number(b.Monto), 0);
+            
+            let costoVentas = 0;
+            ventasPeriodo.forEach(v => {
+                const dets = db.detalles.filter(d => d['ID Venta'] === v['ID Venta']);
+                dets.forEach(d => costoVentas += (Number(d.CostoUnidad) * Number(d.Cantidad)));
+            });
+            
+            document.getElementById("dashVentasTotal").innerText = `$${totalV.toFixed(2)}`;
+            document.getElementById("dashUtilidad").innerText = `$${(totalV - costoVentas - totalG).toFixed(2)}`;
+
+            if (chartVentas) chartVentas.destroy();
+            chartVentas = new Chart(document.getElementById('chartVentas'), {
+                type: 'bar',
+                data: {
+                    labels: ['Ventas', 'Costos Mercancía', 'Gastos Operativos'],
+                    datasets: [{ label: 'Flujo de Efectivo ($)', data: [totalV, costoVentas, totalG], backgroundColor: ['#6366f1', '#fbbf24', '#f87171'], borderRadius: 15 }]
+                }
+            });
+
+            const venData = {};
+            ventasPeriodo.forEach(v => { venData[v.Vendedor] = (venData[v.Vendedor] || 0) + Number(v.Total); });
+            if (chartVendedores) chartVendedores.destroy();
+            chartVendedores = new Chart(document.getElementById('chartVendedores'), {
+                type: 'pie',
+                data: { labels: Object.keys(venData), datasets: [{ data: Object.values(venData), backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899'] }] },
+                options: { plugins: { title: { display: true, text: 'Ventas por Vendedor' } } }
+            });
+        }
+
+        async function guardarGasto() {
+            const d = { categoria: document.getElementById("gastoCat").value, monto: document.getElementById("gastoMonto").value, descripcion: document.getElementById("gastoDesc").value, usuario: usuarioActual.Usuario };
+            if(!d.monto) return alert("Falta monto");
+            showLoader("Registrando gasto...");
+            await fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "registrarGasto", data: d }) });
+            document.getElementById("modalGasto").classList.replace("flex", "hidden");
+            refresh(true); showToast("Gasto Registrado");
+        }
+
+        function abrirModalGasto() { document.getElementById("modalGasto").classList.replace("hidden", "flex"); }
+
+        // --- USUARIOS ---
+        function renderUsuarios() {
+            const cont = document.getElementById("listaUsuarios");
+            if(usuarioActual.Rol === 'Admin') {
+                cont.innerHTML = db.usuarios.map(u => `<div class="bg-white p-4 rounded-2xl shadow-sm border flex justify-between items-center"><div class="flex flex-col"><span class="font-black text-[12px] uppercase text-indigo-600">${u.Usuario}</span><span class="text-[9px] uppercase bg-slate-100 rounded-full px-2 inline-block max-w-max mt-1">${u.Rol}</span></div><button onclick="abrirModalAdminUsuario('editar', '${u.Usuario}')" class="bg-indigo-50 text-indigo-600 p-3 rounded-xl text-[10px] font-black active:scale-95 transition-all">⚙️ Editar</button></div>`).join('');
+            } else {
+                cont.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border flex justify-between items-center"><div class="flex flex-col"><span class="font-black text-[12px] uppercase text-indigo-600">${usuarioActual.Usuario}</span><span class="text-[9px] uppercase bg-slate-100 rounded-full px-2 inline-block max-w-max mt-1">${usuarioActual.Rol}</span></div><button onclick="abrirModalAdminUsuario('editar', '${usuarioActual.Usuario}')" class="bg-indigo-50 text-indigo-600 p-3 rounded-xl text-[10px] font-black active:scale-95 transition-all">⚙️ Editar</button></div>`;
+            }
+        }
+
+        function abrirModalAdminUsuario(modo, usrStr) {
+            document.getElementById("usrNombre").value = ""; document.getElementById("usrPass").value = "";
+            document.getElementById("btnEliminarUsr").classList.add("hidden");
+            const boxRol = document.getElementById("boxUsrRol");
+            if(modo === 'editar') {
+                const u = db.usuarios.find(x => x.Usuario === usrStr);
+                document.getElementById("tituloAdminUsuario").innerText = "Editar " + u.Usuario;
+                document.getElementById("usrIdOriginal").value = u.Usuario;
+                document.getElementById("usrNombre").value = u.Usuario;
+                document.getElementById("usrPass").value = u.Contraseña;
+                document.getElementById("usrRol").value = u.Rol;
+                if(usuarioActual.Rol === 'Admin' && u.Rol !== 'Admin') document.getElementById("btnEliminarUsr").classList.remove("hidden");
+                if(usuarioActual.Rol === 'Vendedor') { boxRol.classList.add("hidden"); document.getElementById("usrNombre").disabled = true; } 
+                else { boxRol.classList.remove("hidden"); document.getElementById("usrNombre").disabled = false; }
+            } else {
+                document.getElementById("tituloAdminUsuario").innerText = "Nuevo Usuario";
+                document.getElementById("usrIdOriginal").value = "NUEVO";
+                boxRol.classList.remove("hidden"); document.getElementById("usrNombre").disabled = false;
+            }
+            document.getElementById("modalAdminUsuario").classList.replace("hidden", "flex");
+        }
+
+        async function ejecutarAdminUsuario(tipoAccion) {
+            const org = document.getElementById("usrIdOriginal").value;
+            const payload = { accion: (tipoAccion === 'eliminar' ? 'eliminar' : (org === 'NUEVO' ? 'crear' : 'editar')), usuarioOriginal: org, usuario: document.getElementById("usrNombre").value.trim(), password: document.getElementById("usrPass").value.trim(), rol: document.getElementById("usrRol").value };
+            if(!payload.usuario || !payload.password) return alert("Rellena todos los campos");
+            showLoader("Guardando usuario...");
+            await fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "administrarUsuario", data: payload }) });
+            document.getElementById("modalAdminUsuario").classList.replace("flex", "hidden");
+            refresh(true);
+        }
+
+        // --- VENTAS Y CARRITO ---
         function setModoOperacion(m) {
             modoOperacion = m;
-            document.getElementById("btnModoNueva").className = m === 'nueva' ? "flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active" : "flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400";
-            document.getElementById("btnModoPago").className = m === 'pago' ? "flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active" : "flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400";
+            document.getElementById("btnModoNueva").className = m === 'nueva' ? "flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active transition-all" : "flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400 transition-all";
+            document.getElementById("btnModoPago").className = m === 'pago' ? "flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active transition-all" : "flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400 transition-all";
             document.getElementById("areaNuevaVenta").classList.toggle("hidden", m !== 'nueva');
             document.getElementById("areaAbono").classList.toggle("hidden", m !== 'pago');
             if(m === 'pago') renderListaPendientes();
@@ -205,22 +398,22 @@
 
         function setMetodoVenta(m) {
             metodoVenta = m;
-            document.getElementById("btnMetContado").className = m === 'contado' ? "px-4 py-2 rounded-xl border font-black text-[9px] bg-indigo-600 text-white uppercase" : "px-4 py-2 rounded-xl border font-black text-[9px] bg-white text-slate-400 uppercase";
-            document.getElementById("btnMetPagos").className = m === 'pagos' ? "px-4 py-2 rounded-xl border font-black text-[9px] bg-indigo-600 text-white uppercase" : "px-4 py-2 rounded-xl border font-black text-[9px] bg-white text-slate-400 uppercase";
+            document.getElementById("btnMetContado").className = m === 'contado' ? "px-4 py-2 rounded-xl border font-black text-[9px] bg-indigo-600 text-white uppercase transition-all" : "px-4 py-2 rounded-xl border font-black text-[9px] bg-white text-slate-400 uppercase transition-all";
+            document.getElementById("btnMetPagos").className = m === 'pagos' ? "px-4 py-2 rounded-xl border font-black text-[9px] bg-indigo-600 text-white uppercase transition-all" : "px-4 py-2 rounded-xl border font-black text-[9px] bg-white text-slate-400 uppercase transition-all";
             document.getElementById("seccionQuincenas").classList.toggle("hidden", m !== 'pagos');
             document.getElementById("contenedorAbonoInicial").classList.toggle("hidden", m === 'contado');
             renderCarrito();
         }
 
-        // --- GESTIÓN DE CARRITO ---
+        function cambiarPlazo(n) { let nuevo = plazoQuincenas + n; if (nuevo >= 1 && (nuevo <= 4 || usuarioActual.Rol === 'Admin')) { plazoQuincenas = nuevo; document.getElementById("txtPlazo").innerText = plazoQuincenas; renderCarrito(); } }
+
         function buscarProducto() {
             const term = document.getElementById("buscarCodigoInput").value.trim();
-            const p = db.inventario.find(i => (i.Código || "").toString() == term || (i.Nombre || "").toLowerCase().includes(term.toLowerCase()));
+            const p = db.inventario.find(i => i.Código.toString() == term || i.Nombre.toLowerCase().includes(term.toLowerCase()));
             if (p) {
-                if (p.Cantidad <= 0) return alert("Sin existencias.");
+                if (p.Cantidad <= 0) return alert("Sin existencias");
                 const enC = carrito.find(c => c.codigo == p.Código);
-                if (enC) enC.cantidad++;
-                else carrito.push({ codigo: p.Código, nombre: p.Nombre, precio: p.PrecioVenta, cantidad: 1, foto: p.FotoURL, recargo: p.RecargoPagos || 15 });
+                if (enC) enC.cantidad++; else carrito.push({ codigo: p.Código, nombre: p.Nombre, precio: p.PrecioVenta, cantidad: 1, foto: p.FotoURL, recargo: p.RecargoPagos || 15 });
                 renderCarrito(); document.getElementById("buscarCodigoInput").value = "";
             }
         }
@@ -235,178 +428,385 @@
 
         function renderCarrito() {
             const cont = document.getElementById("carritoContenedor");
-            if (carrito.length === 0) {
-                cont.innerHTML = "<p class='text-center text-slate-300 font-black uppercase text-[10px] py-6 italic'>Vacío</p>";
-                document.getElementById("totalVentaTxt").innerText = "$0.00";
-                return;
-            }
             let suma = 0;
+            if (carrito.length === 0) { cont.innerHTML = "<p class='text-center text-slate-300 font-black uppercase text-[10px] py-6 italic'>Carrito Vacío</p>"; document.getElementById("totalVentaTxt").innerText = "$0.00"; return; }
             cont.innerHTML = carrito.map(i => {
-                let pf = metodoVenta === 'pagos' ? i.precio * (1 + (i.recargo / 100)) : i.precio;
+                let pf = metodoVenta === 'pagos' ? i.precio * (1 + (i.recargo/100)) : i.precio;
                 suma += (pf * i.cantidad);
-                return `
-                <div class="bg-white p-3 rounded-[1.5rem] border flex items-center gap-3 shadow-sm">
-                    <img src="${i.foto || 'https://via.placeholder.com/50'}" class="w-10 h-10 object-cover rounded-xl border">
-                    <div class="flex-1">
-                        <p class="font-black text-[10px] uppercase truncate w-32 tracking-tighter">${i.nombre}</p>
-                        <p class="text-[9px] font-bold text-indigo-600">$${pf.toFixed(2)}</p>
-                    </div>
+                return `<div class="bg-white p-3 rounded-2xl border flex items-center justify-between shadow-sm">
+                    <div class="flex flex-col"><span class="text-[10px] font-black uppercase italic">${i.nombre}</span><b class="text-xs text-indigo-600">$${(pf * i.cantidad).toFixed(2)}</b></div>
                     <div class="flex items-center gap-2 bg-slate-50 px-2 py-1 rounded-full border">
-                        <button onclick="modificarCantidad('${i.codigo}', -1)" class="w-6 h-6 flex items-center justify-center bg-white rounded-full font-black border shadow-sm">-</button>
+                        <button onclick="modificarCantidad('${i.codigo}', -1)" class="w-6 h-6 bg-white rounded-full font-black border shadow-sm active:scale-90">-</button>
                         <span class="font-black text-xs min-w-[20px] text-center">${i.cantidad}</span>
-                        <button onclick="modificarCantidad('${i.codigo}', 1)" class="w-6 h-6 flex items-center justify-center bg-white rounded-full font-black border shadow-sm">+</button>
+                        <button onclick="modificarCantidad('${i.codigo}', 1)" class="w-6 h-6 bg-white rounded-full font-black border shadow-sm active:scale-90">+</button>
                     </div>
                 </div>`;
             }).join('');
             document.getElementById("totalVentaTxt").innerText = `$${suma.toFixed(2)}`;
         }
 
-        // --- GESTIÓN DE REPORTES E INTERACTIVIDAD (NUEVO v3.13.1) ---
-        function verInfoDetalleDesdeReporte(codigo) {
-            const p = db.inventario.find(i => i.Código.toString() === codigo.toString());
-            const modal = document.getElementById("modalInfoProducto");
-            const cont = document.getElementById("infoDetalleProducto");
-            
-            if (p) {
-                cont.innerHTML = `
-                    <img src="${p.FotoURL || 'https://via.placeholder.com/100'}" class="w-24 h-24 object-cover mx-auto rounded-3xl mb-4 border-2 shadow-lg">
-                    <p class="text-[10px] font-black text-indigo-600 uppercase italic tracking-widest">${p.Nombre}</p>
-                    <div class="grid grid-cols-2 gap-2 mt-4">
-                        <div class="bg-slate-50 p-3 rounded-2xl border text-center">
-                            <p class="text-[8px] font-black text-slate-400 uppercase">Stock Actual</p>
-                            <p class="text-xl font-black">${p.Cantidad}</p>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-2xl border text-center">
-                            <p class="text-[8px] font-black text-slate-400 uppercase">Precio</p>
-                            <p class="text-xl font-black text-indigo-600">$${p.PrecioVenta}</p>
-                        </div>
-                    </div>
-                    <p class="text-[8px] font-black text-slate-300 mt-4 uppercase">Código de barras: ${p.Código}</p>
-                `;
-            } else {
-                cont.innerHTML = `<p class="text-xs font-black text-red-500 uppercase italic">Este producto ya no existe en el inventario.</p>`;
-            }
-            modal.classList.replace("hidden", "flex");
+        // --- ALMACÉN E INVENTARIO Y SUBIDA A DRIVE ---
+        function renderInventario() {
+            const q = document.getElementById("filtroStock").value.toLowerCase();
+            const f = db.inventario.filter(p => p.Nombre.toLowerCase().includes(q) || p.Código.toString().includes(q));
+            document.getElementById("listaInventario").innerHTML = f.map(p => `
+                <div class="bg-white p-4 rounded-[2rem] border flex items-center justify-between shadow-sm">
+                    <div class="flex items-center gap-3"><img src="${p.FotoURL || 'https://via.placeholder.com/100'}" class="w-12 h-12 object-cover rounded-xl border shadow-sm"><div><p class="font-black text-[11px] uppercase">${p.Nombre}</p><p class="text-[9px] font-bold text-indigo-600 italic">S: ${p.Cantidad} | $${p.PrecioVenta}</p></div></div>
+                    <div class="flex gap-1"><button onclick="agregarAlCarritoDesdeStock('${p.Código}')" class="bg-indigo-50 p-4 rounded-2xl text-indigo-600 shadow-sm active:scale-90 transition-all">🛒</button><button onclick="cargarParaEditar('${p.Código}')" class="bg-slate-50 p-4 rounded-2xl shadow-sm active:scale-90 transition-all">✏️</button></div>
+                </div>`).join('');
         }
 
-        function cerrarModalInfo() { document.getElementById("modalInfoProducto").classList.replace("flex", "hidden"); }
+        function agregarAlCarritoDesdeStock(c) {
+            const p = db.inventario.find(i => i.Código.toString() === c.toString());
+            if (p && p.Cantidad > 0) {
+                const enC = carrito.find(it => it.codigo == p.Código);
+                if (enC) enC.cantidad++; else carrito.push({ codigo: p.Código, nombre: p.Nombre, precio: p.PrecioVenta, cantidad: 1, foto: p.FotoURL, recargo: p.RecargoPagos || 15 });
+                renderCarrito(); showToast("Añadido al carrito 🛒");
+            } else showToast("Sin existencias ❌");
+        }
 
+        function verificarExistente() {
+            const c = document.getElementById("prodCodigo").value.trim();
+            const p = db.inventario.find(p => p.Código.toString() == c);
+            if (p) {
+                document.getElementById("prodNombre").value = p.Nombre; 
+                document.getElementById("prodPrecioVenta").value = p.PrecioVenta;
+                document.getElementById("prodCostoCompra").value = p.Costo; 
+                document.getElementById("prodRecargo").value = p.RecargoPagos || 15;
+                document.getElementById("prodFoto").value = p.FotoURL;
+                document.getElementById("txtStockActual").innerText = p.Cantidad;
+                document.getElementById("txtCostoActual").innerText = "$" + parseFloat(p.Costo).toFixed(2);
+                document.getElementById("txtPrecioActual").innerText = "$" + parseFloat(p.PrecioVenta).toFixed(2);
+                document.getElementById("infoStockActual").classList.remove("hidden");
+                if(p.FotoURL) { document.getElementById("imgActual").src = p.FotoURL; document.getElementById("previewImagen").classList.remove("hidden"); }
+            } else document.getElementById("infoStockActual").classList.add("hidden");
+        }
+
+        function abrirModalProducto() { 
+            if(usuarioActual && usuarioActual.Rol !== 'Admin') {
+                document.getElementById("cajaCosto").classList.add("hidden");
+                document.getElementById("cajaRecargo").classList.add("hidden");
+                document.getElementById("infoCostoVisible").classList.add("hidden");
+            } else {
+                document.getElementById("cajaCosto").classList.remove("hidden");
+                document.getElementById("cajaRecargo").classList.remove("hidden");
+                document.getElementById("infoCostoVisible").classList.remove("hidden");
+            }
+            document.getElementById("modalProducto").classList.remove("hidden"); 
+        }
+
+        async function guardarTodoElProducto() {
+            showLoader("Preparando información...");
+            let fotoData = document.getElementById("prodFoto").value;
+
+            if (fotoData && fotoData.startsWith("data:image")) {
+                showLoader("Subiendo imagen a la nube...");
+                try {
+                    const b64 = fotoData.split(",")[1];
+                    const mime = fotoData.split(";")[0].split(":")[1];
+                    const resImg = await fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "subirImagen", data: { base64: b64, mimeType: mime, nombreArchivo: "IMG_" + Date.now() } }) }).then(r => r.json());
+                    if(resImg.status === "success") fotoData = resImg.url; 
+                } catch(e) {
+                    alert("Aviso: Error subiendo foto a Drive. Se guardará sin foto para no colapsar la base.");
+                    fotoData = "";
+                }
+            }
+
+            const d = { 
+                codigo: document.getElementById("prodCodigo").value.trim(), 
+                nombre: document.getElementById("prodNombre").value.trim(), 
+                cantidadAAgregar: parseInt(document.getElementById("prodCantidadNueva").value) || 0, 
+                costoCompra: parseFloat(document.getElementById("prodCostoCompra").value) || 0, 
+                precioVenta: parseFloat(document.getElementById("prodPrecioVenta").value) || 0, 
+                recargoPagos: parseFloat(document.getElementById("prodRecargo").value) || 15, 
+                fotoUrl: fotoData 
+            };
+            
+            showLoader("Guardando en base de datos...");
+            await fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "actualizarInventario", data: d }) });
+            cerrarModal(); refresh(true);
+        }
+
+        // --- REPORTES Y EDICIÓN ---
         function renderVentas() {
             const cont = document.getElementById("listaVentas");
-            if (!db.ventas || db.ventas.length === 0) { cont.innerHTML = "<p class='text-center opacity-30 py-10 font-black italic'>Historial vacío</p>"; return; }
+            if (!db.ventas || db.ventas.length === 0) { cont.innerHTML = "<p class='text-center py-10 opacity-30 italic'>Sin historial</p>"; return; }
             const fIn = document.getElementById("fInicio").value;
             const fFi = document.getElementById("fFin").value;
             const filtradas = db.ventas.filter(v => { const fv = new Date(v.Fecha).toISOString().split('T')[0]; return (!fIn || fv >= fIn) && (!fFi || fv <= fFi); }).reverse();
-
+            
             cont.innerHTML = filtradas.map(v => {
-                let itemsHtml = "";
-                let abonosHtml = "";
+                let itemsHtml = ""; 
                 try {
-                    const lista = typeof v.Productos === 'string' ? JSON.parse(v.Productos) : v.Productos;
-                    if(Array.isArray(lista)) {
-                        itemsHtml = lista.map(p => `
-                        <div onclick="verInfoDetalleDesdeReporte('${p.codigo}')" class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 prod-item-click p-1 rounded-xl transition-all cursor-pointer">
+                    const l = JSON.parse(v.Productos || "[]");
+                    if(Array.isArray(l)) itemsHtml = l.map(p => {
+                        let pFinal = parseFloat(p.precioFinal || p.precio || 0);
+                        let pOrig = parseFloat(p.precioOriginal || p.precio || 0);
+                        let recStr = p.recargoReal !== undefined ? `(+${p.recargoReal}% Recargo)` : ``;
+                        return `
+                        <div class="flex justify-between items-center text-[10px] border-b border-slate-50 py-3">
                             <div class="flex flex-col">
-                                <span class="text-[10px] font-black uppercase text-slate-700">${p.nombre}</span>
-                                <span class="text-[9px] font-black text-indigo-500 italic">STOCK: ${p.stockAnterior || '?'} ➔ ${p.stockNuevo || '?'}</span>
+                                <span class="font-black text-slate-800 uppercase">${p.nombre} (x${p.cantidad})</span>
+                                <span class="text-[9px] text-emerald-600 font-bold mt-1">P. Nuevo: $${pFinal.toFixed(2)} ${recStr}</span>
+                                <span class="text-[8px] text-indigo-400 font-bold italic">Stock Ant: ${p.stockAnterior || '?'} ➔ Nvo: ${p.stockNuevo || '?'}</span>
                             </div>
-                            <b class="text-[10px] text-slate-800">$${(p.precioFinal*p.cantidad).toFixed(2)}</b>
-                        </div>`).join('');
-                    }
-                } catch(e) { itemsHtml = `<p class="text-[9px] font-bold text-slate-300 italic uppercase">Cargando datos...</p>`; }
-
-                try {
-                    const hist = JSON.parse(v.MetodoPago);
-                    if(hist.abonos && hist.abonos.length > 0) {
-                        abonosHtml = `<div class="mt-4 p-4 bg-indigo-50 rounded-2xl border border-indigo-100 animate-fade-in shadow-inner">
-                            <p class="text-[8px] font-black text-indigo-400 uppercase mb-2 tracking-widest italic">Línea de Tiempo de Pagos:</p>
-                            ${hist.abonos.map(a => `<p class="text-[9px] history-dot font-black text-slate-600 mb-1">${new Date(a.fecha).toLocaleDateString()} - <span class="text-indigo-600">$${parseFloat(a.monto).toFixed(2)}</span> <span class="text-[7px] text-slate-400 opacity-60">(${a.vendedor || 'Admin'})</span></p>`).join('')}
+                            <b class="text-indigo-600 text-sm">$${(pFinal * p.cantidad).toFixed(2)}</b>
                         </div>`;
-                    }
-                } catch(e) { abonosHtml = `<p class="text-[9px] mt-2 italic text-slate-400 uppercase tracking-widest text-center">Sin abonos registrados</p>`; }
-
-                return `
-                <div class="bg-white rounded-[2.5rem] border shadow-sm overflow-hidden mb-4 border-slate-100">
-                    <div class="bg-slate-50 p-5 flex justify-between items-center border-b">
-                        <div><p class="text-[10px] font-black text-indigo-600 uppercase italic">CLIENTE: ${v.ClienteNombre}</p><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">${new Date(v.Fecha).toLocaleString()}</p></div>
-                        <span class="bg-white border text-indigo-600 font-black text-[9px] px-3 py-1 rounded-full shadow-sm uppercase italic">Operación</span>
-                    </div>
-                    <div class="p-5">
-                        <p class="text-[8px] font-black text-slate-300 uppercase mb-2 tracking-tighter">Artículos Comprados (Toca para ver stock):</p>
-                        ${itemsHtml}
-                        ${abonosHtml}
-                    </div>
-                    <div class="bg-indigo-50 p-4 flex justify-between items-center border-t border-indigo-100/50">
-                        <span class="text-[10px] font-black text-indigo-400 uppercase">ID: ${v['ID Venta']}</span>
-                        <div class="text-right">
-                            <p class="text-[8px] font-black text-slate-400 uppercase italic">Adeudo</p>
-                            <b class="text-2xl font-black text-indigo-600 tracking-tighter">$${parseFloat(v.ClienteContacto || 0).toFixed(2)}</b>
-                        </div>
-                    </div>
-                </div>`;
+                    }).join('');
+                } catch(e) {}
+                
+                return `<div class="bg-white rounded-[2.5rem] border shadow-sm p-6 mb-4 relative">
+                <button onclick="abrirDetalleVentaGeneral('${v['ID Venta']}')" class="absolute top-6 right-6 bg-slate-100 text-[9px] font-black uppercase p-3 rounded-xl text-slate-500 shadow-sm active:scale-95 transition-all">Editar / Ver</button>
+                <div class="pr-24"><p class="text-[11px] font-black text-indigo-600 uppercase italic">${v.ClienteNombre}</p><p class="text-[8px] text-slate-400 italic">${new Date(v.Fecha).toLocaleString()}</p></div>
+                <div class="py-3 border-y mt-3">${itemsHtml}</div>
+                <div class="flex justify-between items-center pt-3"><span class="text-[10px] text-indigo-500 font-black cursor-pointer underline decoration-indigo-200" onclick="reimprimirReciboHistorial('${v['ID Venta']}')">Reimprimir Recibo</span><div class="text-right"><p class="text-[8px] uppercase font-black text-slate-300">Deuda Total Restante</p><b class="text-2xl text-indigo-600 tracking-tighter">$${parseFloat(v.ClienteContacto).toFixed(2)}</b></div></div></div>`;
             }).join('');
         }
 
-        // --- RESTO DE FUNCIONES MANTENIDAS (COBRANZA, INVENTARIO, ETC.) ---
-        function renderListaPendientes() {
-            const cont = document.getElementById("listaPendientes");
-            const q = document.getElementById("inputBusquedaPendiente").value.toLowerCase();
-            const pendientes = db.ventas.filter(v => parseFloat(v.ClienteContacto) > 0 && v.ClienteNombre.toLowerCase().includes(q)).reverse();
-            cont.innerHTML = pendientes.map(v => `<div onclick="abrirAbonoDirecto('${v['ID Venta']}', ${v.ClienteContacto}, '${v.ClienteNombre}', ${v.Total})" class="bg-white p-5 rounded-[2rem] border shadow-sm flex justify-between items-center active:scale-95 transition-all"><div><p class="text-[10px] font-black text-indigo-600 uppercase italic">${v.ClienteNombre}</p><p class="text-[8px] text-slate-400">${v['ID Venta']}</p></div><b class="text-xl font-black tracking-tighter">$${parseFloat(v.ClienteContacto).toFixed(2)}</b></div>`).join('');
+        function abrirDetalleVentaGeneral(idVenta) {
+            const v = db.ventas.find(x => x['ID Venta'] === idVenta);
+            if(!v) return;
+            ventaEdicionActual = v;
+            let prods = JSON.parse(v.Productos || "[]");
+            let mObj = JSON.parse(v.MetodoPago || "{}");
+            
+            let htmlInfo = `<div class="bg-slate-50 p-4 rounded-2xl text-[10px] space-y-1 mb-3 border border-slate-100"><p><b>ID Venta:</b> ${v['ID Venta']}</p><p><b>Cliente:</b> ${v.ClienteNombre}</p><p><b>Vendedor:</b> ${v.Vendedor}</p><p><b>Total Orig/Nvo de Operación:</b> $${parseFloat(v.Total).toFixed(2)}</p><p><b>Adeudo Restante:</b> <span class="text-red-500 font-black">$${parseFloat(v.ClienteContacto).toFixed(2)}</span></p></div>`;
+            
+            let htmlProdsInfo = `<div class="space-y-2 mb-3">`;
+            prods.forEach(p => {
+                let pFinal = parseFloat(p.precioFinal || p.precio || 0);
+                let pOrig = parseFloat(p.precioOriginal || p.precio || 0);
+                let recStr = p.recargoReal !== undefined ? ` <span class="text-emerald-500 font-black">(+${p.recargoReal}% Recargo)</span>` : '';
+                htmlProdsInfo += `
+                <div class="flex justify-between bg-white p-3 rounded-xl border shadow-sm">
+                    <div class="flex flex-col">
+                        <span class="font-black uppercase text-[11px] text-slate-700">${p.nombre} (x${p.cantidad})</span>
+                        <span class="text-[9px] text-slate-500 font-bold mt-1">Precio Base Guardado: $${pOrig.toFixed(2)}${recStr}</span>
+                        <span class="text-[8px] text-indigo-400 font-bold italic mt-1">Trazabilidad Stock: ${p.stockAnterior || '?'} ➔ ${p.stockNuevo || '?'}</span>
+                    </div>
+                    <div class="flex flex-col text-right justify-center">
+                        <span class="text-[8px] uppercase text-emerald-600 font-black">Nuevo Total Prod</span>
+                        <b class="text-indigo-600 text-sm">$${(pFinal*p.cantidad).toFixed(2)}</b>
+                    </div>
+                </div>`;
+            });
+            htmlProdsInfo += `</div>`;
+            htmlInfo += htmlProdsInfo;
+
+            if(mObj.abonos && mObj.abonos.length > 0) {
+                htmlInfo += `<div class="bg-emerald-50 p-3 rounded-2xl mb-3 border border-emerald-100 shadow-inner"><p class="font-black text-[9px] uppercase text-emerald-600 mb-2">Historial de Abonos Pagados:</p>`;
+                mObj.abonos.forEach((abn) => { htmlInfo += `<div class="flex justify-between text-[9px] border-b border-emerald-100 last:border-0 py-2"><span>${new Date(abn.fecha).toLocaleDateString()} (${abn.vendedor||'S/N'})</span><b class="text-emerald-700">+$${parseFloat(abn.monto).toFixed(2)}</b></div>`; });
+                htmlInfo += `</div>`;
+            }
+
+            if(mObj.fechasProyectadas && mObj.fechasProyectadas.length > 0 && parseFloat(v.ClienteContacto) > 0) {
+                htmlInfo += `<div class="bg-indigo-50 p-3 rounded-2xl mb-3 border border-indigo-100 shadow-inner"><p class="font-black text-[9px] uppercase text-indigo-600 mb-2">Plan de Pagos (Quincenas Actualizadas):</p>`;
+                mObj.fechasProyectadas.forEach((fp, index) => { htmlInfo += `<div class="flex justify-between text-[9px] border-b border-indigo-100 last:border-0 py-2"><span>Q${index+1} - ${new Date(fp.fecha).toLocaleDateString()}</span><b>$${parseFloat(fp.monto).toFixed(2)}</b></div>`; });
+                htmlInfo += `</div>`;
+            }
+
+            document.getElementById("contenidoDetalleVenta").innerHTML = htmlInfo;
+            
+            const secEdit = document.getElementById("seccionEdicionVentaAdmin");
+            if(usuarioActual.Rol === 'Admin') {
+                secEdit.classList.remove("hidden");
+                let isCredito = (mObj.tipo === 'PAGOS' || mObj.quincenas > 1 || (mObj.fechasProyectadas && mObj.fechasProyectadas.length > 0));
+                
+                document.getElementById("editVentaQuincenas").value = mObj.quincenas || 4;
+                
+                document.getElementById("editVentaProductos").innerHTML = prods.map((p, idx) => {
+                    let defaultRecargo = p.recargoReal !== undefined ? p.recargoReal : 15;
+                    return `
+                    <div class="flex justify-between items-center bg-white p-2 rounded-lg border mb-1 shadow-sm">
+                        <span class="truncate w-24 text-[10px] font-black">${p.nombre}</span>
+                        <div class="flex items-center gap-2">
+                            <div class="flex flex-col text-center"><span class="text-[8px] uppercase text-slate-400 font-black">Cant.</span><input type="number" id="editQty_${idx}" value="${p.cantidad}" class="w-10 text-center border rounded font-black py-1 text-xs outline-none focus:border-indigo-500"></div>
+                            ${ isCredito ? `<div class="flex flex-col text-center"><span class="text-[8px] uppercase text-emerald-500 font-black">Nvo % Recargo</span><input type="number" id="editRec_${idx}" value="${defaultRecargo}" class="w-12 text-center border rounded font-black py-1 text-emerald-600 text-xs outline-none focus:border-emerald-500 bg-emerald-50"></div>` : '' }
+                        </div>
+                    </div>`
+                }).join('');
+            } else secEdit.classList.add("hidden");
+            
+            document.getElementById("modalDetalleVenta").classList.replace("hidden", "flex");
         }
 
-        function abrirAbonoDirecto(id, saldo, nombre, total) {
-            cuentaParaAbonar = { id, saldo, nombre, totalOriginal: total };
-            document.getElementById("infoCuentaSeleccionada").innerHTML = `<p class="font-black text-indigo-600 uppercase text-xs">${nombre}</p><div class="bg-slate-50 p-4 rounded-2xl border my-2"><p class="text-[9px] font-black text-slate-400 uppercase mb-1">Adeudo</p><p class="text-3xl font-black text-slate-800">$${saldo.toFixed(2)}</p></div>`;
-            document.getElementById("modalAbonarAhora").classList.replace("hidden", "flex");
-        }
+        function guardarEdicionVenta() {
+            if(!ventaEdicionActual) return;
+            showLoader("Recalculando todo y guardando...");
+            try {
+                const v = ventaEdicionActual;
+                let mObj = JSON.parse(v.MetodoPago || "{}");
+                let prods = JSON.parse(v.Productos || "[]");
+                let nTotal = 0;
+                let isCredito = (mObj.tipo === 'PAGOS' || mObj.quincenas > 1 || (mObj.fechasProyectadas && mObj.fechasProyectadas.length > 0));
+                
+                for(let i=0; i<prods.length; i++) {
+                    let inputQty = document.getElementById(`editQty_${i}`);
+                    let nQty = inputQty ? parseInt(inputQty.value) : 0;
+                    if(isNaN(nQty)) nQty = 0;
+                    prods[i].cantidad = Math.max(0, nQty);
 
-        async function ejecutarAbonoSeleccionado() {
-            const m = parseFloat(document.getElementById("montoAbonoManual").value);
-            if(!m || m <= 0 || m > cuentaParaAbonar.saldo) return alert("Cantidad incorrecta.");
-            const d = { vendedor: usuarioActual.Usuario, cliente: cuentaParaAbonar.nombre, idVenta: cuentaParaAbonar.id.toString().trim(), pagoActual: m, saldoPendiente: cuentaParaAbonar.saldo - m, plazos: "ABONO", totalOperacion: cuentaParaAbonar.totalOriginal, metodo: "PAGO ABONO", esAbono: true };
-            await fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "registrarVenta", data: d }) });
-            generarReciboImagen({...d, fecha: new Date()}); cerrarModalAbono(); refresh();
+                    let pOrig = parseFloat(prods[i].precioOriginal || prods[i].precio || prods[i].precioFinal || 0);
+                    prods[i].precioOriginal = pOrig;
+
+                    if(isCredito) {
+                        let inputRec = document.getElementById(`editRec_${i}`);
+                        let nRec = inputRec ? parseFloat(inputRec.value) : (prods[i].recargoReal || 0);
+                        if(isNaN(nRec)) nRec = 0;
+                        prods[i].recargoReal = nRec;
+                        prods[i].precioFinal = pOrig * (1 + (nRec/100)); 
+                    } else {
+                        prods[i].precioFinal = pOrig;
+                    }
+                    nTotal += (prods[i].precioFinal * prods[i].cantidad);
+                }
+                
+                prods = prods.filter(p => p.cantidad > 0);
+                
+                let sumaAbonos = 0;
+                if(mObj.abonos) mObj.abonos.forEach(a => sumaAbonos += parseFloat(a.monto || 0));
+                
+                let nSaldo = Math.max(0, nTotal - sumaAbonos);
+                
+                let inputQuin = document.getElementById("editVentaQuincenas");
+                if (inputQuin) {
+                    let valQuin = parseInt(inputQuin.value);
+                    if(!isNaN(valQuin) && valQuin > 0) mObj.quincenas = valQuin;
+                }
+
+                if (isCredito && nSaldo > 0) {
+                    mObj.fechasProyectadas = generarFechasPagoProyectadas(v.Fecha, mObj.quincenas, nSaldo);
+                    mObj.tipo = 'PAGOS';
+                } else {
+                    mObj.fechasProyectadas = [];
+                }
+                
+                const payload = { idVenta: v['ID Venta'], saldoPendiente: nSaldo, totalOperacion: nTotal, productos: prods, metodoObj: mObj };
+                
+                fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "editarVenta", data: payload }) })
+                .then(res => res.json())
+                .then(json => {
+                    if(json.status === "success") { 
+                        document.getElementById("modalDetalleVenta").classList.replace("flex", "hidden"); 
+                        showToast("Recálculo y Guardado Exitoso ✅"); 
+                        refresh(true); 
+                    } else { alert("Error en base de datos: " + json.message); hideLoader(); }
+                }).catch(err => { alert("Error enviando recálculo: " + err.message); hideLoader(); });
+                
+            } catch(e) { alert("Error de cálculo interno: " + e.message); hideLoader(); }
         }
 
         async function confirmarOperacion() {
-            if (carrito.length === 0) return alert("Agregue productos.");
             const cl = document.getElementById("clienteNombre").value.trim();
             const tv = parseFloat(document.getElementById("totalVentaTxt").innerText.replace("$", ""));
             const ab = metodoVenta === 'contado' ? tv : (parseFloat(document.getElementById("montoPagado").value) || 0);
-            if (!cl) return alert("Escriba el nombre del cliente.");
-            const pd = carrito.map(i => { const inv = db.inventario.find(p => p.Código.toString() == i.codigo.toString()); return { ...i, precioFinal: (metodoVenta === 'pagos' ? i.precio * (1 + (i.recargo/100)) : i.precio), stockAnterior: inv ? inv.Cantidad : '?', stockNuevo: inv ? (inv.Cantidad - i.cantidad) : '?' }; });
-            const data = { vendedor: usuarioActual.Usuario, cliente: cl, productos: pd, totalOperacion: tv, pagoActual: ab, saldoPendiente: tv - ab, metodo: metodoVenta.toUpperCase(), plazos: metodoVenta==='pagos' ? `1/${plazoQuincenas}` : "1/1", esAbono: false };
+            if (!cl || carrito.length === 0) return alert("Faltan datos");
+            showLoader("Generando venta...");
+            
+            const pd = carrito.map(i => {
+                const inv = db.inventario.find(p => p.Código.toString() == i.codigo.toString());
+                return { 
+                    codigo: i.codigo, nombre: i.nombre, cantidad: i.cantidad, precio: i.precio,
+                    precioOriginal: i.precio, recargoReal: i.recargo, 
+                    precioFinal: (metodoVenta === 'pagos' ? i.precio * (1 + (i.recargo/100)) : i.precio), 
+                    stockAnterior: inv ? inv.Cantidad : '?', 
+                    stockNuevo: inv ? (inv.Cantidad - i.cantidad) : '?' 
+                };
+            });
+
+            const sPendiente = tv - ab;
+            const metObj = { tipo: metodoVenta.toUpperCase(), abonos: [{fecha: new Date(), monto: ab, vendedor: usuarioActual.Usuario}], fechasProyectadas: metodoVenta === 'pagos' ? generarFechasPagoProyectadas(new Date(), plazoQuincenas, sPendiente) : [], quincenas: plazoQuincenas };
+            const data = { vendedor: usuarioActual.Usuario, cliente: cl, productos: pd, totalOperacion: tv, pagoActual: ab, saldoPendiente: sPendiente, metodo: metodoVenta.toUpperCase(), metodoObj: metObj, fechaOriginal: new Date() };
             const r = await fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "registrarVenta", data: data }) }).then(res => res.json());
-            generarReciboImagen({...data, idVenta: r.idVenta, fecha: new Date()});
-            carrito = []; renderCarrito(); refresh(); document.getElementById("clienteNombre").value = ""; document.getElementById("montoPagado").value = "";
+            generarReciboImagen({...data, idVenta: r.idVenta});
+            carrito = []; renderCarrito(); document.getElementById("clienteNombre").value = "";
+            refresh(true);
+        }
+
+        async function ejecutarAbonoSeleccionado() { 
+            const m = parseFloat(document.getElementById("montoAbonoManual").value); 
+            if(!m || m <= 0 || m > cuentaParaAbonar.sal) return alert("Error en monto"); 
+            showLoader("Registrando Abono...");
+            const d = { vendedor: usuarioActual.Usuario, cliente: cuentaParaAbonar.nom, idVenta: cuentaParaAbonar.id.toString().trim(), pagoActual: m, saldoPendiente: cuentaParaAbonar.sal - m, metodo: "PAGO ABONO", esAbono: true }; 
+            await fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "registrarVenta", data: d }) }); 
+            generarReciboImagen({...d, totalOperacion: cuentaParaAbonar.tot}); 
+            document.getElementById("modalAbonarAhora").classList.replace("flex", "hidden"); 
+            refresh(true); 
+        }
+
+        function generarFechasPagoProyectadas(fi, pl, sal) {
+            let fechas = []; let fBase = new Date(fi); 
+            if(isNaN(fBase.getTime())) fBase = new Date(); 
+            let mP = (sal / pl).toFixed(2);
+            for(let i=1; i<=pl; i++) { fBase.setDate(fBase.getDate() + 15); fechas.push({ fecha: fBase.toISOString(), monto: parseFloat(mP) }); }
+            return fechas;
+        }
+
+        function refresh(cerrarLoader = false) { 
+            fetch(`${gasUrl}?action=obtenerDatos`).then(r => r.json()).then(d => { 
+                db = d; renderInventario(); 
+                if(document.getElementById("tab-dashboard").classList.contains("active")) renderDashboard();
+                if(document.getElementById("tab-reportes").classList.contains("active")) renderVentas(); 
+                if(document.getElementById("tab-usuarios").classList.contains("active")) renderUsuarios(); 
+                if(cerrarLoader) hideLoader();
+            }); 
+        }
+
+        function reimprimirReciboHistorial(idVenta) {
+            showLoader("Construyendo Recibo...");
+            const v = db.ventas.find(x => x['ID Venta'] === idVenta);
+            if (!v) { hideLoader(); return; }
+            let prods = []; try { prods = JSON.parse(v.Productos); } catch(e){}
+            let mObj = {}; try { mObj = JSON.parse(v.MetodoPago); } catch(e){}
+            
+            const ticket = document.getElementById("canvasRecibo");
+            let items = prods.length > 0 ? prods.map(p => {
+                let recStr = p.recargoReal !== undefined ? ` (+${p.recargoReal}%)` : '';
+                return `<div style="display:flex; justify-content:space-between; font-size:10px;"><span>${p.cantidad}x ${p.nombre.substring(0,15)}${recStr}</span><span>$${(parseFloat(p.precioFinal || p.precio)*p.cantidad).toFixed(2)}</span></div>`;
+            }).join('') : `<div style="font-size:10px;">Registro Histórico</div>`;
+            
+            let historialHtml = "";
+            if(mObj.abonos && mObj.abonos.length > 0) {
+                historialHtml += `<div style="border-top:1px dashed #ccc; padding-top:5px; margin-top:5px;"><p style="font-size:8px; font-weight:bold; text-transform:uppercase;">Historial de Pagos:</p>`;
+                mObj.abonos.forEach(a => { historialHtml += `<div style="display:flex; justify-content:space-between; font-size:9px;"><span>${new Date(a.fecha).toLocaleDateString()}</span><span>$${parseFloat(a.monto).toFixed(2)}</span></div>`; });
+                historialHtml += `</div>`;
+            }
+            if(mObj.fechasProyectadas && mObj.fechasProyectadas.length > 0 && v.ClienteContacto > 0) {
+                historialHtml += `<div style="border-top:1px dashed #ccc; padding-top:5px; margin-top:5px;"><p style="font-size:8px; font-weight:bold; text-transform:uppercase;">Plan de Pagos Actualizado:</p>`;
+                mObj.fechasProyectadas.forEach((fp,i) => { historialHtml += `<div style="display:flex; justify-content:space-between; font-size:9px;"><span>Q${i+1} - ${new Date(fp.fecha).toLocaleDateString()}</span><span>$${parseFloat(fp.monto).toFixed(2)}</span></div>`; });
+                historialHtml += `</div>`;
+            }
+
+            ticket.innerHTML = `<div style="text-align:center; font-weight:900; border-bottom:2px dashed #000; padding-bottom:10px; margin-bottom:10px; font-size:14px;">*** REPORTE DE SISTEMA ***</div><div style="font-size:10px; margin-bottom:10px;"><b>FECHA ORIGEN:</b> ${new Date(v.Fecha).toLocaleString()}<br><b>ID:</b> ${v['ID Venta']}<br><b>CLIENTE:</b> ${v.ClienteNombre}</div><div style="border-bottom:1px dashed #ccc; padding-bottom:5px; margin-bottom:5px;">${items}</div><div style="font-weight:900; text-align:right; font-size:12px;">TOTAL ORIG/NVO: $${parseFloat(v.Total).toFixed(2)}<br>SALDO PENDIENTE: $${parseFloat(v.ClienteContacto).toFixed(2)}</div>${historialHtml}`;
+            
+            setTimeout(() => { html2canvas(ticket, {scale: 2}).then(c => { document.getElementById("imgReciboFinal").src = c.toDataURL(); document.getElementById("modalRecibo").classList.remove("hidden"); hideLoader(); }).catch(e => { hideLoader(); showToast("Error generando recibo"); }); }, 600);
         }
 
         function generarReciboImagen(d) {
+            showLoader("Imprimiendo...");
             const ticket = document.getElementById("canvasRecibo");
-            let items = d.productos ? d.productos.map(p => `<div style="display:flex; justify-content:space-between; margin-bottom: 4px; font-size:10px;"><span>${p.cantidad}x ${p.nombre.substring(0,18)}</span><span>$${(p.precioFinal*p.cantidad).toFixed(2)}</span></div>`).join('') : `REGISTRO DE ABONO`;
-            ticket.innerHTML = `<div style="text-align:center; font-weight:900; border-bottom:2px dashed #000; padding-bottom:15px; margin-bottom:15px; font-size:14px;">*** SGV PRO v3.13.1 ***</div><div style="font-size:10px; margin-bottom:15px;"><b>FECHA:</b> ${new Date().toLocaleString()}<br><b>ID:</b> ${d.idVenta}<br><b>CLIENTE:</b> ${d.cliente}</div><div style="border-bottom:1px dashed #ccc; padding-bottom:15px; margin-bottom:15px;">${items}</div><div style="font-weight:900; text-align:right; font-size:12px;">TOTAL: $${parseFloat(d.totalOperacion).toFixed(2)}<br>PAGO: $${parseFloat(d.pagoActual).toFixed(2)}<br>SALDO: $${parseFloat(d.saldoPendiente).toFixed(2)}</div>`;
-            setTimeout(() => { html2canvas(ticket).then(c => { document.getElementById("imgReciboFinal").src = c.toDataURL("image/png"); document.getElementById("modalRecibo").classList.remove("hidden"); }); }, 400);
+            let items = d.productos && d.productos.length > 0 ? d.productos.map(p => {
+                let recStr = p.recargoReal !== undefined ? ` (+${p.recargoReal}%)` : '';
+                return `<div style="display:flex; justify-content:space-between; font-size:10px;"><span>${p.cantidad}x ${p.nombre.substring(0,18)}${recStr}</span><span>$${(parseFloat(p.precioFinal || p.precio)*p.cantidad).toFixed(2)}</span></div>`;
+            }).join('') : `<div style="font-size:10px;">PAGO DE ABONO</div>`;
+            let fechasHtml = "";
+            if (d.metodoObj && d.metodoObj.fechasProyectadas && d.metodoObj.fechasProyectadas.length > 0) {
+                fechasHtml = `<div style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;"><p style="font-size:8px; font-weight:bold; text-transform:uppercase;">Fechas de Pago:</p>`;
+                d.metodoObj.fechasProyectadas.forEach((fp, i) => { fechasHtml += `<div style="display:flex; justify-content:space-between; font-size:9px;"><span>Q${i+1} - ${new Date(fp.fecha).toLocaleDateString()}</span><span>$${parseFloat(fp.monto).toFixed(2)}</span></div>`; });
+                fechasHtml += `</div>`;
+            }
+            ticket.innerHTML = `<div style="text-align:center; font-weight:900; border-bottom:2px dashed #000; padding-bottom:10px; margin-bottom:10px; font-size:14px;">*** SGV PRO v3.28 ***</div><div style="font-size:10px; margin-bottom:10px;"><b>FECHA:</b> ${new Date().toLocaleString()}<br><b>ID:</b> ${d.idVenta || 'N/A'}<br><b>CLIENTE:</b> ${d.cliente}</div><div style="border-bottom:1px dashed #ccc; padding-bottom:10px; margin-bottom:10px;">${items}</div><div style="font-weight:900; text-align:right; font-size:12px;">TOTAL: $${parseFloat(d.totalOperacion).toFixed(2)}<br>PAGADO: $${parseFloat(d.pagoActual).toFixed(2)}<br>SALDO: $${parseFloat(d.saldoPendiente).toFixed(2)}</div>${fechasHtml}`;
+            setTimeout(() => { html2canvas(ticket, {scale: 2}).then(c => { document.getElementById("imgReciboFinal").src = c.toDataURL(); document.getElementById("modalRecibo").classList.remove("hidden"); hideLoader(); }); }, 600);
         }
 
-        function renderInventario() {
-            const q = document.getElementById("filtroStock").value.toLowerCase();
-            const f = db.inventario.filter(p => (p.Nombre || "").toLowerCase().includes(q) || (p.Código || "").toString().includes(q));
-            document.getElementById("listaInventario").innerHTML = f.map(p => `<div class="bg-white p-4 rounded-[2rem] border flex items-center gap-4 shadow-sm border-slate-100"><img src="${p.FotoURL || 'https://via.placeholder.com/100'}" class="w-14 h-14 object-cover rounded-2xl border shadow-sm"><div class="flex-1"><p class="font-black text-[11px] uppercase truncate w-32 tracking-tighter">${p.Nombre}</p><p class="text-[9px] font-bold text-indigo-600 italic italic">Stock: ${p.Cantidad} | $${p.PrecioVenta}</p></div><button onclick="cargarParaEditar('${p.Código}')" class="bg-slate-50 p-4 rounded-2xl border active:bg-indigo-600 active:text-white transition-all shadow-sm">✏️</button></div>`).join('');
-        }
-
-        function refresh() { fetch(`${gasUrl}?action=obtenerDatos`).then(r => r.json()).then(d => { db = d; renderInventario(); renderVentas(); if(modoOperacion === 'pago') renderListaPendientes(); }); }
+        function renderListaPendientes() { const cont = document.getElementById("listaPendientes"); const q = document.getElementById("inputBusquedaPendiente").value.toLowerCase(); const p = db.ventas.filter(v => parseFloat(v.ClienteContacto) > 0 && v.ClienteNombre.toLowerCase().includes(q)).reverse(); cont.innerHTML = p.map(v => `<div onclick="abrirAbonoDirecto('${v['ID Venta']}', ${v.ClienteContacto}, '${v.ClienteNombre}', ${v.Total})" class="bg-white p-5 rounded-[2rem] border shadow-sm flex justify-between items-center active:scale-95 transition-all cursor-pointer"><div><p class="text-[10px] font-black text-indigo-600 uppercase italic">${v.ClienteNombre}</p><p class="text-[8px] text-slate-300">ID: ${v['ID Venta']}</p></div><b class="text-xl tracking-tighter">$${parseFloat(v.ClienteContacto).toFixed(2)}</b></div>`).join(''); }
         function logout() { location.reload(); }
-        function cerrarModalAbono() { document.getElementById("modalAbonarAhora").classList.replace("flex", "hidden"); document.getElementById("montoAbonoManual").value = ""; }
-        function cerrarRecibo() { document.getElementById("modalRecibo").classList.add("hidden"); }
-        function abrirModalProducto() { document.getElementById("modalProducto").classList.remove("hidden"); }
-        function cerrarModal() { document.getElementById("modalProducto").classList.add("hidden"); }
+        function abrirAbonoDirecto(id, sal, nom, tot) { cuentaParaAbonar = { id, sal, nom, tot }; document.getElementById("infoCuentaSeleccionada").innerHTML = `<p class="font-black text-indigo-600 uppercase italic">Cliente: ${nom}</p><div class="bg-slate-50 p-4 rounded-2xl border my-2 shadow-inner"><p class="text-[9px] uppercase font-black text-slate-400">Adeudo Actual</p><b class="text-3xl text-slate-800">$${sal.toFixed(2)}</b></div>`; document.getElementById("modalAbonarAhora").classList.replace("hidden", "flex"); }
+        function cerrarModal() { document.getElementById("modalProducto").classList.add("hidden"); document.getElementById("prodCantidadNueva").value=""; document.getElementById("infoStockActual").classList.add("hidden"); }
         function cargarParaEditar(c) { abrirModalProducto(); document.getElementById("prodCodigo").value = c; verificarExistente(); }
-        function verificarExistente() { const cod = document.getElementById("prodCodigo").value.trim(); const p = db.inventario.find(p => (p.Código || "").toString() == cod); if (p) { document.getElementById("prodNombre").value = p.Nombre || ""; document.getElementById("prodPrecio").value = p.PrecioVenta || 0; document.getElementById("prodRecargo").value = p.RecargoPagos || 15; document.getElementById("prodFoto").value = p.FotoURL || ""; if(p.FotoURL) { document.getElementById("imgActual").src = p.FotoURL; document.getElementById("previewImagen").classList.remove("hidden"); } } }
-        async function guardarTodoElProducto() { const d = { codigo: document.getElementById("prodCodigo").value.trim(), nombre: document.getElementById("prodNombre").value.trim(), cantidad: parseInt(document.getElementById("prodStock").value) || 0, precioVenta: parseFloat(document.getElementById("prodPrecio").value) || 0, recargoPagos: parseFloat(document.getElementById("prodRecargo").value) || 15, fotoUrl: document.getElementById("prodFoto").value }; await fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "actualizarInventario", data: d }) }); cerrarModal(); refresh(); }
         function seleccionarFoto(i) { if (!i.files[0]) return; const r = new FileReader(); r.onload = (e) => { document.getElementById("imgActual").src = e.target.result; document.getElementById("previewImagen").classList.remove("hidden"); document.getElementById("prodFoto").value = e.target.result; }; r.readAsDataURL(i.files[0]); }
-        function descargarRecibo() { const link = document.createElement('a'); link.download = `SGV_Recibo_${Date.now()}.png`; link.href = document.getElementById("imgReciboFinal").src; link.click(); }
-        window.onload = () => { if(localStorage.getItem("sgv_url")) document.getElementById("gasUrlInput").value = localStorage.getItem("sgv_url"); };
+        function descargarRecibo() { const link = document.createElement('a'); link.download = `Recibo_${Date.now()}.png`; link.href = document.getElementById("imgReciboFinal").src; link.click(); }
+        function toggleScanner(target) { const divId = `reader-${target}`; const div = document.getElementById(divId); if (div.style.display === "block") { div.style.display = "none"; if (target === 'vender' && scannerVender) scannerVender.stop(); else if(scannerStock) scannerStock.stop(); } else { div.style.display = "block"; const scanner = new Html5Qrcode(divId); scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => { if (target === 'vender') { document.getElementById("buscarCodigoInput").value = text; buscarProducto(); } else { document.getElementById("prodCodigo").value = text; verificarExistente(); } toggleScanner(target); }); if (target === 'vender') scannerVender = scanner; else scannerStock = scanner; } }
     </script>
 </body>
 </html>
