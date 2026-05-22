@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGV PRO v3.35 - Cloudinary Directo</title>
+    <title>SGV PRO v3.40 - Sistema Completo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -30,6 +30,23 @@
         .input-label { font-size: 9px; font-weight: 900; color: #6366f1; text-transform: uppercase; margin-left: 10px; margin-bottom: 2px; display: block; }
         .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-left-color: #ffffff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* NUEVOS ESTILOS DE BOTONES 3D AMIGABLES */
+        .btn-3d-indigo { background: linear-gradient(to bottom, #6366f1, #4f46e5); border: 1px solid #4338ca; box-shadow: 0 4px 0 #312e81, 0 5px 10px rgba(0,0,0,0.2); color: white; transition: all 0.1s; }
+        .btn-3d-indigo:hover { box-shadow: 0 2px 0 #312e81, 0 3px 6px rgba(0,0,0,0.2); transform: translateY(2px); }
+        .btn-3d-indigo:active { box-shadow: none; transform: translateY(4px); }
+        
+        .btn-3d-emerald { background: linear-gradient(to bottom, #10b981, #059669); border: 1px solid #047857; box-shadow: 0 4px 0 #064e3b, 0 5px 10px rgba(0,0,0,0.2); color: white; transition: all 0.1s; }
+        .btn-3d-emerald:hover { box-shadow: 0 2px 0 #064e3b, 0 3px 6px rgba(0,0,0,0.2); transform: translateY(2px); }
+        .btn-3d-emerald:active { box-shadow: none; transform: translateY(4px); }
+
+        .btn-3d-red { background: linear-gradient(to bottom, #ef4444, #dc2626); border: 1px solid #b91c1c; box-shadow: 0 4px 0 #7f1d1d, 0 5px 10px rgba(0,0,0,0.2); color: white; transition: all 0.1s; }
+        .btn-3d-red:hover { box-shadow: 0 2px 0 #7f1d1d, 0 3px 6px rgba(0,0,0,0.2); transform: translateY(2px); }
+        .btn-3d-red:active { box-shadow: none; transform: translateY(4px); }
+
+        .btn-3d-slate { background: #ffffff; border: 2px solid #e2e8f0; box-shadow: 0 4px 0 #cbd5e1, 0 5px 10px rgba(0,0,0,0.05); color: #64748b; transition: all 0.1s; }
+        .btn-3d-slate:hover { box-shadow: 0 2px 0 #cbd5e1, 0 3px 6px rgba(0,0,0,0.05); transform: translateY(2px); }
+        .btn-3d-slate:active { box-shadow: none; transform: translateY(4px); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans custom-scroll">
@@ -48,18 +65,26 @@
             <div class="space-y-4">
                 <input type="text" id="userInput" class="w-full px-6 py-4 border rounded-2xl outline-none font-bold text-center transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" placeholder="Usuario">
                 <input type="password" id="passInput" class="w-full px-6 py-4 border rounded-2xl outline-none font-bold text-center transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" placeholder="Contraseña">
-                <button onclick="intentarLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 rounded-2xl shadow-xl transition-all active:scale-95 tracking-widest uppercase">Entrar</button>
+                <!-- Botón Actualizado a UI 3D -->
+                <button onclick="intentarLogin()" class="w-full btn-3d-indigo py-5 rounded-2xl font-black tracking-widest uppercase">Entrar al Sistema</button>
             </div>
         </div>
     </div>
 
     <div id="appScreen" class="hidden flex-1 flex flex-col w-full max-w-full">
-        <header class="bg-indigo-600 text-white p-5 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <!-- HEADER REDISEÑADO CON INFO DE USUARIO -->
+        <header class="bg-indigo-600 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
             <div class="flex items-center gap-3">
-                <h1 class="font-black text-xl italic tracking-tighter">SGV PRO</h1>
-                <span id="labelUsuarioAdmin" class="bg-indigo-800 px-3 py-1 rounded-full text-[9px] font-black uppercase hidden shadow-inner transition-all">ADMIN</span>
+                <h1 class="font-black text-2xl italic tracking-tighter shadow-sm">SGV PRO</h1>
             </div>
-            <button onclick="logout()" class="text-[10px] font-bold bg-indigo-500 hover:bg-indigo-400 px-4 py-2 rounded-xl text-white shadow-sm active:scale-90 transition-all">SALIR</button>
+            <div class="flex items-center gap-4">
+                <div id="headerUserInfo" class="hidden flex-col items-end">
+                    <span id="headerUserName" class="text-xs font-black uppercase tracking-wider text-indigo-50"></span>
+                    <span id="headerUserRol" class="text-[9px] bg-indigo-800 text-indigo-100 px-2 py-0.5 rounded-full font-bold uppercase mt-0.5 shadow-inner"></span>
+                </div>
+                <!-- Botón Salir 3D -->
+                <button onclick="logout()" class="btn-3d-red px-4 py-2 rounded-xl font-black text-[10px] uppercase">Salir</button>
+            </div>
         </header>
 
         <main class="flex-1 p-3 md:p-4 max-w-4xl w-full mx-auto pb-32">
@@ -67,7 +92,7 @@
             <div id="tab-dashboard" class="app-tab space-y-4">
                 <div class="flex justify-between items-center px-2">
                     <h2 class="font-black text-2xl uppercase italic">Dashboard BI</h2>
-                    <button onclick="abrirModalGasto()" class="bg-red-500 hover:bg-red-600 text-white text-[9px] font-black px-4 py-2 rounded-xl shadow-lg active:scale-95 transition-all">+ GASTO</button>
+                    <button onclick="abrirModalGasto()" class="btn-3d-red px-5 py-3 text-[10px] font-black rounded-xl uppercase">+ Gasto Operativo</button>
                 </div>
                 
                 <!-- Panel de Filtros Dinámicos -->
@@ -94,6 +119,7 @@
                             <option value="Body">Body</option>
                             <option value="Bolsas">Bolsas</option>
                             <option value="Calzado">Calzado</option>
+                            <option value="Jabon">Jabon</option> <!-- NUEVA CATEGORIA AÑADIDA -->
                             <option value="Velas">Velas</option>
                             <option value="Gel Antibacterial">Gel Antibacterial</option>
                             <option value="Porta Gel">Porta Gel</option>
@@ -122,8 +148,8 @@
                     <div class="bg-white p-3 md:p-4 rounded-[2rem] border shadow-sm space-y-3">
                         <div class="flex gap-2 w-full">
                             <input type="text" id="buscarCodigoInput" placeholder="Buscar / Escanear" class="flex-1 min-w-0 px-4 md:px-5 py-3 border rounded-2xl outline-none text-sm focus:border-indigo-500 transition-all">
-                            <button onclick="buscarProducto()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 md:px-5 py-3 rounded-2xl font-black text-[10px] md:text-xs uppercase italic active:scale-95 transition-all">Añadir</button>
-                            <button onclick="toggleScanner('vender')" class="bg-slate-100 hover:bg-slate-200 p-3 rounded-2xl border active:scale-95 transition-all">📷</button>
+                            <button onclick="buscarProducto()" class="btn-3d-indigo px-5 py-3 rounded-xl font-black text-[10px] md:text-xs uppercase italic">Añadir</button>
+                            <button onclick="toggleScanner('vender')" class="btn-3d-slate px-4 py-3 rounded-xl text-lg">📷</button>
                         </div>
                         <div id="reader-vender" class="reader-container"></div>
                     </div>
@@ -150,7 +176,7 @@
                             <span id="totalVentaTxt" class="block text-3xl md:text-4xl font-black text-indigo-600 tracking-tighter break-words w-full transition-all">$0.00</span>
                             <input type="text" id="clienteNombre" placeholder="Nombre del Comprador" class="w-full px-5 py-4 border rounded-2xl bg-slate-50 outline-none font-bold text-sm focus:border-indigo-500 transition-all">
                             <div id="contenedorAbonoInicial" class="hidden"><input type="number" id="montoPagado" placeholder="¿Cuánto entrega hoy?" class="w-full px-5 py-4 border rounded-2xl bg-emerald-50 font-black text-emerald-700 text-sm focus:border-emerald-500 transition-all"></div>
-                            <button onclick="confirmarOperacion()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 md:py-5 rounded-[1.8rem] font-black uppercase shadow-xl active:scale-95 transition-all text-xs md:text-sm">Generar Venta</button>
+                            <button onclick="confirmarOperacion()" class="w-full btn-3d-emerald py-5 rounded-[1.8rem] font-black uppercase text-xs md:text-sm">Generar Venta</button>
                         </div>
                     </div>
                 </div>
@@ -164,7 +190,7 @@
             <div id="tab-inventario" class="app-tab space-y-4">
                 <div class="flex justify-between items-center px-2">
                     <h2 class="font-black text-2xl text-slate-800 uppercase italic">Almacén</h2>
-                    <button onclick="abrirModalProducto()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black px-6 py-3 rounded-2xl shadow-lg active:scale-95 transition-all">+ ENTRADA</button>
+                    <button onclick="abrirModalProducto()" class="btn-3d-indigo px-5 py-3 rounded-xl text-[10px] font-black uppercase">+ Registrar</button>
                 </div>
                 <input type="text" id="filtroStock" oninput="renderInventario()" placeholder="Filtrar stock..." class="w-full px-5 py-3 border rounded-xl bg-white outline-none shadow-sm focus:border-indigo-500 transition-all">
                 <div id="listaInventario" class="grid gap-3"></div>
@@ -184,24 +210,31 @@
             </div>
 
             <div id="tab-usuarios" class="app-tab space-y-4">
-                <div class="flex justify-between items-center px-2"><h2 class="font-black text-2xl text-slate-800 uppercase italic">Usuarios</h2><button id="btnNuevoUsuario" onclick="abrirModalAdminUsuario('crear')" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black px-6 py-3 rounded-2xl shadow-lg active:scale-95 transition-all">+ USUARIO</button></div>
+                <div class="flex justify-between items-center px-2"><h2 class="font-black text-2xl text-slate-800 uppercase italic">Usuarios</h2><button id="btnNuevoUsuario" onclick="abrirModalAdminUsuario('crear')" class="hidden btn-3d-indigo px-5 py-3 rounded-xl text-[10px] font-black uppercase">+ Usuario</button></div>
                 <div id="listaUsuarios" class="space-y-3"></div>
             </div>
         </main>
 
         <nav class="bg-white border-t fixed bottom-0 left-0 right-0 h-20 md:h-24 flex items-center justify-around z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] px-1 md:px-2">
-            <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90 nav-btn-active" id="btn-dashboard">📈<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">BI</span></button>
-            <button onclick="switchTab('vender')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90" id="btn-vender">🛒<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">Ventas</span></button>
+            <!-- BOTÓN BI OCULTO POR DEFECTO PARA VENDEDORES -->
+            <button onclick="switchTab('dashboard')" class="nav-btn hidden flex-col items-center flex-1 transition-all active:scale-90" id="btn-dashboard">📈<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">BI</span></button>
+            <button onclick="switchTab('vender')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90 nav-btn-active" id="btn-vender">🛒<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">Ventas</span></button>
             <button onclick="switchTab('inventario')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90" id="btn-inventario">📦<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">Stock</span></button>
             <button onclick="switchTab('reportes')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90" id="btn-reportes">📊<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">Reportes</span></button>
             <button onclick="switchTab('usuarios')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90" id="btn-usuarios">👥<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">Usuarios</span></button>
         </nav>
     </div>
 
+    <!-- NUEVO MODAL: VISOR DE IMAGEN AMPLIO -->
+    <div id="modalVisorImagen" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-[300] backdrop-blur-md transition-all duration-300" onclick="cerrarVisorImagen()">
+        <button class="absolute top-6 right-6 text-white font-black text-4xl hover:text-red-500 transition-all z-50">&times;</button>
+        <img id="imgVisorAmpliado" src="" class="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl modal-enter" onclick="event.stopPropagation()">
+    </div>
+
     <div id="modalInfoProducto" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-[250] backdrop-blur-sm transition-all duration-300">
-        <div class="bg-white p-6 rounded-[2rem] w-full max-w-sm space-y-4 shadow-2xl border text-center modal-enter">
+        <div class="bg-white p-6 rounded-[2rem] w-full max-w-sm space-y-4 shadow-2xl border text-center modal-enter relative">
             <div id="infoDetalleProducto" class="space-y-2"></div>
-            <button onclick="cerrarModalInfo()" class="w-full bg-slate-100 hover:bg-slate-200 py-4 rounded-2xl font-black text-[10px] text-slate-400 uppercase tracking-widest active:scale-95 transition-all">Cerrar</button>
+            <button onclick="cerrarModalInfo()" class="w-full btn-3d-slate py-4 rounded-xl font-black text-[10px] uppercase tracking-widest mt-4">Cerrar Info</button>
         </div>
     </div>
 
@@ -210,7 +243,7 @@
             <button onclick="cerrarModal()" class="absolute top-6 right-8 text-slate-300 hover:text-red-500 font-black text-2xl transition-all">×</button>
             <h3 class="font-black text-indigo-600 uppercase text-xs italic mb-4">Registro de Mercancía</h3>
             
-            <div><span class="input-label">Código</span><div class="flex gap-2"><input type="text" id="prodCodigo" class="flex-1 px-4 py-3 border rounded-2xl font-black bg-slate-50 outline-none focus:border-indigo-500 transition-all" onchange="verificarExistente()"><button onclick="toggleScanner('stock')" class="bg-white hover:bg-slate-50 border px-4 rounded-2xl shadow-sm active:scale-95 transition-all">📷</button></div></div>
+            <div><span class="input-label">Código</span><div class="flex gap-2"><input type="text" id="prodCodigo" class="flex-1 px-4 py-3 border rounded-2xl font-black bg-slate-50 outline-none focus:border-indigo-500 transition-all" onchange="verificarExistente()"><button onclick="toggleScanner('stock')" class="btn-3d-slate px-4 rounded-2xl">📷</button></div></div>
             <div id="reader-stock" class="reader-container"></div>
             
             <div id="infoStockActual" class="hidden bg-indigo-50 p-4 rounded-2xl mb-3 text-[10px] grid grid-cols-3 text-center border border-indigo-100 shadow-inner transition-all duration-300">
@@ -229,6 +262,7 @@
                         <option value="Body">Body</option>
                         <option value="Bolsas">Bolsas</option>
                         <option value="Calzado">Calzado</option>
+                        <option value="Jabon">Jabon</option> <!-- NUEVA CATEGORIA AÑADIDA -->
                         <option value="Velas">Velas</option>
                         <option value="Gel Antibacterial">Gel Antibacterial</option>
                         <option value="Porta Gel">Porta Gel</option>
@@ -236,7 +270,7 @@
                     </select>
                 </div>
                 <div id="cajaDescuentoPar" class="hidden transition-all duration-300">
-                    <span class="input-label">Desc. x Par ($)</span>
+                    <span class="input-label">Aporte a Desc. Par ($)</span>
                     <input type="number" id="prodDescuentoPar" class="w-full px-4 py-3 border rounded-2xl font-black bg-emerald-50 text-emerald-700 outline-none focus:border-emerald-500 transition-all" placeholder="Ej: 20">
                 </div>
             </div>
@@ -248,16 +282,16 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div><span class="input-label">Precio Venta</span><input type="number" id="prodPrecioVenta" class="w-full px-4 py-3 border rounded-2xl font-black bg-emerald-50 text-emerald-700 outline-none focus:border-emerald-500 transition-all"></div>
-                <div id="cajaRecargo"><span class="input-label">% Recargo Pago</span><input type="number" id="prodRecargo" value="15" class="w-full px-4 py-3 border rounded-2xl font-black bg-slate-50 outline-none focus:border-slate-400 transition-all"></div>
+                <div id="cajaRecargo"><span class="input-label">% Recargo Pago</span><input type="number" id="prodRecargo" value="15" class="w-full px-4 py-3 border rounded-2xl font-black bg-slate-50 outline-none focus:border-slate-400 transition-all" placeholder="Ej: 15 o 0"></div>
             </div>
 
             <div class="border-2 border-dashed p-4 rounded-[2rem] text-center bg-slate-50 transition-all hover:border-indigo-300">
-                <div id="previewImagen" class="hidden mb-3"><img id="imgActual" src="" class="h-24 w-24 object-cover mx-auto rounded-3xl shadow-lg border-4 border-white transition-all"></div>
-                <button onclick="document.getElementById('inputCamara').click()" class="bg-white hover:bg-slate-100 border px-6 py-3 rounded-2xl text-[10px] font-black shadow-sm uppercase italic active:scale-95 transition-all">Cargar Foto</button>
+                <div id="previewImagen" class="hidden mb-3"><img id="imgActual" src="" class="h-24 w-24 object-cover mx-auto rounded-3xl shadow-lg border-4 border-white transition-all cursor-pointer" onclick="abrirVisorImagen(this.src)"></div>
+                <button onclick="document.getElementById('inputCamara').click()" class="btn-3d-slate px-6 py-3 rounded-xl text-[10px] font-black uppercase italic">Cargar Foto</button>
                 <input type="file" id="inputCamara" accept="image/*" capture="environment" class="hidden" onchange="seleccionarFoto(this)">
                 <input type="hidden" id="prodFoto">
             </div>
-            <button onclick="guardarTodoElProducto()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-[2rem] font-black uppercase text-xs shadow-xl active:scale-95 transition-all">Guardar en Sistema</button>
+            <button onclick="guardarTodoElProducto()" class="w-full btn-3d-indigo py-5 rounded-[2rem] font-black uppercase text-xs">Guardar en Sistema</button>
         </div>
     </div>
 
@@ -268,7 +302,7 @@
             <div><span class="input-label">Categoría</span><select id="gastoCat" class="w-full px-4 py-3 border rounded-xl outline-none font-bold bg-slate-50 focus:border-red-400 transition-all"><option>Renta</option><option>Servicios</option><option>Publicidad</option><option>Sueldos</option><option>Otros</option></select></div>
             <div><span class="input-label">Monto</span><input type="number" id="gastoMonto" class="w-full px-4 py-3 border rounded-xl outline-none font-black text-red-600 bg-red-50 text-xl focus:border-red-400 transition-all" placeholder="$0.00"></div>
             <div><span class="input-label">Descripción</span><input type="text" id="gastoDesc" class="w-full px-4 py-3 border rounded-xl outline-none font-bold focus:border-red-400 transition-all" placeholder="¿En qué se gastó?"></div>
-            <button onclick="guardarGasto()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-2xl uppercase shadow-lg active:scale-95 transition-all">Guardar Gasto</button>
+            <button onclick="guardarGasto()" class="w-full btn-3d-red py-4 rounded-2xl font-black uppercase">Guardar Gasto</button>
         </div>
     </div>
 
@@ -282,9 +316,9 @@
                 <p class="font-black text-[10px] text-indigo-600 uppercase text-center mb-3">Edición Individual (Admin)</p>
                 <div class="mb-3"><span class="input-label">Ajustar Plazo (Quincenas)</span><input type="number" id="editVentaQuincenas" class="w-full px-3 py-2 border rounded-xl font-black outline-none text-xs focus:border-indigo-500 transition-all"></div>
                 <div id="editVentaProductos" class="space-y-2 mb-4"></div>
-                <button onclick="guardarEdicionVenta()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl uppercase text-[10px] shadow-md active:scale-95 transition-all">Recalcular y Guardar</button>
+                <button onclick="guardarEdicionVenta()" class="w-full btn-3d-indigo py-3 rounded-xl font-black uppercase text-[10px]">Recalcular y Guardar</button>
             </div>
-            <button onclick="document.getElementById('modalDetalleVenta').classList.replace('flex','hidden')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-400 font-black py-4 rounded-[1.5rem] uppercase text-[10px] tracking-widest mt-4 active:scale-95 transition-all">Cerrar</button>
+            <button onclick="document.getElementById('modalDetalleVenta').classList.replace('flex','hidden')" class="w-full btn-3d-slate py-4 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest mt-4">Cerrar</button>
         </div>
     </div>
 
@@ -304,19 +338,19 @@
                 </div>
             </div>
             <div class="flex gap-2 pt-4">
-                <button id="btnEliminarUsr" onclick="ejecutarAdminUsuario('eliminar')" class="hidden bg-red-100 hover:bg-red-200 text-red-600 font-black py-3 px-4 rounded-xl text-[10px] uppercase active:scale-95 transition-all">Eliminar</button>
-                <button onclick="ejecutarAdminUsuario('guardar')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-[10px] uppercase active:scale-95 transition-all shadow-md">Guardar</button>
+                <button id="btnEliminarUsr" onclick="ejecutarAdminUsuario('eliminar')" class="hidden btn-3d-red py-3 px-4 rounded-xl text-[10px] font-black uppercase w-1/3">Eliminar</button>
+                <button onclick="ejecutarAdminUsuario('guardar')" class="flex-1 btn-3d-indigo py-3 rounded-xl font-black text-[10px] uppercase">Guardar</button>
             </div>
         </div>
     </div>
 
-    <div id="modalRecibo" class="fixed inset-0 bg-black/95 hidden items-center justify-center p-4 z-[200] backdrop-blur-sm transition-all duration-300"><div class="flex flex-col items-center gap-6 modal-enter w-full max-w-sm"><div id="previewReciboContenedor" class="rounded-xl shadow-2xl bg-white border-4 border-white overflow-hidden w-full"><img id="imgReciboFinal" src="" class="w-full"></div><div class="flex gap-2 w-full"><button onclick="descargarRecibo()" class="flex-1 bg-green-600 hover:bg-green-500 text-white py-4 md:py-5 rounded-2xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">Descargar 📥</button><button onclick="document.getElementById('modalRecibo').classList.add('hidden')" class="px-6 bg-slate-100 hover:bg-slate-200 py-4 md:py-5 rounded-2xl font-black text-[10px] text-slate-400 active:scale-95 transition-all">Cerrar</button></div></div></div>
+    <div id="modalRecibo" class="fixed inset-0 bg-black/95 hidden items-center justify-center p-4 z-[200] backdrop-blur-sm transition-all duration-300"><div class="flex flex-col items-center gap-6 modal-enter w-full max-w-sm"><div id="previewReciboContenedor" class="rounded-xl shadow-2xl bg-white border-4 border-white overflow-hidden w-full"><img id="imgReciboFinal" src="" class="w-full"></div><div class="flex gap-2 w-full"><button onclick="descargarRecibo()" class="flex-1 btn-3d-emerald py-4 md:py-5 rounded-2xl font-black uppercase text-[10px]">Descargar 📥</button><button onclick="document.getElementById('modalRecibo').classList.add('hidden')" class="px-6 btn-3d-slate py-4 md:py-5 rounded-2xl font-black text-[10px]">Cerrar</button></div></div></div>
     <div id="reciboInvisible"><div id="canvasRecibo"></div></div>
     
-    <div id="modalAbonarAhora" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[150] backdrop-blur-sm transition-all duration-300"><div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-6 shadow-2xl text-center modal-enter"><div id="infoCuentaSeleccionada"></div><input type="number" id="montoAbonoManual" placeholder="Monto del abono" class="w-full px-6 py-5 border rounded-2xl font-black bg-indigo-50 text-indigo-600 text-center text-xl outline-none shadow-inner focus:border-indigo-400 transition-all"><div class="flex gap-2"><button onclick="ejecutarAbonoSeleccionado()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-2xl font-black uppercase text-[10px] active:scale-95 transition-all shadow-md">Pagar</button><button onclick="document.getElementById('modalAbonarAhora').classList.replace('flex','hidden')" class="px-5 bg-slate-100 hover:bg-slate-200 py-5 rounded-2xl font-black text-[10px] text-slate-400 active:scale-95 transition-all">Cerrar</button></div></div></div>
+    <div id="modalAbonarAhora" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[150] backdrop-blur-sm transition-all duration-300"><div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-6 shadow-2xl text-center modal-enter"><div id="infoCuentaSeleccionada"></div><input type="number" id="montoAbonoManual" placeholder="Monto del abono" class="w-full px-6 py-5 border rounded-2xl font-black bg-indigo-50 text-indigo-600 text-center text-xl outline-none shadow-inner focus:border-indigo-400 transition-all"><div class="flex gap-2"><button onclick="ejecutarAbonoSeleccionado()" class="flex-1 btn-3d-emerald py-5 rounded-2xl font-black uppercase text-[10px]">Pagar</button><button onclick="document.getElementById('modalAbonarAhora').classList.replace('flex','hidden')" class="px-5 btn-3d-slate py-5 rounded-2xl font-black text-[10px]">Cerrar</button></div></div></div>
 
     <script>
-        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGlpSUp6w6Unn1jGKGexXBTFdVz6ukAokQNbIU7lwWSZYy56e8aHlFQrZeJxJIqjB9/exec";
+        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZ3tLuJ2Rv23s8hXdQypJIxxn_w_bKgDxGXcw4BS19aKnH2fTWVDLdXOV-UIlOce_L/exec";
         
         let db = { inventario: [], usuarios: [], ventas: [], detalles: [], gastos: [] };
         let gasUrl = APP_SCRIPT_URL; 
@@ -343,11 +377,25 @@
                     db = data; usuarioActual = found;
                     document.getElementById("loginScreen").classList.add("hidden");
                     document.getElementById("appScreen").classList.remove("hidden");
+                    
+                    // CARGAR INFO DEL HEADER
+                    document.getElementById("headerUserName").innerText = usuarioActual.Usuario;
+                    document.getElementById("headerUserRol").innerText = usuarioActual.Rol;
+                    document.getElementById("headerUserInfo").classList.remove("hidden");
+                    document.getElementById("headerUserInfo").classList.add("flex");
+                    
                     if(usuarioActual.Rol === 'Admin') {
-                        document.getElementById("labelUsuarioAdmin").classList.remove("hidden");
                         document.getElementById("btnNuevoUsuario").classList.remove("hidden");
-                        document.getElementById("btn-dashboard").classList.replace("hidden", "flex");
+                        document.getElementById("btn-dashboard").classList.remove("hidden");
+                        document.getElementById("btn-dashboard").classList.add("flex");
+                    } else {
+                        document.getElementById("btnNuevoUsuario").classList.add("hidden");
+                        document.getElementById("btn-dashboard").classList.add("hidden");
+                        document.getElementById("btn-dashboard").classList.remove("flex");
                     }
+                    
+                    // AL INICIAR, ENTRAR DIRECTAMENTE A VENTAS
+                    switchTab('vender'); 
                     refresh(true);
                 } else alert("Usuario o contraseña incorrectos");
             }).catch(e => { hideLoader(); alert("Fallo de conexión."); });
@@ -365,7 +413,6 @@
         }
 
         function renderDashboard() {
-            // 1. Obtener valores de los filtros
             const elFInicio = document.getElementById("dashFInicio"); const fIn = elFInicio ? elFInicio.value : "";
             const elFFin = document.getElementById("dashFFin"); const fFi = elFFin ? elFFin.value : "";
             const elFCli = document.getElementById("dashFCli"); const qCli = elFCli ? elFCli.value.toLowerCase() : "";
@@ -373,20 +420,13 @@
             const elFMet = document.getElementById("dashFMet"); const qMet = elFMet ? elFMet.value : "";
             const elFCat = document.getElementById("dashFCat"); const qCat = elFCat ? elFCat.value : "";
 
-            // 2. Filtrar Gastos (Afectados por Fecha y por Vendedor)
-            // Si hay filtros específicos de Mercancía/Cliente, omitimos los gastos operativos para mostrar Margen Bruto
             let totalG = 0;
             if (!qCli && !qMet && !qCat) {
                 const gastosPeriodo = db.gastos.filter(g => {
                     if(!g.Fecha) return false;
-                    
-                    // CORRECCIÓN: Evitar duplicidad del costo. Omitimos las compras de stock automáticas del backend.
                     const catGas = (g.Categoría || g.Categoria || "").toLowerCase();
                     const descGas = (g.Descripción || g.Descripcion || "").toLowerCase();
-                    if (catGas.includes("compra de mercan") || descGas.includes("automátic") || descGas.includes("automatic")) {
-                        return false;
-                    }
-
+                    if (catGas.includes("compra de mercan") || descGas.includes("automátic") || descGas.includes("automatic")) { return false; }
                     const fg = new Date(g.Fecha).toISOString().split('T')[0];
                     const matchDate = (!fIn || fg >= fIn) && (!fFi || fg <= fFi);
                     const matchVen = !qVen || (g.Usuario || "").toLowerCase().includes(qVen);
@@ -395,30 +435,24 @@
                 totalG = gastosPeriodo.reduce((a, b) => a + Number(b.Monto || 0), 0);
             }
 
-            // 3. Variables para las Ventas y Costos
             let totalV = 0;
             let costoVentas = 0;
             const venData = {}; 
 
             db.ventas.forEach(v => {
                 if(!v.Fecha) return;
-                
-                // Filtros a nivel de venta general
                 const fv = new Date(v.Fecha).toISOString().split('T')[0];
                 const matchDate = (!fIn || fv >= fIn) && (!fFi || fv <= fFi);
                 const matchCli = !qCli || (v.ClienteNombre || "").toLowerCase().includes(qCli);
                 const matchVen = !qVen || (v.Vendedor || "").toLowerCase().includes(qVen);
-                
                 let mObj = {}; try { mObj = JSON.parse(v.MetodoPago || "{}"); } catch(e){}
                 const matchMet = !qMet || (mObj.tipo === qMet);
 
-                // Solo procesamos la venta si cumple los filtros generales
                 if (matchDate && matchCli && matchVen && matchMet) {
                     let prods = []; try { prods = JSON.parse(v.Productos || "[]"); } catch(e){}
                     let ventaParcial = 0;
                     let costoParcial = 0;
 
-                    // Filtramos producto por producto si hay un filtro de Categoría
                     prods.forEach(p => {
                         const matchCat = !qCat || (p.categoria === qCat);
                         if (matchCat) {
@@ -426,21 +460,16 @@
                             let sub = p.totalCalculado !== undefined ? parseFloat(p.totalCalculado) : (pFinal * p.cantidad - (p.descuentoParAplicado || 0));
                             ventaParcial += sub;
                             
-                            // Buscar el costo real histórico
                             const det = db.detalles.find(d => d['ID Venta'] === v['ID Venta'] && d.Código.toString() === p.codigo.toString());
                             let costoUnitario = det ? parseFloat(det.CostoUnidad || 0) : 0;
-                            
-                            // Respaldo para ventas antiguas: buscar costo actual en inventario
                             if (!costoUnitario) {
                                 const invFallback = db.inventario.find(i => i.Código.toString() === p.codigo.toString());
                                 if (invFallback) costoUnitario = parseFloat(invFallback.Costo || 0);
                             }
-                            
                             costoParcial += (costoUnitario * p.cantidad);
                         }
                     });
 
-                    // Si hay venta tras el filtro (o si no se filtró por categoría y es una venta antigua sin JSON)
                     if (ventaParcial > 0 || (prods.length === 0 && !qCat)) {
                         if (prods.length === 0 && !qCat) {
                             ventaParcial = parseFloat(v.Total) || 0;
@@ -461,11 +490,9 @@
                 }
             });
 
-            // 4. Cálculos Finales
             const utilidad = totalV - costoVentas - totalG;
             const margen = totalV > 0 ? (utilidad / totalV) * 100 : 0;
             
-            // 5. Actualizar Pantalla
             const elVentasTotal = document.getElementById("dashVentasTotal");
             if (elVentasTotal) elVentasTotal.innerText = `$${totalV.toFixed(2)}`;
             const elUtilidad = document.getElementById("dashUtilidad");
@@ -477,7 +504,6 @@
                 margenEl.className = margen >= 0 ? "text-lg md:text-xl text-emerald-600 font-black transition-all" : "text-lg md:text-xl text-red-600 font-black transition-all";
             }
 
-            // 6. Actualizar Gráficas
             const chartVentasCtx = document.getElementById('chartVentas');
             if (chartVentasCtx) {
                 if (chartVentas) chartVentas.destroy();
@@ -485,12 +511,7 @@
                     type: 'bar', 
                     data: { 
                         labels: ['Ventas', 'Costos Merc.', 'Gastos Oper.'], 
-                        datasets: [{ 
-                            label: 'Flujo ($)', 
-                            data: [totalV, costoVentas, totalG], 
-                            backgroundColor: ['#6366f1', '#fbbf24', '#f87171'], 
-                            borderRadius: 15 
-                        }] 
+                        datasets: [{ label: 'Flujo ($)', data: [totalV, costoVentas, totalG], backgroundColor: ['#6366f1', '#fbbf24', '#f87171'], borderRadius: 15 }] 
                     } 
                 });
             }
@@ -502,10 +523,7 @@
                     type: 'doughnut', 
                     data: { 
                         labels: Object.keys(venData), 
-                        datasets: [{ 
-                            data: Object.values(venData), 
-                            backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6'] 
-                        }] 
+                        datasets: [{ data: Object.values(venData), backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6'] }] 
                     } 
                 });
             }
@@ -522,9 +540,9 @@
         function renderUsuarios() {
             const cont = document.getElementById("listaUsuarios");
             if(usuarioActual.Rol === 'Admin') {
-                cont.innerHTML = db.usuarios.map(u => `<div class="bg-white p-4 rounded-2xl shadow-sm border flex justify-between items-center transition-all hover:shadow-md"><div class="flex flex-col"><span class="font-black text-[12px] uppercase text-indigo-600">${u.Usuario}</span><span class="text-[9px] uppercase bg-slate-100 rounded-full px-2 inline-block max-w-max mt-1">${u.Rol}</span></div><button onclick="abrirModalAdminUsuario('editar', '${u.Usuario}')" class="bg-indigo-50 text-indigo-600 p-3 rounded-xl text-[10px] font-black active:scale-95 transition-all">⚙️ Editar</button></div>`).join('');
+                cont.innerHTML = db.usuarios.map(u => `<div class="bg-white p-4 rounded-2xl shadow-sm border flex justify-between items-center transition-all hover:shadow-md"><div class="flex flex-col"><span class="font-black text-[12px] uppercase text-indigo-600">${u.Usuario}</span><span class="text-[9px] uppercase bg-slate-100 rounded-full px-2 inline-block max-w-max mt-1">${u.Rol}</span></div><button onclick="abrirModalAdminUsuario('editar', '${u.Usuario}')" class="bg-indigo-50 text-indigo-600 p-3 rounded-xl text-[10px] font-black active:scale-95 transition-all border border-indigo-100">⚙️ Editar</button></div>`).join('');
             } else {
-                cont.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border flex justify-between items-center transition-all hover:shadow-md"><div class="flex flex-col"><span class="font-black text-[12px] uppercase text-indigo-600">${usuarioActual.Usuario}</span><span class="text-[9px] uppercase bg-slate-100 rounded-full px-2 inline-block max-w-max mt-1">${usuarioActual.Rol}</span></div><button onclick="abrirModalAdminUsuario('editar', '${usuarioActual.Usuario}')" class="bg-indigo-50 text-indigo-600 p-3 rounded-xl text-[10px] font-black active:scale-95 transition-all">⚙️ Editar</button></div>`;
+                cont.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border flex justify-between items-center transition-all hover:shadow-md"><div class="flex flex-col"><span class="font-black text-[12px] uppercase text-indigo-600">${usuarioActual.Usuario}</span><span class="text-[9px] uppercase bg-slate-100 rounded-full px-2 inline-block max-w-max mt-1">${usuarioActual.Rol}</span></div><button onclick="abrirModalAdminUsuario('editar', '${usuarioActual.Usuario}')" class="bg-indigo-50 text-indigo-600 p-3 rounded-xl text-[10px] font-black active:scale-95 transition-all border border-indigo-100">⚙️ Editar</button></div>`;
             }
         }
         function abrirModalAdminUsuario(modo, usrStr) {
@@ -552,8 +570,8 @@
 
         function setModoOperacion(m) {
             modoOperacion = m;
-            document.getElementById("btnModoNueva").className = m === 'nueva' ? "flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active transition-all active:scale-95" : "flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400 transition-all active:scale-95";
-            document.getElementById("btnModoPago").className = m === 'pago' ? "flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active transition-all active:scale-95" : "flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400 transition-all active:scale-95";
+            document.getElementById("btnModoNueva").className = m === 'nueva' ? "flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active transition-all active:scale-95 shadow-sm" : "flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400 transition-all active:scale-95";
+            document.getElementById("btnModoPago").className = m === 'pago' ? "flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active transition-all active:scale-95 shadow-sm" : "flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400 transition-all active:scale-95";
             document.getElementById("areaNuevaVenta").classList.toggle("hidden", m !== 'nueva');
             document.getElementById("areaAbono").classList.toggle("hidden", m !== 'pago');
             if(m === 'pago') renderListaPendientes();
@@ -561,8 +579,8 @@
 
         function setMetodoVenta(m) {
             metodoVenta = m;
-            document.getElementById("btnMetContado").className = m === 'contado' ? "px-3 py-2 rounded-xl border font-black text-[9px] bg-indigo-600 text-white uppercase transition-all active:scale-95" : "px-3 py-2 rounded-xl border font-black text-[9px] bg-white text-slate-400 uppercase transition-all active:scale-95";
-            document.getElementById("btnMetPagos").className = m === 'pagos' ? "px-3 py-2 rounded-xl border font-black text-[9px] bg-indigo-600 text-white uppercase transition-all active:scale-95" : "px-3 py-2 rounded-xl border font-black text-[9px] bg-white text-slate-400 uppercase transition-all active:scale-95";
+            document.getElementById("btnMetContado").className = m === 'contado' ? "px-3 py-2 rounded-xl border font-black text-[9px] bg-indigo-600 text-white uppercase transition-all shadow-md active:scale-95" : "px-3 py-2 rounded-xl border font-black text-[9px] bg-white text-slate-400 uppercase transition-all active:scale-95";
+            document.getElementById("btnMetPagos").className = m === 'pagos' ? "px-3 py-2 rounded-xl border font-black text-[9px] bg-indigo-600 text-white uppercase transition-all shadow-md active:scale-95" : "px-3 py-2 rounded-xl border font-black text-[9px] bg-white text-slate-400 uppercase transition-all active:scale-95";
             document.getElementById("seccionQuincenas").classList.toggle("hidden", m !== 'pagos');
             document.getElementById("contenedorAbonoInicial").classList.toggle("hidden", m === 'contado');
             renderCarrito();
@@ -575,8 +593,13 @@
             const p = db.inventario.find(i => i.Código.toString() == term || i.Nombre.toLowerCase().includes(term.toLowerCase()));
             if (p) {
                 if (p.Cantidad <= 0) return alert("Sin existencias");
+                
+                // CORRECCION 0%: Validamos si viene 0 de la base de datos
+                let numRec = parseFloat(p.RecargoPagos);
+                let recargoSeguro = isNaN(numRec) ? 15 : numRec;
+
                 const enC = carrito.find(c => c.codigo == p.Código);
-                if (enC) enC.cantidad++; else carrito.push({ codigo: p.Código, nombre: p.Nombre, precio: p.PrecioVenta, cantidad: 1, foto: p.FotoURL, recargo: p.RecargoPagos || 15, categoria: p.Categoría || "General", descuentoPar: p.DescuentoPar || 0 });
+                if (enC) enC.cantidad++; else carrito.push({ codigo: p.Código, nombre: p.Nombre, precio: p.PrecioVenta, cantidad: 1, foto: p.FotoURL, recargo: recargoSeguro, categoria: p.Categoría || "General", descuentoPar: p.DescuentoPar || 0 });
                 renderCarrito(); document.getElementById("buscarCodigoInput").value = "";
             }
         }
@@ -589,24 +612,41 @@
             renderCarrito();
         }
 
+        // LÓGICA DE DESCUENTO AGRUPANDO TODA LA CATEGORÍA (JABON AÑADIDO)
+        function calcularDescuentosGlobales(lista) {
+            lista.forEach(i => i.descuentoParAplicado = 0);
+            const categoriasAplica = ['Body', 'Velas', 'Gel Antibacterial', 'Jabon']; // Jabon integrado a la promo
+            
+            categoriasAplica.forEach(cat => {
+                let pool = [];
+                lista.filter(i => i.categoria === cat).forEach(item => {
+                    let descVal = parseFloat(item.descuentoPar || item.descuentoParBase) || 0; 
+                    for(let k=0; k<item.cantidad; k++) {
+                        pool.push({ ref: item, desc: descVal });
+                    }
+                });
+                pool.sort((a, b) => b.desc - a.desc);
+                let itemsEnPar = Math.floor(pool.length / 2) * 2;
+                for(let i=0; i<itemsEnPar; i++) {
+                    pool[i].ref.descuentoParAplicado += pool[i].desc;
+                }
+            });
+        }
+
         function renderCarrito() {
             const cont = document.getElementById("carritoContenedor");
             let sumaFinal = 0;
             if (carrito.length === 0) { cont.innerHTML = "<p class='text-center text-slate-300 font-black uppercase text-[10px] py-6 italic transition-all'>Carrito Vacío</p>"; document.getElementById("totalVentaTxt").innerText = "$0.00"; return; }
             
+            calcularDescuentosGlobales(carrito);
+
             cont.innerHTML = carrito.map(i => {
                 let baseSubtotal = i.precio * i.cantidad;
-                let descuentoAplicado = 0;
-                if (['Body', 'Velas', 'Gel Antibacterial'].includes(i.categoria)) {
-                    let pares = Math.floor(i.cantidad / 2);
-                    descuentoAplicado = pares * (i.descuentoPar || 0);
-                }
-                
-                let subtotalDescontado = baseSubtotal - descuentoAplicado;
+                let subtotalDescontado = baseSubtotal - (i.descuentoParAplicado || 0);
                 let totalProdFinal = metodoVenta === 'pagos' ? subtotalDescontado * (1 + (i.recargo/100)) : subtotalDescontado;
                 
                 sumaFinal += totalProdFinal;
-                let descText = descuentoAplicado > 0 ? `<span class="text-[9px] text-emerald-500 font-black block mt-1 transition-all">✨ Ahorro Pares: -$${descuentoAplicado.toFixed(2)}</span>` : ``;
+                let descText = i.descuentoParAplicado > 0 ? `<span class="text-[9px] text-emerald-500 font-black block mt-1 transition-all">✨ Ahorro en Pares: -$${i.descuentoParAplicado.toFixed(2)}</span>` : ``;
 
                 return `<div class="bg-white p-3 rounded-2xl border flex items-center justify-between shadow-sm transition-all hover:shadow-md">
                     <div class="flex flex-col"><span class="text-[10px] font-black uppercase italic">${i.nombre}</span><b class="text-xs text-indigo-600 transition-all">$${totalProdFinal.toFixed(2)}</b>${descText}</div>
@@ -620,10 +660,10 @@
             document.getElementById("totalVentaTxt").innerText = `$${sumaFinal.toFixed(2)}`;
         }
 
-        // --- ALMACÉN E INVENTARIO ---
         function evaluarCategoria() {
             const cat = document.getElementById("prodCategoria").value;
-            if(['Body', 'Velas', 'Gel Antibacterial'].includes(cat)) { document.getElementById("cajaDescuentoPar").classList.remove("hidden"); } 
+            // Jabon activa la caja del descuento
+            if(['Body', 'Velas', 'Gel Antibacterial', 'Jabon'].includes(cat)) { document.getElementById("cajaDescuentoPar").classList.remove("hidden"); } 
             else { document.getElementById("cajaDescuentoPar").classList.add("hidden"); document.getElementById("prodDescuentoPar").value = ""; }
         }
 
@@ -631,21 +671,37 @@
             const q = document.getElementById("filtroStock").value.toLowerCase();
             const f = db.inventario.filter(p => p.Nombre.toLowerCase().includes(q) || p.Código.toString().includes(q));
             document.getElementById("listaInventario").innerHTML = f.map(p => {
-                let tagPair = (['Body', 'Velas', 'Gel Antibacterial'].includes(p.Categoría) && p.DescuentoPar > 0) ? `<span class="bg-emerald-100 text-emerald-700 text-[8px] px-2 rounded-full font-bold ml-1 transition-all">Desc -$${p.DescuentoPar}/par</span>` : ``;
+                let tagPair = (['Body', 'Velas', 'Gel Antibacterial', 'Jabon'].includes(p.Categoría) && p.DescuentoPar > 0) ? `<span class="bg-emerald-100 text-emerald-700 text-[8px] px-2 rounded-full font-bold ml-1 transition-all">Aporte Par: $${p.DescuentoPar}</span>` : ``;
                 return `<div class="bg-white p-4 rounded-[2rem] border flex items-center justify-between shadow-sm transition-all hover:shadow-md">
                     <div class="flex items-center gap-3"><img src="${p.FotoURL || 'https://via.placeholder.com/100'}" class="w-12 h-12 object-cover rounded-xl border shadow-sm transition-all hover:scale-105 cursor-pointer" onclick="mostrarInfoImagen('${p.FotoURL}', '${p.Nombre}', '${p.Código}', '${p.Categoría}', ${p.DescuentoPar || 0})"><div><p class="font-black text-[11px] uppercase">${p.Nombre}</p><p class="text-[9px] font-bold text-indigo-600 italic">S: ${p.Cantidad} | $${p.PrecioVenta} ${tagPair}</p></div></div>
-                    <div class="flex gap-1"><button onclick="agregarAlCarritoDesdeStock('${p.Código}')" class="bg-indigo-50 hover:bg-indigo-100 p-4 rounded-2xl text-indigo-600 shadow-sm active:scale-90 transition-all">🛒</button><button onclick="cargarParaEditar('${p.Código}')" class="bg-slate-50 hover:bg-slate-100 p-4 rounded-2xl shadow-sm active:scale-90 transition-all">✏️</button></div>
+                    <div class="flex gap-1"><button onclick="agregarAlCarritoDesdeStock('${p.Código}')" class="bg-indigo-50 hover:bg-indigo-100 p-4 rounded-2xl text-indigo-600 shadow-sm active:scale-90 transition-all border border-indigo-100">🛒</button><button onclick="cargarParaEditar('${p.Código}')" class="bg-slate-50 hover:bg-slate-100 p-4 rounded-2xl shadow-sm active:scale-90 transition-all border border-slate-200">✏️</button></div>
                 </div>`
             }).join('');
         }
 
+        // FUNCIONES DEL NUEVO VISOR DE IMAGEN
+        function abrirVisorImagen(url) {
+            document.getElementById('imgVisorAmpliado').src = url;
+            document.getElementById('modalVisorImagen').classList.replace('hidden', 'flex');
+        }
+        function cerrarVisorImagen() {
+            document.getElementById('modalVisorImagen').classList.replace('flex', 'hidden');
+        }
+
         function mostrarInfoImagen(url, nombre, codigo, categoria, descuentoPar) {
             if(!url || url === 'https://via.placeholder.com/100') return;
-            let tagDescuento = (['Body', 'Velas', 'Gel Antibacterial'].includes(categoria) && descuentoPar > 0)
-                ? `<div class="bg-emerald-100 text-emerald-700 p-3 rounded-xl mt-3 font-black text-[10px] uppercase shadow-sm border border-emerald-200">✨ Descuento Activo: -$${descuentoPar} por cada par</div>`
+            let tagDescuento = (['Body', 'Velas', 'Gel Antibacterial', 'Jabon'].includes(categoria) && descuentoPar > 0)
+                ? `<div class="bg-emerald-100 text-emerald-700 p-3 rounded-xl mt-3 font-black text-[10px] uppercase shadow-sm border border-emerald-200">✨ Aporte al armar par: $${descuentoPar}</div>`
                 : '';
+            
+            // La imagen en el modal ahora es clickeable para abrir en grande
             document.getElementById("infoDetalleProducto").innerHTML = `
-                <img src="${url}" class="w-full h-48 object-cover rounded-xl shadow-inner border">
+                <div class="relative group cursor-pointer" onclick="abrirVisorImagen('${url}')">
+                    <img src="${url}" class="w-full h-48 object-cover rounded-xl shadow-inner border group-hover:opacity-90 transition-all">
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                        <span class="bg-black/50 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase">🔍 Ampliar</span>
+                    </div>
+                </div>
                 <h4 class="font-black text-indigo-600 uppercase text-xs mt-3">${nombre}</h4>
                 <p class="text-[10px] text-slate-400 font-bold uppercase mb-2">Código: ${codigo}</p>
                 ${tagDescuento}
@@ -656,8 +712,12 @@
         function agregarAlCarritoDesdeStock(c) {
             const p = db.inventario.find(i => i.Código.toString() === c.toString());
             if (p && p.Cantidad > 0) {
+                // CORRECCION 0%: Validamos si viene 0 de la base de datos
+                let numRec = parseFloat(p.RecargoPagos);
+                let recargoSeguro = isNaN(numRec) ? 15 : numRec;
+
                 const enC = carrito.find(it => it.codigo == p.Código);
-                if (enC) enC.cantidad++; else carrito.push({ codigo: p.Código, nombre: p.Nombre, precio: p.PrecioVenta, cantidad: 1, foto: p.FotoURL, recargo: p.RecargoPagos || 15, categoria: p.Categoría || "General", descuentoPar: p.DescuentoPar || 0 });
+                if (enC) enC.cantidad++; else carrito.push({ codigo: p.Código, nombre: p.Nombre, precio: p.PrecioVenta, cantidad: 1, foto: p.FotoURL, recargo: recargoSeguro, categoria: p.Categoría || "General", descuentoPar: p.DescuentoPar || 0 });
                 renderCarrito(); showToast("Añadido 🛒");
             } else showToast("Sin existencias ❌");
         }
@@ -667,7 +727,11 @@
             const p = db.inventario.find(p => p.Código.toString() == c);
             if (p) {
                 document.getElementById("prodNombre").value = p.Nombre; document.getElementById("prodPrecioVenta").value = p.PrecioVenta;
-                document.getElementById("prodCostoCompra").value = p.Costo; document.getElementById("prodRecargo").value = p.RecargoPagos || 15;
+                document.getElementById("prodCostoCompra").value = p.Costo; 
+                
+                // CORRECCIÓN 0%: Rellenar con 0 si es 0, en lugar de poner 15.
+                document.getElementById("prodRecargo").value = (p.RecargoPagos !== undefined && p.RecargoPagos !== "") ? p.RecargoPagos : 15;
+                
                 document.getElementById("prodFoto").value = p.FotoURL; document.getElementById("prodCategoria").value = p.Categoría || "General";
                 document.getElementById("prodDescuentoPar").value = p.DescuentoPar || ""; evaluarCategoria();
                 document.getElementById("txtStockActual").innerText = p.Cantidad; document.getElementById("txtCostoActual").innerText = "$" + parseFloat(p.Costo).toFixed(2);
@@ -680,46 +744,63 @@
         }
 
         function abrirModalProducto() { 
-            if(usuarioActual && usuarioActual.Rol !== 'Admin') {
-                document.getElementById("cajaCosto").classList.add("hidden"); document.getElementById("cajaRecargo").classList.add("hidden"); document.getElementById("infoCostoVisible").classList.add("hidden");
+            const esAdmin = usuarioActual && usuarioActual.Rol === 'Admin';
+
+            if(!esAdmin) {
+                document.getElementById("cajaCosto").classList.add("hidden"); 
+                document.getElementById("cajaRecargo").classList.add("hidden"); 
+                document.getElementById("infoCostoVisible").classList.add("hidden");
+                
+                // Bloqueo de Inputs a Vendedores
+                document.getElementById("prodCantidadNueva").disabled = true;
+                document.getElementById("prodPrecioVenta").disabled = true;
+                document.getElementById("prodDescuentoPar").disabled = true;
+                
+                document.getElementById("prodCantidadNueva").classList.add("opacity-50", "cursor-not-allowed");
+                document.getElementById("prodPrecioVenta").classList.add("opacity-50", "cursor-not-allowed");
+                document.getElementById("prodDescuentoPar").classList.add("opacity-50", "cursor-not-allowed");
             } else {
-                document.getElementById("cajaCosto").classList.remove("hidden"); document.getElementById("cajaRecargo").classList.remove("hidden"); document.getElementById("infoCostoVisible").classList.remove("hidden");
+                document.getElementById("cajaCosto").classList.remove("hidden"); 
+                document.getElementById("cajaRecargo").classList.remove("hidden"); 
+                document.getElementById("infoCostoVisible").classList.remove("hidden");
+                
+                // Liberar Inputs a Admins
+                document.getElementById("prodCantidadNueva").disabled = false;
+                document.getElementById("prodPrecioVenta").disabled = false;
+                document.getElementById("prodDescuentoPar").disabled = false;
+                
+                document.getElementById("prodCantidadNueva").classList.remove("opacity-50", "cursor-not-allowed");
+                document.getElementById("prodPrecioVenta").classList.remove("opacity-50", "cursor-not-allowed");
+                document.getElementById("prodDescuentoPar").classList.remove("opacity-50", "cursor-not-allowed");
             }
+            
             document.getElementById("prodCategoria").value = "General"; evaluarCategoria();
             document.getElementById("modalProducto").classList.remove("hidden"); 
         }
 
-        // --- SUBIDA A CLOUDINARY DIRECTO Y REGISTRO ---
         async function guardarTodoElProducto() {
             showLoader("Preparando información..."); 
             let fotoData = document.getElementById("prodFoto").value;
             
-            // Subir a Cloudinary si es una imagen nueva (data:image)
             if (fotoData && fotoData.startsWith("data:image")) {
                 showLoader("Subiendo imagen a Cloudinary...");
                 try {
                     const formData = new FormData();
                     formData.append("file", fotoData);
-                    
-                    // PRESET PERSONALIZADO REQUERIDO
                     formData.append("upload_preset", "fotos_sgv"); 
-
-                    // Cloud Name correcto detectado
-                    const resCloudinary = await fetch("https://api.cloudinary.com/v1_1/dcerhuq5d/image/upload", {
-                        method: "POST",
-                        body: formData
-                    }).then(r => r.json());
-
-                    if (resCloudinary.secure_url) {
-                        fotoData = resCloudinary.secure_url;
-                    } else {
-                        throw new Error(resCloudinary.error?.message || "Error desconocido en Cloudinary");
-                    }
+                    const resCloudinary = await fetch("https://api.cloudinary.com/v1_1/dcerhuq5d/image/upload", { method: "POST", body: formData }).then(r => r.json());
+                    if (resCloudinary.secure_url) { fotoData = resCloudinary.secure_url; } 
+                    else { throw new Error(resCloudinary.error?.message || "Error desconocido"); }
                 } catch (e) { 
-                    alert("Aviso: Hubo un problema subiendo la foto a Cloudinary. Verifica que creaste el preset 'fotos_sgv' y sea Unsigned. Guardando sin foto... (" + e.message + ")");
+                    alert("Aviso: Hubo un problema subiendo la foto a Cloudinary. Guardando sin foto...");
                     fotoData = ""; 
                 }
             }
+
+            // CORRECCIÓN 0%: Parsear de forma segura respetando el 0%
+            let rawRecargo = document.getElementById("prodRecargo").value;
+            let numRecargo = parseFloat(rawRecargo);
+            let recargoSeguro = isNaN(numRecargo) ? 15 : numRecargo;
 
             const d = { 
                 codigo: document.getElementById("prodCodigo").value.trim(), 
@@ -727,20 +808,19 @@
                 cantidadAAgregar: parseInt(document.getElementById("prodCantidadNueva").value) || 0, 
                 costoCompra: parseFloat(document.getElementById("prodCostoCompra").value) || 0, 
                 precioVenta: parseFloat(document.getElementById("prodPrecioVenta").value) || 0, 
-                recargoPagos: parseFloat(document.getElementById("prodRecargo").value) || 15, 
+                recargoPagos: recargoSeguro, 
                 categoria: document.getElementById("prodCategoria").value, 
                 descuentoPar: parseFloat(document.getElementById("prodDescuentoPar").value) || 0, 
                 fotoUrl: fotoData,
-                usuario: usuarioActual ? usuarioActual.Usuario : "Sistema" // <-- Agregado para que el gasto tenga dueño
+                usuario: usuarioActual ? usuarioActual.Usuario : "Sistema"
             };
             
             showLoader("Guardando en base de datos...");
             await fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "actualizarInventario", data: d }) });
-            showToast("Producto y gasto guardados ✅");
+            showToast("Producto actualizado ✅");
             cerrarModal(); refresh(true);
         }
 
-        // --- REPORTES Y EDICIÓN ---
         function renderVentas() {
             const cont = document.getElementById("listaVentas");
             if (!db.ventas || db.ventas.length === 0) { cont.innerHTML = "<p class='text-center py-10 opacity-30 italic'>Sin historial</p>"; return; }
@@ -779,7 +859,7 @@
                 } catch(e) {}
                 
                 return `<div class="bg-white rounded-[2.5rem] border shadow-sm p-6 mb-4 relative transition-all hover:shadow-md">
-                <button onclick="abrirDetalleVentaGeneral('${v['ID Venta']}')" class="absolute top-6 right-6 bg-slate-100 hover:bg-slate-200 text-[9px] font-black uppercase p-3 rounded-xl text-slate-500 shadow-sm active:scale-95 transition-all">Editar / Ver</button>
+                <button onclick="abrirDetalleVentaGeneral('${v['ID Venta']}')" class="absolute top-6 right-6 btn-3d-slate text-[9px] font-black uppercase p-3 rounded-xl shadow-sm">Editar / Ver</button>
                 <div class="pr-24"><p class="text-[11px] font-black text-indigo-600 uppercase italic">${v.ClienteNombre}</p><p class="text-[8px] text-slate-400 italic">${new Date(v.Fecha).toLocaleString()}</p></div>
                 <div class="py-3 border-y mt-3">${itemsHtml}</div>
                 <div class="flex justify-between items-center pt-3"><span class="text-[10px] text-indigo-500 font-black cursor-pointer underline decoration-indigo-200 hover:text-indigo-700 transition-all" onclick="reimprimirReciboHistorial('${v['ID Venta']}')">Reimprimir Recibo</span><div class="text-right"><p class="text-[8px] uppercase font-black text-slate-300">Deuda Total Restante</p><b class="text-2xl text-indigo-600 tracking-tighter">$${parseFloat(v.ClienteContacto).toFixed(2)}</b></div></div></div>`;
@@ -845,22 +925,22 @@
                 for(let i=0; i<prods.length; i++) {
                     let inputQty = document.getElementById(`editQty_${i}`); let nQty = inputQty ? parseInt(inputQty.value) : 0; if(isNaN(nQty)) nQty = 0;
                     prods[i].cantidad = Math.max(0, nQty); 
-                    let pOrig = parseFloat(prods[i].precioOriginal || prods[i].precio || prods[i].precioFinal || 0); prods[i].precioOriginal = pOrig;
+                    prods[i].precioOriginal = parseFloat(prods[i].precioOriginal || prods[i].precio || prods[i].precioFinal || 0); 
+                    prods[i].descuentoPar = prods[i].descuentoParBase || 0; 
+                }
 
+                calcularDescuentosGlobales(prods);
+
+                for(let i=0; i<prods.length; i++) {
+                    let pOrig = prods[i].precioOriginal;
                     let nRec = 0;
                     if(isCredito) {
                         let inputRec = document.getElementById(`editRec_${i}`); nRec = inputRec ? parseFloat(inputRec.value) : (prods[i].recargoReal || 0);
                         if(isNaN(nRec)) nRec = 0; prods[i].recargoReal = nRec; prods[i].precioFinal = pOrig; 
                     } else { prods[i].precioFinal = pOrig; }
 
-                    let descReal = 0;
-                    if (['Body', 'Velas', 'Gel Antibacterial'].includes(prods[i].categoria)) {
-                        let pares = Math.floor(prods[i].cantidad / 2); descReal = pares * (prods[i].descuentoParBase || 0);
-                    }
-                    prods[i].descuentoParAplicado = descReal; 
-                    
                     let baseSub = pOrig * prods[i].cantidad;
-                    let subDescontado = baseSub - descReal;
+                    let subDescontado = baseSub - (prods[i].descuentoParAplicado || 0);
                     let totalConRecargo = isCredito ? subDescontado * (1 + (nRec/100)) : subDescontado;
                     
                     prods[i].totalCalculado = totalConRecargo;
@@ -887,20 +967,18 @@
             const ab = metodoVenta === 'contado' ? tv : (parseFloat(document.getElementById("montoPagado").value) || 0);
             if (!cl || carrito.length === 0) return alert("Faltan datos"); showLoader("Generando venta...");
             
+            calcularDescuentosGlobales(carrito);
+
             const pd = carrito.map(i => {
                 const inv = db.inventario.find(p => p.Código.toString() == i.codigo.toString());
-                let pares = 0; let descReal = 0;
-                if (['Body', 'Velas', 'Gel Antibacterial'].includes(i.categoria)) { pares = Math.floor(i.cantidad / 2); descReal = pares * (i.descuentoPar || 0); }
-                
                 let baseSub = i.precio * i.cantidad;
-                let subDescontado = baseSub - descReal;
+                let subDescontado = baseSub - (i.descuentoParAplicado || 0);
                 let totalConRecargo = metodoVenta === 'pagos' ? subDescontado * (1 + (i.recargo/100)) : subDescontado;
 
                 return { 
                     codigo: i.codigo, nombre: i.nombre, cantidad: i.cantidad, precio: i.precio, precioOriginal: i.precio, recargoReal: i.recargo, 
-                    precioFinal: i.precio, 
-                    totalCalculado: totalConRecargo, 
-                    categoria: i.categoria, descuentoParBase: i.descuentoPar, descuentoParAplicado: descReal,
+                    precioFinal: i.precio, totalCalculado: totalConRecargo, 
+                    categoria: i.categoria, descuentoParBase: i.descuentoPar, descuentoParAplicado: i.descuentoParAplicado,
                     stockAnterior: inv ? inv.Cantidad : '?', stockNuevo: inv ? (inv.Cantidad - i.cantidad) : '?' 
                 };
             });
