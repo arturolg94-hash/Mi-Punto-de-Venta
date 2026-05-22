@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGV PRO v3.34 - Cloudinary Directo</title>
+    <title>SGV PRO v3.35 - Cloudinary Directo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -69,15 +69,50 @@
                     <h2 class="font-black text-2xl uppercase italic">Dashboard BI</h2>
                     <button onclick="abrirModalGasto()" class="bg-red-500 hover:bg-red-600 text-white text-[9px] font-black px-4 py-2 rounded-xl shadow-lg active:scale-95 transition-all">+ GASTO</button>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all"><span class="input-label">Ventas (30d)</span><b id="dashVentasTotal" class="text-lg md:text-xl text-indigo-600 font-black">$0.00</b></div>
-                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all"><span class="input-label">Utilidad Aprox</span><b id="dashUtilidad" class="text-lg md:text-xl text-emerald-600 font-black">$0.00</b></div>
+                
+                <!-- Panel de Filtros Dinámicos -->
+                <div class="bg-white p-4 rounded-[2rem] border shadow-sm grid grid-cols-2 md:grid-cols-3 gap-2 mb-2 transition-all">
+                    <div class="col-span-2 md:col-span-3 flex justify-between items-center">
+                        <span class="input-label text-[8px]">Filtros Dinámicos</span>
+                        <span class="text-[8px] text-slate-400 font-bold italic">* Dejar vacío para ver todo el historial</span>
+                    </div>
+                    <div><span class="text-[8px] text-slate-400 font-bold ml-2 uppercase">Desde</span><input type="date" id="dashFInicio" onchange="renderDashboard()" class="w-full px-3 py-2 bg-slate-50 border rounded-xl text-[10px] outline-none focus:border-indigo-500 transition-all"></div>
+                    <div><span class="text-[8px] text-slate-400 font-bold ml-2 uppercase">Hasta</span><input type="date" id="dashFFin" onchange="renderDashboard()" class="w-full px-3 py-2 bg-slate-50 border rounded-xl text-[10px] outline-none focus:border-indigo-500 transition-all"></div>
+                    <div><span class="text-[8px] text-slate-400 font-bold ml-2 uppercase">Tipo de Venta</span>
+                        <select id="dashFMet" onchange="renderDashboard()" class="w-full px-3 py-2 bg-slate-50 border rounded-xl text-[10px] outline-none focus:border-indigo-500 transition-all">
+                            <option value="">Todos los tipos</option>
+                            <option value="CONTADO">Contado</option>
+                            <option value="PAGOS">A Pagos</option>
+                        </select>
+                    </div>
+                    <div><input type="text" id="dashFCli" oninput="renderDashboard()" placeholder="Filtro de Cliente..." class="w-full px-3 py-2 mt-2 bg-slate-50 border rounded-xl text-[10px] outline-none focus:border-indigo-500 transition-all"></div>
+                    <div><input type="text" id="dashFVen" oninput="renderDashboard()" placeholder="Filtro de Vendedor..." class="w-full px-3 py-2 mt-2 bg-slate-50 border rounded-xl text-[10px] outline-none focus:border-indigo-500 transition-all"></div>
+                    <div>
+                        <select id="dashFCat" onchange="renderDashboard()" class="w-full px-3 py-2 mt-2 bg-slate-50 border rounded-xl text-[10px] outline-none focus:border-indigo-500 transition-all">
+                            <option value="">Todas las Categorías</option>
+                            <option value="General">General</option>
+                            <option value="Body">Body</option>
+                            <option value="Bolsas">Bolsas</option>
+                            <option value="Calzado">Calzado</option>
+                            <option value="Velas">Velas</option>
+                            <option value="Gel Antibacterial">Gel Antibacterial</option>
+                            <option value="Porta Gel">Porta Gel</option>
+                            <option value="Ropa">Ropa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Indicadores -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all"><span class="input-label">Ventas</span><b id="dashVentasTotal" class="text-lg md:text-xl text-indigo-600 font-black">$0.00</b></div>
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all"><span class="input-label">Utilidad Neta</span><b id="dashUtilidad" class="text-lg md:text-xl text-emerald-600 font-black">$0.00</b></div>
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all col-span-2 md:col-span-1"><span class="input-label">Margen (%)</span><b id="dashMargen" class="text-lg md:text-xl text-blue-500 font-black">0.00%</b></div>
                 </div>
                 <div class="bg-white p-4 md:p-5 rounded-[2.5rem] border shadow-sm"><canvas id="chartVentas"></canvas></div>
                 <div class="bg-white p-4 md:p-5 rounded-[2.5rem] border shadow-sm"><canvas id="chartVendedores"></canvas></div>
             </div>
 
-            <div id="tab-vender" class="app-tab active space-y-3 md:space-y-4">
+            <div id="tab-vender" class="app-tab space-y-3 md:space-y-4">
                 <div class="flex gap-2 bg-white p-2 rounded-2xl shadow-sm border">
                     <button onclick="setModoOperacion('nueva')" id="btnModoNueva" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active transition-all active:scale-95">Nueva Venta</button>
                     <button onclick="setModoOperacion('pago')" id="btnModoPago" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400 transition-all active:scale-95">Registrar Pago</button>
@@ -155,7 +190,7 @@
         </main>
 
         <nav class="bg-white border-t fixed bottom-0 left-0 right-0 h-20 md:h-24 flex items-center justify-around z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] px-1 md:px-2">
-            <button onclick="switchTab('dashboard')" class="nav-btn hidden flex-col items-center flex-1 transition-all active:scale-90" id="btn-dashboard">📈<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">BI</span></button>
+            <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90 nav-btn-active" id="btn-dashboard">📈<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">BI</span></button>
             <button onclick="switchTab('vender')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90" id="btn-vender">🛒<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">Ventas</span></button>
             <button onclick="switchTab('inventario')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90" id="btn-inventario">📦<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">Stock</span></button>
             <button onclick="switchTab('reportes')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90" id="btn-reportes">📊<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">Reportes</span></button>
@@ -281,7 +316,7 @@
     <div id="modalAbonarAhora" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[150] backdrop-blur-sm transition-all duration-300"><div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-6 shadow-2xl text-center modal-enter"><div id="infoCuentaSeleccionada"></div><input type="number" id="montoAbonoManual" placeholder="Monto del abono" class="w-full px-6 py-5 border rounded-2xl font-black bg-indigo-50 text-indigo-600 text-center text-xl outline-none shadow-inner focus:border-indigo-400 transition-all"><div class="flex gap-2"><button onclick="ejecutarAbonoSeleccionado()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-2xl font-black uppercase text-[10px] active:scale-95 transition-all shadow-md">Pagar</button><button onclick="document.getElementById('modalAbonarAhora').classList.replace('flex','hidden')" class="px-5 bg-slate-100 hover:bg-slate-200 py-5 rounded-2xl font-black text-[10px] text-slate-400 active:scale-95 transition-all">Cerrar</button></div></div></div>
 
     <script>
-        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4kOTTQBt3nYXopuGrzwR9IZCHBrf5ubGt-O1WwZ3VUF5fMPuTOhPBLeZTa5TufGtx/exec";
+        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGlpSUp6w6Unn1jGKGexXBTFdVz6ukAokQNbIU7lwWSZYy56e8aHlFQrZeJxJIqjB9/exec";
         
         let db = { inventario: [], usuarios: [], ventas: [], detalles: [], gastos: [] };
         let gasUrl = APP_SCRIPT_URL; 
@@ -330,24 +365,150 @@
         }
 
         function renderDashboard() {
-            const hoy = new Date();
-            const ventasPeriodo = db.ventas.filter(v => (hoy - new Date(v.Fecha)) / (1000*60*60*24) <= 30);
-            const totalV = ventasPeriodo.reduce((a, b) => a + Number(b.Total), 0);
-            const gastosPeriodo = db.gastos.filter(g => (hoy - new Date(g.Fecha)) / (1000*60*60*24) <= 30);
-            const totalG = gastosPeriodo.reduce((a, b) => a + Number(b.Monto), 0);
+            // 1. Obtener valores de los filtros
+            const elFInicio = document.getElementById("dashFInicio"); const fIn = elFInicio ? elFInicio.value : "";
+            const elFFin = document.getElementById("dashFFin"); const fFi = elFFin ? elFFin.value : "";
+            const elFCli = document.getElementById("dashFCli"); const qCli = elFCli ? elFCli.value.toLowerCase() : "";
+            const elFVen = document.getElementById("dashFVen"); const qVen = elFVen ? elFVen.value.toLowerCase() : "";
+            const elFMet = document.getElementById("dashFMet"); const qMet = elFMet ? elFMet.value : "";
+            const elFCat = document.getElementById("dashFCat"); const qCat = elFCat ? elFCat.value : "";
+
+            // 2. Filtrar Gastos (Afectados por Fecha y por Vendedor)
+            // Si hay filtros específicos de Mercancía/Cliente, omitimos los gastos operativos para mostrar Margen Bruto
+            let totalG = 0;
+            if (!qCli && !qMet && !qCat) {
+                const gastosPeriodo = db.gastos.filter(g => {
+                    if(!g.Fecha) return false;
+                    
+                    // CORRECCIÓN: Evitar duplicidad del costo. Omitimos las compras de stock automáticas del backend.
+                    const catGas = (g.Categoría || g.Categoria || "").toLowerCase();
+                    const descGas = (g.Descripción || g.Descripcion || "").toLowerCase();
+                    if (catGas.includes("compra de mercan") || descGas.includes("automátic") || descGas.includes("automatic")) {
+                        return false;
+                    }
+
+                    const fg = new Date(g.Fecha).toISOString().split('T')[0];
+                    const matchDate = (!fIn || fg >= fIn) && (!fFi || fg <= fFi);
+                    const matchVen = !qVen || (g.Usuario || "").toLowerCase().includes(qVen);
+                    return matchDate && matchVen;
+                });
+                totalG = gastosPeriodo.reduce((a, b) => a + Number(b.Monto || 0), 0);
+            }
+
+            // 3. Variables para las Ventas y Costos
+            let totalV = 0;
             let costoVentas = 0;
-            ventasPeriodo.forEach(v => {
-                const dets = db.detalles.filter(d => d['ID Venta'] === v['ID Venta']);
-                dets.forEach(d => costoVentas += (Number(d.CostoUnidad) * Number(d.Cantidad)));
+            const venData = {}; 
+
+            db.ventas.forEach(v => {
+                if(!v.Fecha) return;
+                
+                // Filtros a nivel de venta general
+                const fv = new Date(v.Fecha).toISOString().split('T')[0];
+                const matchDate = (!fIn || fv >= fIn) && (!fFi || fv <= fFi);
+                const matchCli = !qCli || (v.ClienteNombre || "").toLowerCase().includes(qCli);
+                const matchVen = !qVen || (v.Vendedor || "").toLowerCase().includes(qVen);
+                
+                let mObj = {}; try { mObj = JSON.parse(v.MetodoPago || "{}"); } catch(e){}
+                const matchMet = !qMet || (mObj.tipo === qMet);
+
+                // Solo procesamos la venta si cumple los filtros generales
+                if (matchDate && matchCli && matchVen && matchMet) {
+                    let prods = []; try { prods = JSON.parse(v.Productos || "[]"); } catch(e){}
+                    let ventaParcial = 0;
+                    let costoParcial = 0;
+
+                    // Filtramos producto por producto si hay un filtro de Categoría
+                    prods.forEach(p => {
+                        const matchCat = !qCat || (p.categoria === qCat);
+                        if (matchCat) {
+                            let pFinal = parseFloat(p.precioFinal || p.precio || 0);
+                            let sub = p.totalCalculado !== undefined ? parseFloat(p.totalCalculado) : (pFinal * p.cantidad - (p.descuentoParAplicado || 0));
+                            ventaParcial += sub;
+                            
+                            // Buscar el costo real histórico
+                            const det = db.detalles.find(d => d['ID Venta'] === v['ID Venta'] && d.Código.toString() === p.codigo.toString());
+                            let costoUnitario = det ? parseFloat(det.CostoUnidad || 0) : 0;
+                            
+                            // Respaldo para ventas antiguas: buscar costo actual en inventario
+                            if (!costoUnitario) {
+                                const invFallback = db.inventario.find(i => i.Código.toString() === p.codigo.toString());
+                                if (invFallback) costoUnitario = parseFloat(invFallback.Costo || 0);
+                            }
+                            
+                            costoParcial += (costoUnitario * p.cantidad);
+                        }
+                    });
+
+                    // Si hay venta tras el filtro (o si no se filtró por categoría y es una venta antigua sin JSON)
+                    if (ventaParcial > 0 || (prods.length === 0 && !qCat)) {
+                        if (prods.length === 0 && !qCat) {
+                            ventaParcial = parseFloat(v.Total) || 0;
+                            const dets = db.detalles.filter(d => d['ID Venta'] === v['ID Venta']);
+                            dets.forEach(d => {
+                                let cUnidad = parseFloat(d.CostoUnidad || 0);
+                                if (!cUnidad) {
+                                    const invFallback = db.inventario.find(i => i.Código.toString() === d.Código.toString());
+                                    if (invFallback) cUnidad = parseFloat(invFallback.Costo || 0);
+                                }
+                                costoParcial += (cUnidad * parseFloat(d.Cantidad || 0));
+                            });
+                        }
+                        totalV += ventaParcial;
+                        costoVentas += costoParcial;
+                        venData[v.Vendedor] = (venData[v.Vendedor] || 0) + ventaParcial;
+                    }
+                }
             });
-            document.getElementById("dashVentasTotal").innerText = `$${totalV.toFixed(2)}`;
-            document.getElementById("dashUtilidad").innerText = `$${(totalV - costoVentas - totalG).toFixed(2)}`;
-            if (chartVentas) chartVentas.destroy();
-            chartVentas = new Chart(document.getElementById('chartVentas'), { type: 'bar', data: { labels: ['Ventas', 'Costos', 'Gastos'], datasets: [{ label: 'Flujo ($)', data: [totalV, costoVentas, totalG], backgroundColor: ['#6366f1', '#fbbf24', '#f87171'], borderRadius: 15 }] } });
-            const venData = {};
-            ventasPeriodo.forEach(v => { venData[v.Vendedor] = (venData[v.Vendedor] || 0) + Number(v.Total); });
-            if (chartVendedores) chartVendedores.destroy();
-            chartVendedores = new Chart(document.getElementById('chartVendedores'), { type: 'pie', data: { labels: Object.keys(venData), datasets: [{ data: Object.values(venData), backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899'] }] } });
+
+            // 4. Cálculos Finales
+            const utilidad = totalV - costoVentas - totalG;
+            const margen = totalV > 0 ? (utilidad / totalV) * 100 : 0;
+            
+            // 5. Actualizar Pantalla
+            const elVentasTotal = document.getElementById("dashVentasTotal");
+            if (elVentasTotal) elVentasTotal.innerText = `$${totalV.toFixed(2)}`;
+            const elUtilidad = document.getElementById("dashUtilidad");
+            if (elUtilidad) elUtilidad.innerText = `$${utilidad.toFixed(2)}`;
+            
+            const margenEl = document.getElementById("dashMargen");
+            if (margenEl) {
+                margenEl.innerText = `${margen.toFixed(2)}%`;
+                margenEl.className = margen >= 0 ? "text-lg md:text-xl text-emerald-600 font-black transition-all" : "text-lg md:text-xl text-red-600 font-black transition-all";
+            }
+
+            // 6. Actualizar Gráficas
+            const chartVentasCtx = document.getElementById('chartVentas');
+            if (chartVentasCtx) {
+                if (chartVentas) chartVentas.destroy();
+                chartVentas = new Chart(chartVentasCtx, { 
+                    type: 'bar', 
+                    data: { 
+                        labels: ['Ventas', 'Costos Merc.', 'Gastos Oper.'], 
+                        datasets: [{ 
+                            label: 'Flujo ($)', 
+                            data: [totalV, costoVentas, totalG], 
+                            backgroundColor: ['#6366f1', '#fbbf24', '#f87171'], 
+                            borderRadius: 15 
+                        }] 
+                    } 
+                });
+            }
+            
+            const chartVendedoresCtx = document.getElementById('chartVendedores');
+            if (chartVendedoresCtx) {
+                if (chartVendedores) chartVendedores.destroy();
+                chartVendedores = new Chart(chartVendedoresCtx, { 
+                    type: 'doughnut', 
+                    data: { 
+                        labels: Object.keys(venData), 
+                        datasets: [{ 
+                            data: Object.values(venData), 
+                            backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6'] 
+                        }] 
+                    } 
+                });
+            }
         }
 
         async function guardarGasto() {
@@ -528,7 +689,7 @@
             document.getElementById("modalProducto").classList.remove("hidden"); 
         }
 
-        // --- SUBIDA A CLOUDINARY DIRECTO ---
+        // --- SUBIDA A CLOUDINARY DIRECTO Y REGISTRO ---
         async function guardarTodoElProducto() {
             showLoader("Preparando información..."); 
             let fotoData = document.getElementById("prodFoto").value;
@@ -569,11 +730,13 @@
                 recargoPagos: parseFloat(document.getElementById("prodRecargo").value) || 15, 
                 categoria: document.getElementById("prodCategoria").value, 
                 descuentoPar: parseFloat(document.getElementById("prodDescuentoPar").value) || 0, 
-                fotoUrl: fotoData 
+                fotoUrl: fotoData,
+                usuario: usuarioActual ? usuarioActual.Usuario : "Sistema" // <-- Agregado para que el gasto tenga dueño
             };
             
             showLoader("Guardando en base de datos...");
             await fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "actualizarInventario", data: d }) });
+            showToast("Producto y gasto guardados ✅");
             cerrarModal(); refresh(true);
         }
 
@@ -581,8 +744,19 @@
         function renderVentas() {
             const cont = document.getElementById("listaVentas");
             if (!db.ventas || db.ventas.length === 0) { cont.innerHTML = "<p class='text-center py-10 opacity-30 italic'>Sin historial</p>"; return; }
-            const fIn = document.getElementById("fInicio").value; const fFi = document.getElementById("fFin").value;
-            const filtradas = db.ventas.filter(v => { const fv = new Date(v.Fecha).toISOString().split('T')[0]; return (!fIn || fv >= fIn) && (!fFi || fv <= fFi); }).reverse();
+            
+            const elFInicio = document.getElementById("fInicio"); const fIn = elFInicio ? elFInicio.value : "";
+            const elFFin = document.getElementById("fFin"); const fFi = elFFin ? elFFin.value : "";
+            const elCliRep = document.getElementById("filtroCliRep"); const qCli = elCliRep ? elCliRep.value.toLowerCase() : "";
+            const elVenRep = document.getElementById("filtroVenRep"); const qVen = elVenRep ? elVenRep.value.toLowerCase() : "";
+            
+            const filtradas = db.ventas.filter(v => { 
+                const fv = new Date(v.Fecha).toISOString().split('T')[0]; 
+                const matchDate = (!fIn || fv >= fIn) && (!fFi || fv <= fFi);
+                const matchCli = !qCli || (v.ClienteNombre || "").toLowerCase().includes(qCli);
+                const matchVen = !qVen || (v.Vendedor || "").toLowerCase().includes(qVen);
+                return matchDate && matchCli && matchVen;
+            }).reverse();
             
             cont.innerHTML = filtradas.map(v => {
                 let itemsHtml = ""; 
