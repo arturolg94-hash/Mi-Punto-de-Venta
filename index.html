@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGV PRO v3.40 - Sistema Completo</title>
+    <title>SGV PRO v3.42 - Temas Dinámicos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -65,7 +65,6 @@
             <div class="space-y-4">
                 <input type="text" id="userInput" class="w-full px-6 py-4 border rounded-2xl outline-none font-bold text-center transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" placeholder="Usuario">
                 <input type="password" id="passInput" class="w-full px-6 py-4 border rounded-2xl outline-none font-bold text-center transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" placeholder="Contraseña">
-                <!-- Botón Actualizado a UI 3D -->
                 <button onclick="intentarLogin()" class="w-full btn-3d-indigo py-5 rounded-2xl font-black tracking-widest uppercase">Entrar al Sistema</button>
             </div>
         </div>
@@ -77,13 +76,16 @@
             <div class="flex items-center gap-3">
                 <h1 class="font-black text-2xl italic tracking-tighter shadow-sm">SGV PRO</h1>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
+                <!-- BOTÓN PARA CAMBIAR EL TEMA -->
+                <button onclick="abrirModalTema()" class="btn-3d-slate p-2 rounded-xl text-lg hover:scale-105 transition-all">🎨</button>
+                
                 <div id="headerUserInfo" class="hidden flex-col items-end">
                     <span id="headerUserName" class="text-xs font-black uppercase tracking-wider text-indigo-50"></span>
                     <span id="headerUserRol" class="text-[9px] bg-indigo-800 text-indigo-100 px-2 py-0.5 rounded-full font-bold uppercase mt-0.5 shadow-inner"></span>
                 </div>
                 <!-- Botón Salir 3D -->
-                <button onclick="logout()" class="btn-3d-red px-4 py-2 rounded-xl font-black text-[10px] uppercase">Salir</button>
+                <button onclick="logout()" class="btn-3d-red px-3 py-2 rounded-xl font-black text-[10px] uppercase">Salir</button>
             </div>
         </header>
 
@@ -119,7 +121,7 @@
                             <option value="Body">Body</option>
                             <option value="Bolsas">Bolsas</option>
                             <option value="Calzado">Calzado</option>
-                            <option value="Jabon">Jabon</option> <!-- NUEVA CATEGORIA AÑADIDA -->
+                            <option value="Jabon">Jabon</option>
                             <option value="Velas">Velas</option>
                             <option value="Gel Antibacterial">Gel Antibacterial</option>
                             <option value="Porta Gel">Porta Gel</option>
@@ -140,8 +142,8 @@
 
             <div id="tab-vender" class="app-tab space-y-3 md:space-y-4">
                 <div class="flex gap-2 bg-white p-2 rounded-2xl shadow-sm border">
-                    <button onclick="setModoOperacion('nueva')" id="btnModoNueva" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active transition-all active:scale-95">Nueva Venta</button>
-                    <button onclick="setModoOperacion('pago')" id="btnModoPago" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400 transition-all active:scale-95">Registrar Pago</button>
+                    <button onclick="setModoOperacion('nueva')" id="btnModoNueva" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase btn-modo-active transition-all active:scale-95 shadow-sm">Nueva Venta</button>
+                    <button onclick="setModoOperacion('pago')" id="btnModoPago" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-slate-50 text-slate-400 transition-all active:scale-95 shadow-sm">Registrar Pago</button>
                 </div>
 
                 <div id="areaNuevaVenta" class="space-y-4">
@@ -225,7 +227,23 @@
         </nav>
     </div>
 
-    <!-- NUEVO MODAL: VISOR DE IMAGEN AMPLIO -->
+    <!-- MODAL PARA CAMBIAR EL TEMA -->
+    <div id="modalTema" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[200] backdrop-blur-md transition-all duration-300">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-4 border shadow-2xl relative text-center modal-enter">
+            <button onclick="document.getElementById('modalTema').classList.replace('flex','hidden')" class="absolute top-6 right-6 text-slate-300 hover:text-red-500 font-black text-xl transition-all">×</button>
+            <h3 class="font-black text-slate-800 uppercase text-xs italic mb-4">Paleta de Colores</h3>
+            <p class="text-[10px] text-slate-400 mb-4 font-bold">Selecciona cómo quieres ver el sistema</p>
+            <div class="grid grid-cols-3 gap-4">
+                <button onclick="cambiarTema('azul')" class="h-16 rounded-2xl bg-indigo-500 shadow-lg border-4 border-white hover:scale-110 active:scale-90 transition-all"></button>
+                <button onclick="cambiarTema('rosa')" class="h-16 rounded-2xl bg-pink-500 shadow-lg border-4 border-white hover:scale-110 active:scale-90 transition-all"></button>
+                <button onclick="cambiarTema('rojo')" class="h-16 rounded-2xl bg-red-500 shadow-lg border-4 border-white hover:scale-110 active:scale-90 transition-all"></button>
+                <button onclick="cambiarTema('verde')" class="h-16 rounded-2xl bg-emerald-500 shadow-lg border-4 border-white hover:scale-110 active:scale-90 transition-all"></button>
+                <button onclick="cambiarTema('lila')" class="h-16 rounded-2xl bg-purple-500 shadow-lg border-4 border-white hover:scale-110 active:scale-90 transition-all"></button>
+                <button onclick="cambiarTema('oscuro')" class="h-16 rounded-2xl bg-slate-700 shadow-lg border-4 border-white hover:scale-110 active:scale-90 transition-all"></button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalVisorImagen" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-[300] backdrop-blur-md transition-all duration-300" onclick="cerrarVisorImagen()">
         <button class="absolute top-6 right-6 text-white font-black text-4xl hover:text-red-500 transition-all z-50">&times;</button>
         <img id="imgVisorAmpliado" src="" class="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl modal-enter" onclick="event.stopPropagation()">
@@ -262,7 +280,7 @@
                         <option value="Body">Body</option>
                         <option value="Bolsas">Bolsas</option>
                         <option value="Calzado">Calzado</option>
-                        <option value="Jabon">Jabon</option> <!-- NUEVA CATEGORIA AÑADIDA -->
+                        <option value="Jabon">Jabon</option>
                         <option value="Velas">Velas</option>
                         <option value="Gel Antibacterial">Gel Antibacterial</option>
                         <option value="Porta Gel">Porta Gel</option>
@@ -276,6 +294,7 @@
             </div>
 
             <div class="grid grid-cols-2 gap-3">
+                <!-- NOTA: El ID prodCantidadNueva ahora se limpia automáticamente cuando se escanea un producto existente -->
                 <div><span class="input-label">Cant. a Sumar</span><input type="number" id="prodCantidadNueva" class="w-full px-4 py-3 border rounded-2xl font-black bg-indigo-50 text-indigo-600 outline-none focus:border-indigo-500 transition-all" placeholder="Ingreso"></div>
                 <div id="cajaCosto"><span class="input-label">Costo Compra</span><input type="number" id="prodCostoCompra" class="w-full px-4 py-3 border rounded-2xl font-black bg-slate-50 outline-none focus:border-slate-400 transition-all" placeholder="Costo nuevo"></div>
             </div>
@@ -350,7 +369,8 @@
     <div id="modalAbonarAhora" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[150] backdrop-blur-sm transition-all duration-300"><div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-6 shadow-2xl text-center modal-enter"><div id="infoCuentaSeleccionada"></div><input type="number" id="montoAbonoManual" placeholder="Monto del abono" class="w-full px-6 py-5 border rounded-2xl font-black bg-indigo-50 text-indigo-600 text-center text-xl outline-none shadow-inner focus:border-indigo-400 transition-all"><div class="flex gap-2"><button onclick="ejecutarAbonoSeleccionado()" class="flex-1 btn-3d-emerald py-5 rounded-2xl font-black uppercase text-[10px]">Pagar</button><button onclick="document.getElementById('modalAbonarAhora').classList.replace('flex','hidden')" class="px-5 btn-3d-slate py-5 rounded-2xl font-black text-[10px]">Cerrar</button></div></div></div>
 
     <script>
-        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZ3tLuJ2Rv23s8hXdQypJIxxn_w_bKgDxGXcw4BS19aKnH2fTWVDLdXOV-UIlOce_L/exec";
+        // --- URL ACTUALIZADA SEGÚN LA VERSIÓN 3.41 DEL BACKEND ---
+        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVZsRUGV4_haojJ4pyzti9nChIE-gl5zYRDCdIumEQ3MFOwTFQr28R6n-QAS5YTHdD/exec";
         
         let db = { inventario: [], usuarios: [], ventas: [], detalles: [], gastos: [] };
         let gasUrl = APP_SCRIPT_URL; 
@@ -359,6 +379,48 @@
         let cuentaParaAbonar = null; let scannerVender, scannerStock;
         let ventaEdicionActual = null; 
         let chartVentas, chartVendedores;
+
+        // INYECCIÓN DINÁMICA DE TEMAS CSS
+        const temasCSS = {
+            'rosa': { '50':'#fdf2f8', '100':'#fce7f3', '200':'#fbcfe8', '400':'#f472b6', '500':'#ec4899', '600':'#db2777', '700':'#be185d', '800':'#9d174d' },
+            'lila': { '50':'#faf5ff', '100':'#f3e8ff', '200':'#e9d5ff', '400':'#c084fc', '500':'#a855f7', '600':'#9333ea', '700':'#7e22ce', '800':'#6b21a8' },
+            'verde': { '50':'#f0fdf4', '100':'#dcfce7', '200':'#bbf7d0', '400':'#4ade80', '500':'#22c55e', '600':'#16a34a', '700':'#15803d', '800':'#166534' },
+            'rojo': { '50':'#fef2f2', '100':'#fee2e2', '200':'#fecaca', '400':'#f87171', '500':'#ef4444', '600':'#dc2626', '700':'#b91c1c', '800':'#991b1b' },
+            'oscuro': { '50':'#f8fafc', '100':'#f1f5f9', '200':'#cbd5e1', '400':'#94a3b8', '500':'#64748b', '600':'#475569', '700':'#334155', '800':'#1e293b' }
+        };
+
+        function setTemaUI(tema) {
+            let styleTag = document.getElementById('dynamic-theme-style');
+            if (!styleTag) { styleTag = document.createElement('style'); styleTag.id = 'dynamic-theme-style'; document.head.appendChild(styleTag); }
+            if (tema === 'azul' || !temasCSS[tema]) { styleTag.innerHTML = ''; return; }
+            const c = temasCSS[tema];
+            styleTag.innerHTML = `
+                .bg-indigo-50 { background-color: ${c['50']} !important; } .bg-indigo-100 { background-color: ${c['100']} !important; }
+                .bg-indigo-600 { background-color: ${c['600']} !important; } .bg-indigo-700 { background-color: ${c['700']} !important; }
+                .bg-indigo-800 { background-color: ${c['800']} !important; } .text-indigo-400 { color: ${c['400']} !important; }
+                .text-indigo-500 { color: ${c['500']} !important; } .text-indigo-600 { color: ${c['600']} !important; }
+                .text-indigo-700 { color: ${c['700']} !important; } .text-indigo-50 { color: ${c['50']} !important; }
+                .text-indigo-100 { color: ${c['100']} !important; } .border-indigo-100 { border-color: ${c['100']} !important; }
+                .border-indigo-200 { border-color: ${c['200']} !important; } .border-indigo-500 { border-color: ${c['500']} !important; }
+                .focus\\:border-indigo-500:focus { border-color: ${c['500']} !important; } .focus\\:ring-indigo-200:focus { box-shadow: 0 0 0 3px ${c['200']} !important; }
+                .decoration-indigo-200 { text-decoration-color: ${c['200']} !important; }
+                .btn-3d-indigo { background: linear-gradient(to bottom, ${c['400']}, ${c['600']}) !important; border-color: ${c['700']} !important; box-shadow: 0 4px 0 ${c['800']}, 0 5px 10px rgba(0,0,0,0.2) !important; }
+                .btn-3d-indigo:hover { box-shadow: 0 2px 0 ${c['800']}, 0 3px 6px rgba(0,0,0,0.2) !important; }
+                .btn-3d-indigo:active { box-shadow: none !important; }
+                .nav-btn-active { color: ${c['600']} !important; border-top-color: ${c['600']} !important; }
+                .btn-modo-active { background-color: ${c['600']} !important; color: white !important; }
+            `;
+        }
+
+        function abrirModalTema() { document.getElementById('modalTema').classList.replace('hidden', 'flex'); }
+        
+        function cambiarTema(tema) {
+            setTemaUI(tema);
+            localStorage.setItem('sgv_theme_' + usuarioActual.Usuario, tema);
+            document.getElementById('modalTema').classList.replace('flex','hidden');
+            showToast("🎨 Tema Actualizado");
+            fetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "guardarTema", data: { usuario: usuarioActual.Usuario, tema: tema } }) });
+        }
 
         function showLoader(text = "Procesando...") { document.getElementById("loaderText").innerText = text; document.getElementById("loaderOverlay").classList.replace("hidden", "flex"); }
         function hideLoader() { document.getElementById("loaderOverlay").classList.replace("flex", "hidden"); }
@@ -378,7 +440,6 @@
                     document.getElementById("loginScreen").classList.add("hidden");
                     document.getElementById("appScreen").classList.remove("hidden");
                     
-                    // CARGAR INFO DEL HEADER
                     document.getElementById("headerUserName").innerText = usuarioActual.Usuario;
                     document.getElementById("headerUserRol").innerText = usuarioActual.Rol;
                     document.getElementById("headerUserInfo").classList.remove("hidden");
@@ -393,8 +454,16 @@
                         document.getElementById("btn-dashboard").classList.add("hidden");
                         document.getElementById("btn-dashboard").classList.remove("flex");
                     }
+
+                    // APLICAR TEMA DEL USUARIO
+                    let userPermisos = {};
+                    try { userPermisos = JSON.parse(usuarioActual.Permisos || "{}"); } catch(e){}
+                    if(userPermisos.tema) { setTemaUI(userPermisos.tema); } 
+                    else {
+                        let localT = localStorage.getItem('sgv_theme_' + usuarioActual.Usuario);
+                        if(localT) setTemaUI(localT); else setTemaUI('azul');
+                    }
                     
-                    // AL INICIAR, ENTRAR DIRECTAMENTE A VENTAS
                     switchTab('vender'); 
                     refresh(true);
                 } else alert("Usuario o contraseña incorrectos");
@@ -594,7 +663,6 @@
             if (p) {
                 if (p.Cantidad <= 0) return alert("Sin existencias");
                 
-                // CORRECCION 0%: Validamos si viene 0 de la base de datos
                 let numRec = parseFloat(p.RecargoPagos);
                 let recargoSeguro = isNaN(numRec) ? 15 : numRec;
 
@@ -612,10 +680,9 @@
             renderCarrito();
         }
 
-        // LÓGICA DE DESCUENTO AGRUPANDO TODA LA CATEGORÍA (JABON AÑADIDO)
         function calcularDescuentosGlobales(lista) {
             lista.forEach(i => i.descuentoParAplicado = 0);
-            const categoriasAplica = ['Body', 'Velas', 'Gel Antibacterial', 'Jabon']; // Jabon integrado a la promo
+            const categoriasAplica = ['Body', 'Velas', 'Gel Antibacterial', 'Jabon']; 
             
             categoriasAplica.forEach(cat => {
                 let pool = [];
@@ -662,7 +729,6 @@
 
         function evaluarCategoria() {
             const cat = document.getElementById("prodCategoria").value;
-            // Jabon activa la caja del descuento
             if(['Body', 'Velas', 'Gel Antibacterial', 'Jabon'].includes(cat)) { document.getElementById("cajaDescuentoPar").classList.remove("hidden"); } 
             else { document.getElementById("cajaDescuentoPar").classList.add("hidden"); document.getElementById("prodDescuentoPar").value = ""; }
         }
@@ -679,7 +745,6 @@
             }).join('');
         }
 
-        // FUNCIONES DEL NUEVO VISOR DE IMAGEN
         function abrirVisorImagen(url) {
             document.getElementById('imgVisorAmpliado').src = url;
             document.getElementById('modalVisorImagen').classList.replace('hidden', 'flex');
@@ -694,7 +759,6 @@
                 ? `<div class="bg-emerald-100 text-emerald-700 p-3 rounded-xl mt-3 font-black text-[10px] uppercase shadow-sm border border-emerald-200">✨ Aporte al armar par: $${descuentoPar}</div>`
                 : '';
             
-            // La imagen en el modal ahora es clickeable para abrir en grande
             document.getElementById("infoDetalleProducto").innerHTML = `
                 <div class="relative group cursor-pointer" onclick="abrirVisorImagen('${url}')">
                     <img src="${url}" class="w-full h-48 object-cover rounded-xl shadow-inner border group-hover:opacity-90 transition-all">
@@ -712,7 +776,6 @@
         function agregarAlCarritoDesdeStock(c) {
             const p = db.inventario.find(i => i.Código.toString() === c.toString());
             if (p && p.Cantidad > 0) {
-                // CORRECCION 0%: Validamos si viene 0 de la base de datos
                 let numRec = parseFloat(p.RecargoPagos);
                 let recargoSeguro = isNaN(numRec) ? 15 : numRec;
 
@@ -726,14 +789,18 @@
             const c = document.getElementById("prodCodigo").value.trim();
             const p = db.inventario.find(p => p.Código.toString() == c);
             if (p) {
-                document.getElementById("prodNombre").value = p.Nombre; document.getElementById("prodPrecioVenta").value = p.PrecioVenta;
+                showToast("✅ Producto existente encontrado");
+                document.getElementById("prodNombre").value = p.Nombre; 
+                document.getElementById("prodPrecioVenta").value = p.PrecioVenta;
                 document.getElementById("prodCostoCompra").value = p.Costo; 
-                
-                // CORRECCIÓN 0%: Rellenar con 0 si es 0, en lugar de poner 15.
                 document.getElementById("prodRecargo").value = (p.RecargoPagos !== undefined && p.RecargoPagos !== "") ? p.RecargoPagos : 15;
+                document.getElementById("prodFoto").value = p.FotoURL; 
+                document.getElementById("prodCategoria").value = p.Categoría || "General";
+                document.getElementById("prodDescuentoPar").value = p.DescuentoPar || ""; 
                 
-                document.getElementById("prodFoto").value = p.FotoURL; document.getElementById("prodCategoria").value = p.Categoría || "General";
-                document.getElementById("prodDescuentoPar").value = p.DescuentoPar || ""; evaluarCategoria();
+                document.getElementById("prodCantidadNueva").value = ""; 
+                
+                evaluarCategoria();
                 document.getElementById("txtStockActual").innerText = p.Cantidad; document.getElementById("txtCostoActual").innerText = "$" + parseFloat(p.Costo).toFixed(2);
                 document.getElementById("txtPrecioActual").innerText = "$" + parseFloat(p.PrecioVenta).toFixed(2);
                 document.getElementById("infoStockActual").classList.remove("hidden");
@@ -751,7 +818,6 @@
                 document.getElementById("cajaRecargo").classList.add("hidden"); 
                 document.getElementById("infoCostoVisible").classList.add("hidden");
                 
-                // Bloqueo de Inputs a Vendedores
                 document.getElementById("prodCantidadNueva").disabled = true;
                 document.getElementById("prodPrecioVenta").disabled = true;
                 document.getElementById("prodDescuentoPar").disabled = true;
@@ -764,7 +830,6 @@
                 document.getElementById("cajaRecargo").classList.remove("hidden"); 
                 document.getElementById("infoCostoVisible").classList.remove("hidden");
                 
-                // Liberar Inputs a Admins
                 document.getElementById("prodCantidadNueva").disabled = false;
                 document.getElementById("prodPrecioVenta").disabled = false;
                 document.getElementById("prodDescuentoPar").disabled = false;
@@ -797,7 +862,6 @@
                 }
             }
 
-            // CORRECCIÓN 0%: Parsear de forma segura respetando el 0%
             let rawRecargo = document.getElementById("prodRecargo").value;
             let numRecargo = parseFloat(rawRecargo);
             let recargoSeguro = isNaN(numRecargo) ? 15 : numRecargo;
