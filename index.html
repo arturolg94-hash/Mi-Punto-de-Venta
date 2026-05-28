@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGV PRO v3.45 - AutoCorrección de Base de Datos</title>
+    <title>SGV PRO v3.47 - Corrección de Sintaxis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -1443,7 +1443,7 @@
             refresh(true);
         }
 
-        async function ejecutarAbonoSeleccionado() { 
+        function ejecutarAbonoSeleccionado() { 
             const m = parseFloat(document.getElementById("montoAbonoManual").value); 
             if(!m || m <= 0 || m > cuentaParaAbonar.sal) return alert("Error en monto"); 
             
@@ -1458,14 +1458,14 @@
                 esAbono: true 
             }; 
             
-            await fetch(gasUrl, { 
+            fetch(gasUrl, { 
                 method: "POST", 
                 body: JSON.stringify({ action: "registrarVenta", data: d }) 
-            }); 
-            
-            generarReciboImagen({...d, totalOperacion: cuentaParaAbonar.tot}); 
-            document.getElementById("modalAbonarAhora").classList.replace("flex", "hidden"); 
-            refresh(true); 
+            }).then(() => {
+                generarReciboImagen({...d, totalOperacion: cuentaParaAbonar.tot}); 
+                document.getElementById("modalAbonarAhora").classList.replace("flex", "hidden"); 
+                refresh(true); 
+            });
         }
 
         function generarFechasPagoProyectadas(fi, pl, sal) {
@@ -1473,9 +1473,26 @@
             let fBase = new Date(fi); 
             if(isNaN(fBase.getTime())) fBase = new Date(); 
             let mP = (sal / pl).toFixed(2);
+            
+            let currentDate = new Date(fBase);
             for(let i=1; i<=pl; i++) { 
-                fBase.setDate(fBase.getDate() + 15); 
-                fechas.push({ fecha: fBase.toISOString(), monto: parseFloat(mP) }); 
+                let year = currentDate.getFullYear();
+                let month = currentDate.getMonth();
+                let day = currentDate.getDate();
+                
+                // Calculamos el último día del mes actual de forma automática (28, 29, 30 o 31)
+                let lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+                
+                // Saltos de quincena reales en el calendario
+                if (day < 15) {
+                    currentDate = new Date(year, month, 15, 12, 0, 0); // Día 15
+                } else if (day >= 15 && day < lastDayOfMonth) {
+                    currentDate = new Date(year, month, lastDayOfMonth, 12, 0, 0); // Fin de mes
+                } else {
+                    currentDate = new Date(year, month + 1, 15, 12, 0, 0); // Brinca al 15 del siguiente mes
+                }
+                
+                fechas.push({ fecha: currentDate.toISOString(), monto: parseFloat(mP) }); 
             } 
             return fechas;
         }
