@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>SGV PRO v3.55 - Tooltips BI</title>
+    <title>SGV PRO v3.57 - Filtro BI Inteligente</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -148,15 +148,15 @@
                             <span class="text-[7px] text-slate-400 italic">Toca varios para combinarlos</span>
                         </div>
                         <div id="dashFCatContainer" class="flex flex-wrap gap-1.5 md:gap-2">
-                            <label class="cursor-pointer"><input type="checkbox" value="General" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">General</span></label>
-                            <label class="cursor-pointer"><input type="checkbox" value="Body" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Body</span></label>
-                            <label class="cursor-pointer"><input type="checkbox" value="Bolsas" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Bolsas</span></label>
-                            <label class="cursor-pointer"><input type="checkbox" value="Calzado" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Calzado</span></label>
-                            <label class="cursor-pointer"><input type="checkbox" value="Jabon" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Jabón</span></label>
-                            <label class="cursor-pointer"><input type="checkbox" value="Velas" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Velas</span></label>
-                            <label class="cursor-pointer"><input type="checkbox" value="Gel Antibacterial" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Gel Antibac.</span></label>
-                            <label class="cursor-pointer"><input type="checkbox" value="Porta Gel" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Porta Gel</span></label>
-                            <label class="cursor-pointer"><input type="checkbox" value="Ropa" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Ropa</span></label>
+                            <label class="cursor-pointer" title="Ver artículos generales o sin categorizar"><input type="checkbox" value="General" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">General</span></label>
+                            <label class="cursor-pointer" title="Filtrar ventas e inversión en Bodys, Splash y Cremas"><input type="checkbox" value="Body" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Body</span></label>
+                            <label class="cursor-pointer" title="Filtrar ventas e inversión en Bolsas"><input type="checkbox" value="Bolsas" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Bolsas</span></label>
+                            <label class="cursor-pointer" title="Filtrar ventas e inversión en Calzado"><input type="checkbox" value="Calzado" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Calzado</span></label>
+                            <label class="cursor-pointer" title="Filtrar ventas e inversión en Jabones"><input type="checkbox" value="Jabon" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Jabón</span></label>
+                            <label class="cursor-pointer" title="Filtrar ventas e inversión en Velas"><input type="checkbox" value="Velas" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Velas</span></label>
+                            <label class="cursor-pointer" title="Filtrar ventas e inversión en Gel Antibacterial"><input type="checkbox" value="Gel Antibacterial" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Gel Antibac.</span></label>
+                            <label class="cursor-pointer" title="Filtrar ventas e inversión en Porta Gel"><input type="checkbox" value="Porta Gel" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Porta Gel</span></label>
+                            <label class="cursor-pointer" title="Filtrar ventas e inversión en Ropa"><input type="checkbox" value="Ropa" class="peer hidden" onchange="renderDashboard()"><span class="block px-3 py-1.5 bg-slate-100 peer-checked:bg-indigo-600 peer-checked:text-white rounded-xl text-[9px] font-black uppercase transition-all shadow-sm">Ropa</span></label>
                         </div>
                     </div>
                 </div>
@@ -760,13 +760,29 @@
                     const descGas = (g.Descripción || g.Descripcion || "").toLowerCase();
                     let monto = Number(g.Monto || 0);
 
-                    const isMercancia = catGas.toLowerCase().includes("mercancía") || catGas.toLowerCase().includes("mercan") || descGas.includes("automátic") || descGas.includes("automatic");
+                    // 1. Detectar si el gasto es de Mercancía 
+                    // (Buscando tanto en la categoría como en la descripción)
+                    let isMercancia = catGas.toLowerCase().includes("mercancía") || catGas.toLowerCase().includes("mercan") || descGas.includes("automátic") || descGas.includes("automatic") || catGas.toLowerCase().includes("compra");
+                    
+                    // Ampliamos la red: Si menciona un producto en la categoría o descripción, lo forzamos a ser Mercancía.
+                    const kwInventario = ["body", "bolsa", "calzado", "jabon", "jabón", "vela", "gel", "ropa", "splash", "crema", "lote", "piezas", "mist"];
+                    if (kwInventario.some(kw => catGas.toLowerCase().includes(kw) || descGas.includes(kw))) {
+                        isMercancia = true;
+                    }
 
                     if (isMercancia) {
-                        // Verificamos si el gasto coincide con las categorías de mercancía seleccionadas
+                        // 2. Verificamos si este gasto coincide con los botones de filtro seleccionados inteligentemente
                         let matchCatGas = selectedCats.length === 0;
                         if (selectedCats.length > 0) {
-                            matchCatGas = selectedCats.some(c => catGas.toLowerCase().includes(c) || descGas.includes(c));
+                            matchCatGas = selectedCats.some(c => {
+                                let match = catGas.toLowerCase().includes(c) || descGas.includes(c);
+                                // Lógica de sinónimos para el motor de búsqueda
+                                if (c === "body" && (descGas.includes("splash") || descGas.includes("crema") || descGas.includes("bodys") || descGas.includes("mist"))) match = true;
+                                if (c === "jabon" && (descGas.includes("jabón") || descGas.includes("jabones"))) match = true;
+                                if (c === "bolsas" && descGas.includes("bolsa")) match = true;
+                                if (c === "velas" && descGas.includes("vela")) match = true;
+                                return match;
+                            });
                         }
 
                         if (matchCatGas) {
@@ -774,8 +790,7 @@
                             gastosData[catGas] = (gastosData[catGas] || 0) + monto; 
                         }
                     } else {
-                        // Los gastos operativos siempre se suman a su total general, 
-                        // independientemente de qué tipo de mercancía se filtre.
+                        // Todo lo que no cumpla como mercancía se asume Gasto Operativo (Renta, Luz, etc.)
                         gastosOperativos += monto;
                         gastosData[catGas] = (gastosData[catGas] || 0) + monto; 
                     }
@@ -1936,12 +1951,10 @@
             if (!imgUrl || imgUrl === "") return alert("No hay recibo para compartir.");
 
             try {
-                // Convertimos el base64 a un archivo Blob
                 const response = await fetch(imgUrl);
                 const blob = await response.blob();
                 const file = new File([blob], `Recibo_SGV_${Date.now()}.png`, { type: 'image/png' });
 
-                // Verificamos si el navegador soporta compartir archivos
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         title: 'Recibo SGV PRO',
@@ -1952,7 +1965,6 @@
                     alert("Tu navegador actual no soporta compartir imágenes directamente. Usa el botón de Descargar.");
                 }
             } catch (error) {
-                // Ignoramos el error si el usuario simplemente canceló el menú de compartir
                 if (error.name !== 'AbortError') {
                     console.error("Error al compartir:", error);
                     alert("Ocurrió un error al intentar compartir.");
