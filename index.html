@@ -2,14 +2,18 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGV PRO v3.47 - Corrección de Sintaxis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>SGV PRO v3.51 - Estabilización y UX</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ANIMACIONES Y DISEÑO RESPONSIVO */
+        * { -webkit-tap-highlight-color: transparent; }
+        html { scroll-behavior: smooth; }
         .app-tab { display: none; opacity: 0; }
         .app-tab.active { display: block; animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
@@ -17,11 +21,15 @@
         .modal-enter { animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes modalFadeIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
 
+        .custom-scroll { -webkit-overflow-scrolling: touch; }
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        body { overflow-x: hidden; }
+        body { overflow-x: hidden; overscroll-behavior-y: none; }
+        .nav-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .main-safe { padding-bottom: calc(7rem + env(safe-area-inset-bottom)); }
+
         .nav-btn-active { color: #4f46e5; border-top: 3px solid #4f46e5; }
         .btn-modo-active { background-color: #4f46e5 !important; color: white !important; }
         #canvasRecibo { width: 320px; background: white; padding: 25px; color: black; font-family: 'Courier New', Courier, monospace; border: 1px solid #eee; }
@@ -86,17 +94,17 @@
             </div>
         </header>
 
-        <main class="flex-1 p-3 md:p-4 max-w-4xl w-full mx-auto pb-32">
+        <main class="flex-1 p-3 md:p-4 max-w-4xl w-full mx-auto main-safe">
             
             <div id="tab-dashboard" class="app-tab space-y-4">
                 <div class="flex justify-between items-center px-2">
                     <h2 class="font-black text-2xl uppercase italic">Dashboard BI</h2>
-                    <button onclick="abrirModalGasto()" class="btn-3d-red px-5 py-3 text-[10px] font-black rounded-xl uppercase">+ Gasto Operativo</button>
+                    <button onclick="abrirModalGasto()" class="btn-3d-red px-5 py-3 text-[10px] font-black rounded-xl uppercase">+ Gasto/Compra</button>
                 </div>
                 
                 <div class="bg-white p-4 rounded-[2rem] border shadow-sm grid grid-cols-2 md:grid-cols-3 gap-2 mb-2 transition-all">
                     <div class="col-span-2 md:col-span-3 flex justify-between items-center">
-                        <span class="input-label text-[8px]">Filtros Dinámicos</span>
+                        <span class="input-label text-[8px]">Filtros Dinámicos de Reporte</span>
                         <span class="text-[8px] text-slate-400 font-bold italic">* Dejar vacío para ver todo el historial</span>
                     </div>
                     <div><span class="text-[8px] text-slate-400 font-bold ml-2 uppercase">Desde</span><input type="date" id="dashFInicio" onchange="renderDashboard()" class="w-full px-3 py-2 bg-slate-50 border rounded-xl text-[10px] outline-none focus:border-indigo-500 transition-all"></div>
@@ -126,13 +134,47 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all"><span class="input-label">Ventas</span><b id="dashVentasTotal" class="text-lg md:text-xl text-indigo-600 font-black">$0.00</b></div>
-                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all"><span class="input-label">Utilidad Neta</span><b id="dashUtilidad" class="text-lg md:text-xl text-emerald-600 font-black">$0.00</b></div>
-                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all col-span-2 md:col-span-1"><span class="input-label">Margen (%)</span><b id="dashMargen" class="text-lg md:text-xl text-blue-500 font-black">0.00%</b></div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all">
+                        <span class="input-label">Ventas Generadas</span>
+                        <b id="dashVentas" class="text-lg md:text-xl text-indigo-600 font-black">$0.00</b>
+                    </div>
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all">
+                        <span class="input-label">Pagos Recibidos</span>
+                        <b id="dashPagos" class="text-lg md:text-xl text-emerald-600 font-black">$0.00</b>
+                    </div>
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all">
+                        <span class="input-label">Utilidad Neta</span>
+                        <b id="dashUtilidad" class="text-lg md:text-xl text-blue-600 font-black">$0.00</b>
+                    </div>
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all">
+                        <span class="input-label" title="Pagos Recibidos - Egresos Totales">Flujo de Caja</span>
+                        <b id="dashFlujo" class="text-lg md:text-xl text-purple-600 font-black">$0.00</b>
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all">
+                        <span class="input-label">Costo Vendida</span>
+                        <b id="dashCostoVendida" class="text-lg md:text-xl text-slate-600 font-black">$0.00</b>
+                    </div>
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all">
+                        <span class="input-label">Gastos Operativos</span>
+                        <b id="dashGastosOper" class="text-lg md:text-xl text-red-500 font-black">$0.00</b>
+                    </div>
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all">
+                        <span class="input-label">Inversión Mercancía</span>
+                        <b id="dashInversionStock" class="text-lg md:text-xl text-orange-500 font-black">$0.00</b>
+                    </div>
+                    <div class="bg-white p-4 rounded-3xl border shadow-sm text-center hover:shadow-md transition-all bg-red-50/50">
+                        <span class="input-label" title="Gastos Operativos + Inversión Mercancía">Egresos Totales</span>
+                        <b id="dashEgresos" class="text-lg md:text-xl text-red-600 font-black">$0.00</b>
+                    </div>
                 </div>
-                <div class="bg-white p-4 md:p-5 rounded-[2.5rem] border shadow-sm"><canvas id="chartVentas"></canvas></div>
-                <div class="bg-white p-4 md:p-5 rounded-[2.5rem] border shadow-sm"><canvas id="chartVendedores"></canvas></div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="bg-white p-4 md:p-5 rounded-[2.5rem] border shadow-sm col-span-1 md:col-span-2"><canvas id="chartVentas"></canvas></div>
+                    <div class="bg-white p-4 md:p-5 rounded-[2.5rem] border shadow-sm"><canvas id="chartGastos"></canvas></div>
+                    <div class="bg-white p-4 md:p-5 rounded-[2.5rem] border shadow-sm"><canvas id="chartVendedores"></canvas></div>
+                </div>
             </div>
 
             <div id="tab-vender" class="app-tab space-y-3 md:space-y-4">
@@ -212,7 +254,7 @@
             </div>
         </main>
 
-        <nav class="bg-white border-t fixed bottom-0 left-0 right-0 h-20 md:h-24 flex items-center justify-around z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] px-1 md:px-2">
+        <nav class="bg-white border-t fixed bottom-0 left-0 right-0 h-20 md:h-24 nav-safe flex items-center justify-around z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] px-1 md:px-2">
             <button onclick="switchTab('dashboard')" class="nav-btn hidden flex-col items-center flex-1 transition-all active:scale-90" id="btn-dashboard">📈<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">BI</span></button>
             <button onclick="switchTab('vender')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90 nav-btn-active" id="btn-vender">🛒<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">Ventas</span></button>
             <button onclick="switchTab('inventario')" class="nav-btn flex flex-col items-center flex-1 transition-all active:scale-90" id="btn-inventario">📦<span class="text-[8px] md:text-[9px] font-black uppercase mt-1">Stock</span></button>
@@ -222,8 +264,8 @@
     </div>
 
     <!-- MODALES Y VENTANAS FLOTANTES -->
-    <div id="modalTema" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[200] backdrop-blur-md transition-all duration-300">
-        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-4 border shadow-2xl relative text-center modal-enter">
+    <div id="modalTema" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[200] backdrop-blur-md transition-all duration-300" onclick="cerrarOverlay(event, 'modalTema')">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-4 border shadow-2xl relative text-center modal-enter" onclick="event.stopPropagation()">
             <button onclick="document.getElementById('modalTema').classList.replace('flex','hidden')" class="absolute top-6 right-6 text-slate-300 hover:text-red-500 font-black text-xl transition-all">×</button>
             <h3 class="font-black text-slate-800 uppercase text-xs italic mb-4">Paleta de Colores</h3>
             <p class="text-[10px] text-slate-400 mb-4 font-bold">Selecciona cómo quieres ver el sistema</p>
@@ -243,15 +285,15 @@
         <img id="imgVisorAmpliado" src="" class="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl modal-enter" onclick="event.stopPropagation()">
     </div>
 
-    <div id="modalInfoProducto" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-[250] backdrop-blur-sm transition-all duration-300">
-        <div class="bg-white p-6 rounded-[2rem] w-full max-w-sm space-y-4 shadow-2xl border text-center modal-enter relative">
+    <div id="modalInfoProducto" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-[250] backdrop-blur-sm transition-all duration-300" onclick="cerrarOverlay(event, 'modalInfoProducto')">
+        <div class="bg-white p-6 rounded-[2rem] w-full max-w-sm space-y-4 shadow-2xl border text-center modal-enter relative" onclick="event.stopPropagation()">
             <div id="infoDetalleProducto" class="space-y-2"></div>
             <button onclick="cerrarModalInfo()" class="w-full btn-3d-slate py-4 rounded-xl font-black text-[10px] uppercase tracking-widest mt-4">Cerrar Info</button>
         </div>
     </div>
 
-    <div id="modalProducto" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-[100] backdrop-blur-md transition-all duration-300">
-        <div class="bg-white p-6 md:p-8 rounded-[3rem] w-full max-w-md space-y-4 border shadow-2xl overflow-y-auto max-h-[90vh] custom-scroll relative modal-enter">
+    <div id="modalProducto" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-[100] backdrop-blur-md transition-all duration-300" onclick="cerrarOverlay(event, 'modalProducto', cerrarModal)">
+        <div class="bg-white p-6 md:p-8 rounded-[3rem] w-full max-w-md space-y-4 border shadow-2xl overflow-y-auto max-h-[90vh] custom-scroll overscroll-contain relative modal-enter" onclick="event.stopPropagation()">
             <button onclick="cerrarModal()" class="absolute top-6 right-8 text-slate-300 hover:text-red-500 font-black text-2xl transition-all">×</button>
             <h3 class="font-black text-indigo-600 uppercase text-xs italic mb-4">Registro de Mercancía</h3>
             
@@ -307,19 +349,41 @@
         </div>
     </div>
 
-    <div id="modalGasto" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[180] backdrop-blur-md transition-all duration-300">
-        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-4 border shadow-2xl relative modal-enter">
+    <div id="modalGasto" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[180] backdrop-blur-md transition-all duration-300" onclick="cerrarOverlay(event, 'modalGasto')">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-4 border shadow-2xl relative modal-enter" onclick="event.stopPropagation()">
             <button onclick="document.getElementById('modalGasto').classList.replace('flex','hidden')" class="absolute top-6 right-8 text-slate-300 hover:text-red-500 font-black text-2xl transition-all">×</button>
-            <h3 class="font-black text-red-600 uppercase text-xs italic mb-2">Registrar Gasto</h3>
-            <div><span class="input-label">Categoría</span><select id="gastoCat" class="w-full px-4 py-3 border rounded-xl outline-none font-bold bg-slate-50 focus:border-red-400 transition-all"><option>Renta</option><option>Servicios</option><option>Publicidad</option><option>Sueldos</option><option>Otros</option></select></div>
+            <h3 class="font-black text-red-600 uppercase text-xs italic mb-2">Registrar Movimiento</h3>
+            <div><span class="input-label">Categoría</span>
+                <select id="gastoCat" class="w-full px-4 py-3 border rounded-xl outline-none font-bold bg-slate-50 focus:border-red-400 transition-all">
+                    <optgroup label="Gastos Operativos">
+                        <option value="Renta">Renta</option>
+                        <option value="Luz">Luz</option>
+                        <option value="Agua">Agua</option>
+                        <option value="Internet">Internet</option>
+                        <option value="Sueldos">Sueldos</option>
+                        <option value="Publicidad">Publicidad</option>
+                        <option value="Operativo - Otros">Operativo - Otros</option>
+                    </optgroup>
+                    <optgroup label="Inversión / Compras">
+                        <option value="Mercancía - General">Mercancía - General</option>
+                        <option value="Mercancía - Body">Mercancía - Body</option>
+                        <option value="Mercancía - Bolsas">Mercancía - Bolsas</option>
+                        <option value="Mercancía - Calzado">Mercancía - Calzado</option>
+                        <option value="Mercancía - Jabon">Mercancía - Jabon</option>
+                        <option value="Mercancía - Velas">Mercancía - Velas</option>
+                        <option value="Mercancía - Gel Antibac.">Mercancía - Gel Antibac.</option>
+                        <option value="Mercancía - Ropa">Mercancía - Ropa</option>
+                    </optgroup>
+                </select>
+            </div>
             <div><span class="input-label">Monto</span><input type="number" id="gastoMonto" class="w-full px-4 py-3 border rounded-xl outline-none font-black text-red-600 bg-red-50 text-xl focus:border-red-400 transition-all" placeholder="$0.00"></div>
             <div><span class="input-label">Descripción</span><input type="text" id="gastoDesc" class="w-full px-4 py-3 border rounded-xl outline-none font-bold focus:border-red-400 transition-all" placeholder="¿En qué se gastó?"></div>
-            <button onclick="guardarGasto()" class="w-full btn-3d-red py-4 rounded-2xl font-black uppercase">Guardar Gasto</button>
+            <button onclick="guardarGasto()" class="w-full btn-3d-red py-4 rounded-2xl font-black uppercase">Guardar Registro</button>
         </div>
     </div>
 
-    <div id="modalDetalleVenta" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[160] backdrop-blur-md transition-all duration-300">
-        <div class="bg-white p-6 rounded-[2.5rem] w-full max-w-md space-y-4 border shadow-2xl overflow-y-auto max-h-[90vh] custom-scroll relative text-sm modal-enter">
+    <div id="modalDetalleVenta" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[160] backdrop-blur-md transition-all duration-300" onclick="cerrarOverlay(event, 'modalDetalleVenta')">
+        <div class="bg-white p-6 rounded-[2.5rem] w-full max-w-md space-y-4 border shadow-2xl overflow-y-auto max-h-[90vh] custom-scroll overscroll-contain relative text-sm modal-enter" onclick="event.stopPropagation()">
             <button onclick="document.getElementById('modalDetalleVenta').classList.replace('flex','hidden')" class="absolute top-6 right-8 text-slate-300 hover:text-red-500 font-black text-2xl transition-all">×</button>
             <h3 class="font-black text-indigo-600 uppercase text-xs italic mb-2">Información de Venta</h3>
             <div id="contenidoDetalleVenta"></div>
@@ -334,8 +398,8 @@
         </div>
     </div>
 
-    <div id="modalAdminUsuario" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[160] backdrop-blur-md transition-all duration-300">
-        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-xs space-y-4 border shadow-2xl relative text-center modal-enter">
+    <div id="modalAdminUsuario" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[160] backdrop-blur-md transition-all duration-300" onclick="cerrarOverlay(event, 'modalAdminUsuario')">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-xs space-y-4 border shadow-2xl relative text-center modal-enter" onclick="event.stopPropagation()">
             <button onclick="document.getElementById('modalAdminUsuario').classList.replace('flex','hidden')" class="absolute top-6 right-6 text-slate-300 hover:text-red-500 font-black text-xl transition-all">×</button>
             <h3 id="tituloAdminUsuario" class="font-black text-indigo-600 uppercase text-xs italic mb-2">Usuario</h3>
             <input type="hidden" id="usrIdOriginal">
@@ -369,8 +433,8 @@
     </div>
     <div id="reciboInvisible"><div id="canvasRecibo"></div></div>
     
-    <div id="modalAbonarAhora" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[150] backdrop-blur-sm transition-all duration-300">
-        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-6 shadow-2xl text-center modal-enter">
+    <div id="modalAbonarAhora" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[150] backdrop-blur-sm transition-all duration-300" onclick="cerrarOverlay(event, 'modalAbonarAhora')">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm space-y-6 shadow-2xl text-center modal-enter" onclick="event.stopPropagation()">
             <div id="infoCuentaSeleccionada"></div>
             <input type="number" id="montoAbonoManual" placeholder="Monto del abono" class="w-full px-6 py-5 border rounded-2xl font-black bg-indigo-50 text-indigo-600 text-center text-xl outline-none shadow-inner focus:border-indigo-400 transition-all">
             <div class="flex gap-2">
@@ -389,7 +453,17 @@
         let modoOperacion = 'nueva'; let metodoVenta = 'contado'; let plazoQuincenas = 4;
         let cuentaParaAbonar = null; let scannerVender, scannerStock;
         let ventaEdicionActual = null; 
-        let chartVentas, chartVendedores;
+        
+        // Variables globales para las gráficas
+        let chartVentas, chartVendedores, chartGastos;
+
+        // ESTABILIZACIÓN UX: Cierra modales al dar clic afuera de la caja blanca
+        function cerrarOverlay(event, id, customFn = null) {
+            if (event.target.id === id) {
+                if (customFn) customFn();
+                else document.getElementById(id).classList.replace('flex', 'hidden');
+            }
+        }
 
         const temasCSS = {
             'rosa': { '50':'#fdf2f8', '100':'#fce7f3', '200':'#fbcfe8', '400':'#f472b6', '500':'#ec4899', '600':'#db2777', '700':'#be185d', '800':'#9d174d' },
@@ -560,41 +634,73 @@
             const elFMet = document.getElementById("dashFMet"); const qMet = elFMet ? elFMet.value : "";
             const elFCat = document.getElementById("dashFCat"); const qCat = elFCat ? elFCat.value : "";
 
-            let totalG = 0;
-            if (!qCli && !qMet && !qCat) {
-                const gastosPeriodo = db.gastos.filter(g => {
-                    if(!g.Fecha) return false;
-                    const catGas = (g.Categoría || g.Categoria || "").toLowerCase();
+            let ventasTotales = 0;
+            let pagosRecibidos = 0;
+            let costoMercanciaVendida = 0;
+            let gastosOperativos = 0;
+            let inversionMercancia = 0;
+            const venData = {};
+            const gastosData = {};
+
+            // 1. EVALUAR GASTOS (Gastos Operativos vs Compras de Mercancía)
+            db.gastos.forEach(g => {
+                if(!g.Fecha) return;
+                const fg = new Date(g.Fecha).toISOString().split('T')[0];
+                const matchDate = (!fIn || fg >= fIn) && (!fFi || fg <= fFi);
+                const matchVen = !qVen || (g.Usuario || "").toLowerCase().includes(qVen);
+
+                if(matchDate && matchVen) {
+                    const catGas = (g.Categoría || g.Categoria || "").trim();
                     const descGas = (g.Descripción || g.Descripcion || "").toLowerCase();
-                    if (catGas.includes("compra de mercan") || descGas.includes("automátic") || descGas.includes("automatic")) { return false; }
-                    const fg = new Date(g.Fecha).toISOString().split('T')[0];
-                    const matchDate = (!fIn || fg >= fIn) && (!fFi || fg <= fFi);
-                    const matchVen = !qVen || (g.Usuario || "").toLowerCase().includes(qVen);
-                    return matchDate && matchVen;
-                });
-                totalG = gastosPeriodo.reduce((a, b) => a + Number(b.Monto || 0), 0);
-            }
+                    let monto = Number(g.Monto || 0);
 
-            let totalV = 0;
-            let costoVentas = 0;
-            const venData = {}; 
+                    if (catGas.toLowerCase().includes("mercancía") || catGas.toLowerCase().includes("mercan") || descGas.includes("automátic") || descGas.includes("automatic")) {
+                        inversionMercancia += monto;
+                        gastosData[catGas] = (gastosData[catGas] || 0) + monto; // Guardar para desglose
+                    } else {
+                        gastosOperativos += monto;
+                        gastosData[catGas] = (gastosData[catGas] || 0) + monto; // Guardar para desglose
+                    }
+                }
+            });
 
+            // 2. EVALUAR VENTAS Y ABONOS (Ingresos vs Costos de Venta)
             db.ventas.forEach(v => {
-                if(!v.Fecha) return;
-                const fv = new Date(v.Fecha).toISOString().split('T')[0];
-                const matchDate = (!fIn || fv >= fIn) && (!fFi || fv <= fFi);
-                const matchCli = !qCli || (v.ClienteNombre || "").toLowerCase().includes(qCli);
-                const matchVen = !qVen || (v.Vendedor || "").toLowerCase().includes(qVen);
-                
                 let mObj = {}; 
                 try { mObj = JSON.parse(v.MetodoPago || "{}"); } catch(e){}
+                let prods = []; 
+                try { prods = JSON.parse(v.Productos || "[]"); } catch(e){}
                 
+                let fv = "";
+                if(v.Fecha) fv = new Date(v.Fecha).toISOString().split('T')[0];
+                const matchDateVenta = (!fIn || fv >= fIn) && (!fFi || fv <= fFi);
+                const matchCli = !qCli || (v.ClienteNombre || "").toLowerCase().includes(qCli);
+                const matchVen = !qVen || (v.Vendedor || "").toLowerCase().includes(qVen);
                 const matchMet = !qMet || (mObj.tipo === qMet);
 
-                if (matchDate && matchCli && matchVen && matchMet) {
-                    let prods = []; 
-                    try { prods = JSON.parse(v.Productos || "[]"); } catch(e){}
-                    
+                // Evaluar ABONOS para "Pagos Recibidos" (Flujo Real Efectivo)
+                if (mObj && mObj.abonos) {
+                    mObj.abonos.forEach(abn => {
+                        if (!abn.fecha) return;
+                        const fa = new Date(abn.fecha).toISOString().split('T')[0];
+                        const matchDateAbono = (!fIn || fa >= fIn) && (!fFi || fa <= fFi);
+                        const matchVenAbono = !qVen || (abn.vendedor || "").toLowerCase().includes(qVen);
+                        
+                        // Si el abono cuadra con fechas, y su Venta cuadra con filtros...
+                        if (matchDateAbono && matchVenAbono && matchCli && matchMet) {
+                            let saleHasCategory = true;
+                            if (qCat) {
+                                saleHasCategory = prods.some(p => p.categoria === qCat);
+                            }
+                            if (saleHasCategory) {
+                                pagosRecibidos += parseFloat(abn.monto) || 0;
+                            }
+                        }
+                    });
+                }
+
+                // Evaluar VENTAS base para "Ventas Totales" y "Costo de Venta"
+                if (matchDateVenta && matchCli && matchVen && matchMet && !v.esAbono && v.MetodoPago !== "PAGO ABONO") {
                     let ventaParcial = 0;
                     let costoParcial = 0;
 
@@ -615,6 +721,7 @@
                         }
                     });
 
+                    // Casos raros legacy sin productos
                     if (ventaParcial > 0 || (prods.length === 0 && !qCat)) {
                         if (prods.length === 0 && !qCat) {
                             ventaParcial = parseFloat(v.Total) || 0;
@@ -628,51 +735,74 @@
                                 costoParcial += (cUnidad * parseFloat(d.Cantidad || 0));
                             });
                         }
-                        totalV += ventaParcial;
-                        costoVentas += costoParcial;
+                        ventasTotales += ventaParcial;
+                        costoMercanciaVendida += costoParcial;
                         venData[v.Vendedor] = (venData[v.Vendedor] || 0) + ventaParcial;
                     }
                 }
             });
 
-            const utilidad = totalV - costoVentas - totalG;
-            const margen = totalV > 0 ? (utilidad / totalV) * 100 : 0;
+            // 3. ACTUALIZAR INTERFAZ Y CÁLCULOS
+            const utilidadNeta = pagosRecibidos - costoMercanciaVendida - gastosOperativos;
+            const egresosTotales = gastosOperativos + inversionMercancia;
+            const flujoCaja = pagosRecibidos - egresosTotales;
             
-            const elVentasTotal = document.getElementById("dashVentasTotal");
-            if (elVentasTotal) elVentasTotal.innerText = `$${totalV.toFixed(2)}`;
+            document.getElementById("dashVentas").innerText = `$${ventasTotales.toFixed(2)}`;
+            document.getElementById("dashPagos").innerText = `$${pagosRecibidos.toFixed(2)}`;
+            document.getElementById("dashCostoVendida").innerText = `$${costoMercanciaVendida.toFixed(2)}`;
+            document.getElementById("dashGastosOper").innerText = `$${gastosOperativos.toFixed(2)}`;
+            document.getElementById("dashInversionStock").innerText = `$${inversionMercancia.toFixed(2)}`;
+            document.getElementById("dashEgresos").innerText = `$${egresosTotales.toFixed(2)}`;
             
             const elUtilidad = document.getElementById("dashUtilidad");
-            if (elUtilidad) elUtilidad.innerText = `$${utilidad.toFixed(2)}`;
-            
-            const margenEl = document.getElementById("dashMargen");
-            if (margenEl) {
-                margenEl.innerText = `${margen.toFixed(2)}%`;
-                margenEl.className = margen >= 0 ? "text-lg md:text-xl text-emerald-600 font-black transition-all" : "text-lg md:text-xl text-red-600 font-black transition-all";
-            }
+            elUtilidad.innerText = `$${utilidadNeta.toFixed(2)}`;
+            elUtilidad.className = utilidadNeta >= 0 ? "text-lg md:text-xl text-blue-600 font-black transition-all" : "text-lg md:text-xl text-red-600 font-black transition-all";
 
-            const chartVentasCtx = document.getElementById('chartVentas');
-            if (chartVentasCtx) {
-                if (chartVentas) chartVentas.destroy();
-                chartVentas = new Chart(chartVentasCtx, { 
-                    type: 'bar', 
-                    data: { 
-                        labels: ['Ventas', 'Costos Merc.', 'Gastos Oper.'], 
-                        datasets: [{ label: 'Flujo ($)', data: [totalV, costoVentas, totalG], backgroundColor: ['#6366f1', '#fbbf24', '#f87171'], borderRadius: 15 }] 
-                    } 
-                });
-            }
-            
-            const chartVendedoresCtx = document.getElementById('chartVendedores');
-            if (chartVendedoresCtx) {
-                if (chartVendedores) chartVendedores.destroy();
-                chartVendedores = new Chart(chartVendedoresCtx, { 
-                    type: 'doughnut', 
-                    data: { 
-                        labels: Object.keys(venData), 
-                        datasets: [{ data: Object.values(venData), backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6'] }] 
-                    } 
-                });
-            }
+            const elFlujo = document.getElementById("dashFlujo");
+            elFlujo.innerText = `$${flujoCaja.toFixed(2)}`;
+            elFlujo.className = flujoCaja >= 0 ? "text-lg md:text-xl text-purple-600 font-black transition-all" : "text-lg md:text-xl text-red-600 font-black transition-all";
+
+            // 4. GENERAR GRÁFICAS
+            if (chartVentas) chartVentas.destroy();
+            chartVentas = new Chart(document.getElementById('chartVentas'), {
+                type: 'bar',
+                data: {
+                    labels: ['Ventas', 'Pagos Recibidos', 'Costo Vendido', 'Gastos Oper.', 'Inversión Stock'],
+                    datasets: [{
+                        label: 'Monto ($)',
+                        data: [ventasTotales, pagosRecibidos, costoMercanciaVendida, gastosOperativos, inversionMercancia],
+                        backgroundColor: ['#6366f1', '#10b981', '#94a3b8', '#ef4444', '#f97316'],
+                        borderRadius: 8
+                    }]
+                },
+                options: { plugins: { title: { display: true, text: 'Flujo Financiero General' }, legend: { display: false } } }
+            });
+
+            if (chartGastos) chartGastos.destroy();
+            chartGastos = new Chart(document.getElementById('chartGastos'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(gastosData),
+                    datasets: [{
+                        data: Object.values(gastosData),
+                        backgroundColor: ['#f87171', '#fb923c', '#fbbf24', '#a3e635', '#4ade80', '#34d399', '#2dd4bf', '#38bdf8', '#818cf8', '#c084fc', '#f472b6', '#fb7185']
+                    }]
+                },
+                options: { plugins: { title: { display: true, text: 'Distribución de Egresos' } } }
+            });
+
+            if (chartVendedores) chartVendedores.destroy();
+            chartVendedores = new Chart(document.getElementById('chartVendedores'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(venData),
+                    datasets: [{
+                        data: Object.values(venData),
+                        backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6']
+                    }]
+                },
+                options: { plugins: { title: { display: true, text: 'Ventas por Vendedor' } } }
+            });
         }
 
         async function guardarGasto() {
@@ -691,7 +821,7 @@
             });
             document.getElementById("modalGasto").classList.replace("flex", "hidden"); 
             refresh(true); 
-            showToast("Gasto Guardado");
+            showToast("Registro Guardado");
         }
 
         function abrirModalGasto() { 
