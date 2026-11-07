@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>SGV PRO v4.11 - Argon Enterprise Dashboard</title>
+    <title>SGV PRO v4.12 - Argon Enterprise Dashboard</title>
     
     <!-- Google Fonts: Plus Jakarta Sans (Argon Typography) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -135,7 +135,7 @@
                 <span id="loaderPercentTxt">15%</span>
             </div>
 
-            <!-- Botón de Desbloqueo Seguro (Aparece si demora o por acción manual) -->
+            <!-- Botón de Desbloqueo Seguro -->
             <button id="btnForceUnlock" onclick="forzarDesbloqueo()" class="hidden w-full mt-2 bg-rose-500/20 hover:bg-rose-500 text-rose-200 hover:text-white border border-rose-500/40 py-2.5 px-4 rounded-xl text-[11px] font-extrabold uppercase tracking-wider transition-all">
                 <i class="fa-solid fa-bolt mr-1"></i> Cancelar / Desbloquear
             </button>
@@ -175,7 +175,7 @@
                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white text-argon-primary shadow-argon mb-4 text-2xl font-black">
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
-                <h1 class="text-3xl font-extrabold tracking-tight">SGV PRO <span class="font-light opacity-85">Argon v4.11</span></h1>
+                <h1 class="text-3xl font-extrabold tracking-tight">SGV PRO <span class="font-light opacity-85">Argon v4.12</span></h1>
                 <p class="text-xs text-indigo-100 font-medium mt-1">Plataforma de Inventario, Punto de Venta & BI</p>
             </div>
 
@@ -205,7 +205,7 @@
                     </div>
                 </div>
             </div>
-            <p class="text-center text-[11px] text-slate-400 font-semibold mt-6">SGV PRO v4.11 • Sincronización Serverless con Control de Procesos</p>
+            <p class="text-center text-[11px] text-slate-400 font-semibold mt-6">SGV PRO v4.12 • Sincronización Serverless con Control de Procesos</p>
         </div>
     </div>
 
@@ -222,7 +222,7 @@
                 </div>
                 <div>
                     <h2 class="font-extrabold text-slate-800 text-base tracking-tight leading-none">SGV PRO</h2>
-                    <span class="text-[10px] font-bold text-argon-primary uppercase tracking-widest">Argon v4.11</span>
+                    <span class="text-[10px] font-bold text-argon-primary uppercase tracking-widest">Argon v4.12</span>
                 </div>
             </div>
 
@@ -797,7 +797,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="exportarReportePDF()" class="bg-white text-argon-primary hover:bg-indigo-50 px-4 py-2 rounded-xl text-xs font-extrabold uppercase shadow-sm transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-file-pdf text-rose-500"></i> Descargar PDF
+                        <i class="fa-solid fa-file-pdf text-rose-500"></i> Descargar PDF Completo
                     </button>
                     <button onclick="document.getElementById('modalReporteEjecutivo').classList.replace('flex','hidden')" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-black text-lg">×</button>
                 </div>
@@ -1120,13 +1120,11 @@
             clearTimeout(unlockButtonTimer);
             clearTimeout(watchdogTimer);
 
-            // Mostrar botón de desbloqueo manual tras 5 segundos
             unlockButtonTimer = setTimeout(() => {
                 const btn = document.getElementById("btnForceUnlock");
                 if (btn) btn.classList.remove("hidden");
             }, 5000);
 
-            // Watchdog de seguridad máxima a los 22 segundos
             watchdogTimer = setTimeout(() => {
                 forzarDesbloqueo("Tiempo de espera agotado. Se liberó la pantalla para evitar bloqueos.");
             }, 22000);
@@ -1200,7 +1198,6 @@
             }
         }
 
-        // Cerrar dropdowns al hacer clic fuera
         document.addEventListener('click', function(e) {
             if (e.target.id !== 'clienteNombre' && e.target.id !== 'sugerenciasClientes') {
                 const box = document.getElementById("sugerenciasClientes");
@@ -1259,7 +1256,7 @@
                 return `
                 <div onclick="${agotado ? '' : `seleccionarProductoPredictivo('${safeCod}')`}" class="p-3 flex items-center justify-between gap-3 transition-all ${agotado ? 'opacity-50 bg-slate-50 cursor-not-allowed' : 'hover:bg-indigo-50/70 cursor-pointer'}">
                     <div class="flex items-center gap-3 min-w-0">
-                        <img src="${foto}" class="w-11 h-11 rounded-xl object-cover border border-slate-200 shrink-0">
+                        <img src="${foto}" class="w-11 h-11 rounded-xl object-cover border border-slate-200 shrink-0 bg-white">
                         <div class="min-w-0">
                             <div class="flex items-center gap-1.5">
                                 <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">#${p.Código}</span>
@@ -1349,12 +1346,6 @@
 
         // =========================================================================
         // MOTOR MATEMÁTICO DE SEMÁFORO QUINCENAL (5 NIVELES DE COLOR POR METAS ACUMULADAS)
-        // Compara el Total Liquidado a la fecha actual contra la meta acumulada de cada fecha de quincena:
-        // - Azul: >= Meta de la próxima quincena (1 quincena o más adelantada)
-        // - Verde: Entre la Meta de la última quincena pasada y 1 peso menos de la próxima quincena
-        // - Amarillo: Desde 1 peso menos de la última quincena pasada hasta la Meta de la quincena antepasada (1 Qna retraso)
-        // - Naranja: Desde 1 peso menos de la quincena antepasada hasta la Meta de hace 2 quincenas (2 Qnas retraso)
-        // - Rojo: Menor a la Meta de hace 2 quincenas (3 o más quincenas de retraso)
         // =========================================================================
         function evaluarEstadoCobranza(v) {
             const saldo = parseFloat(v.ClienteContacto) || 0;
@@ -1388,7 +1379,6 @@
             const fechaVenta = v.Fecha ? new Date(v.Fecha) : new Date();
             const hoy = new Date();
 
-            // Determinar enganche inicial (si hubo pago en el momento de la venta)
             let engancheInicial = 0;
             if (abonos.length > 0) {
                 const fAbono0 = new Date(abonos[0].fecha || fechaVenta);
@@ -1397,7 +1387,6 @@
                 }
             }
 
-            // Construir el calendario de fechas quincenales si no existe en el registro
             let listaFechas = [];
             if (Array.isArray(mObj.fechasProyectadas) && mObj.fechasProyectadas.length > 0) {
                 listaFechas = mObj.fechasProyectadas;
@@ -1410,10 +1399,6 @@
             const montoFinanciado = Math.max(0, total - engancheInicial);
             const cuotaQuincenal = numQuincenas > 0 ? Number((montoFinanciado / numQuincenas).toFixed(2)) : total;
 
-            // Función auxiliar: devuelve la cantidad acumulada que debería estar pagada en la quincena índice `idx`
-            // idx = 0 -> Enganche inicial (antes de vencer la Q1)
-            // idx = 1 -> Enganche + 1 cuota (al vencer Q1)
-            // idx = k -> Enganche + k cuotas (al vencer Qk)
             const metaAcumuladaEnQuincena = (idx) => {
                 if (idx < 0) return -Infinity;
                 if (idx === 0) return Number(engancheInicial.toFixed(2));
@@ -1421,7 +1406,6 @@
                 return Number(Math.min(total, engancheInicial + (idx * cuotaQuincenal)).toFixed(2));
             };
 
-            // Contar cuántas fechas de pago quincenal ya pasaron (k = última quincena pasada)
             let k = 0;
             for (let i = 0; i < listaFechas.length; i++) {
                 const fQuincena = new Date(listaFechas[i].fecha);
@@ -1431,12 +1415,12 @@
                 }
             }
 
-            const metaUltimaPasada = metaAcumuladaEnQuincena(k);       // Lo que debía estar liquidado a la última quincena pasada
-            const metaProximaQuincena = metaAcumuladaEnQuincena(k + 1); // Lo que deberá estar liquidado en la próxima quincena
-            const metaAntepasada = metaAcumuladaEnQuincena(k - 1);      // Quincena antepasada (1 Qna de retraso)
-            const metaTrasAntepasada = metaAcumuladaEnQuincena(k - 2);  // 2 Quincenas antes de la última pasada (2 Qnas de retraso)
+            const metaUltimaPasada = metaAcumuladaEnQuincena(k);       
+            const metaProximaQuincena = metaAcumuladaEnQuincena(k + 1); 
+            const metaAntepasada = metaAcumuladaEnQuincena(k - 1);      
+            const metaTrasAntepasada = metaAcumuladaEnQuincena(k - 2);  
 
-            // 1. AZUL (Adelantado): Total liquidado >= Meta de la próxima quincena (1 o más quincenas adelantadas)
+            // 1. AZUL (Adelantado)
             if (cuotaQuincenal > 0 && pagadoReal >= metaProximaQuincena && metaProximaQuincena > metaUltimaPasada) {
                 const qAdelanto = Math.max(1, Math.floor((pagadoReal - metaUltimaPasada + 0.01) / cuotaQuincenal));
                 const montoAdelantado = Math.max(0, pagadoReal - metaUltimaPasada);
@@ -1457,7 +1441,7 @@
                 };
             }
 
-            // 2. VERDE (Al Corriente): Entre la cantidad de la última quincena pasada y hasta $1 peso menos de la próxima quincena
+            // 2. VERDE (Al Corriente)
             if (pagadoReal >= metaUltimaPasada) {
                 return {
                     liquidada: false,
@@ -1475,10 +1459,9 @@
                 };
             }
 
-            // Si pagadoReal es al menos $1 peso menor a la última quincena pasada (pagadoReal <= metaUltimaPasada - 1 o menor a metaUltimaPasada)
             const faltanteHoy = Math.max(0, metaUltimaPasada - pagadoReal);
 
-            // 3. AMARILLO (1 Quincena de Retraso): Desde $1 peso menos de la última quincena pasada hasta el valor de la quincena antepasada
+            // 3. AMARILLO (1 Quincena de Retraso)
             if (k >= 1 && pagadoReal >= metaAntepasada) {
                 return {
                     liquidada: false,
@@ -1496,7 +1479,7 @@
                 };
             }
 
-            // 4. NARANJA (2 Quincenas de Retraso): Desde $1 peso menos de la quincena antepasada hasta el valor de 2 quincenas atrás
+            // 4. NARANJA (2 Quincenas de Retraso)
             if (k >= 2 && pagadoReal >= metaTrasAntepasada) {
                 return {
                     liquidada: false,
@@ -1514,7 +1497,7 @@
                 };
             }
 
-            // 5. ROJO (3 o más Quincenas de Retraso): Menor al valor de 2 quincenas atrás
+            // 5. ROJO (3 o más Quincenas de Retraso)
             const qRetrasoCalculadas = cuotaQuincenal > 0 ? Math.max(3, Math.ceil(faltanteHoy / cuotaQuincenal)) : 3;
             return {
                 liquidada: false,
@@ -1720,106 +1703,103 @@
 
             let ventasTotales = 0, pagosRecibidos = 0, costoMercanciaVendida = 0, gastosOperativos = 0, inversionMercancia = 0;
             const venData = {}, gastosData = {};
+            const detalleGastosFiltrados = [];
 
-            // 1. Evaluar Gastos explícitos en hoja Gastos (si no se filtra por un cliente específico)
-            let productosConGastoExplicito = new Set();
+            // 1. Evaluar Gastos explícitos en hoja Gastos
+            (db.gastos || []).forEach(g => {
+                if(!g.Fecha) return;
+                const fg = new Date(g.Fecha).toISOString().split('T')[0];
+                const matchDate = (!fIn || fg >= fIn) && (!fFi || fg <= fFi);
+                const matchVen = !qVen || (g.Usuario || "").toLowerCase().includes(qVen);
 
-            if (!qCli) {
-                (db.gastos || []).forEach(g => {
-                    if(!g.Fecha) return;
-                    const fg = new Date(g.Fecha).toISOString().split('T')[0];
-                    const matchDate = (!fIn || fg >= fIn) && (!fFi || fg <= fFi);
-                    const matchVen = !qVen || (g.Usuario || "").toLowerCase().includes(qVen);
+                if(matchDate && matchVen) {
+                    const catGas = (g.Categoría || g.Categoria || "General").trim();
+                    const descGas = (g.Descripción || g.Descripcion || "").toLowerCase();
+                    let monto = Number(g.Monto || 0);
 
-                    if(matchDate && matchVen) {
-                        const catGas = (g.Categoría || g.Categoria || "General").trim();
-                        const descGas = (g.Descripción || g.Descripcion || "").toLowerCase();
-                        let monto = parseFloat(g.Monto) || 0;
+                    let isMercancia = catGas.toLowerCase().includes("mercancía") || catGas.toLowerCase().includes("mercan") || descGas.includes("automátic") || descGas.includes("automatic") || catGas.toLowerCase().includes("compra");
+                    const kwInventario = ["body", "bolsa", "calzado", "jabon", "jabón", "vela", "gel", "ropa", "splash", "crema", "lote", "piezas", "mist", "pzs"];
+                    if (kwInventario.some(kw => catGas.toLowerCase().includes(kw) || descGas.includes(kw))) isMercancia = true;
 
-                        let isMercancia = catGas.toLowerCase().includes("mercancía") || catGas.toLowerCase().includes("mercan") || descGas.includes("automátic") || descGas.includes("automatic") || catGas.toLowerCase().includes("compra") || descGas.includes("stock");
-                        const kwInventario = ["body", "bolsa", "calzado", "jabon", "jabón", "vela", "gel", "ropa", "splash", "crema", "lote", "piezas", "mist", "pzs"];
-                        if (kwInventario.some(kw => catGas.toLowerCase().includes(kw) || descGas.includes(kw))) isMercancia = true;
-
-                        // Registrar nombres o códigos mencionados en compras automáticas para no duplicar con la conciliación de inventario
-                        (db.inventario || []).forEach(itemInv => {
-                            const nomInv = String(itemInv.Nombre || "").toLowerCase().trim();
-                            const codInv = String(itemInv.Código || "").toLowerCase().trim();
-                            if ((nomInv && descGas.includes(nomInv)) || (codInv && descGas.includes(codInv))) {
-                                productosConGastoExplicito.add(String(itemInv.Código).trim());
-                            }
-                        });
-
-                        if (isMercancia) {
-                            let matchCatGas = selectedCats.length === 0;
-                            if (selectedCats.length > 0) {
-                                matchCatGas = selectedCats.some(c => {
-                                    let match = catGas.toLowerCase().includes(c) || descGas.includes(c);
-                                    if (c === "body" && (descGas.includes("splash") || descGas.includes("crema") || descGas.includes("bodys") || descGas.includes("mist"))) match = true;
-                                    if (c === "jabon" && (descGas.includes("jabón") || descGas.includes("jabones"))) match = true;
-                                    if (c === "bolsas" && descGas.includes("bolsa")) match = true;
-                                    if (c === "velas" && descGas.includes("vela")) match = true;
-                                    return match;
-                                });
-                            }
-                            if (matchCatGas) {
-                                inversionMercancia += monto;
-                                gastosData[catGas] = (gastosData[catGas] || 0) + monto; 
-                            }
-                        } else if (selectedCats.length === 0) {
-                            gastosOperativos += monto;
-                            gastosData[catGas] = (gastosData[catGas] || 0) + monto; 
+                    if (isMercancia) {
+                        let matchCatGas = selectedCats.length === 0;
+                        if (selectedCats.length > 0) {
+                            matchCatGas = selectedCats.some(c => {
+                                let match = catGas.toLowerCase().includes(c) || descGas.includes(c);
+                                if (c === "body" && (descGas.includes("splash") || descGas.includes("crema") || descGas.includes("bodys") || descGas.includes("mist"))) match = true;
+                                if (c === "jabon" && (descGas.includes("jabón") || descGas.includes("jabones"))) match = true;
+                                if (c === "bolsas" && descGas.includes("bolsa")) match = true;
+                                if (c === "velas" && descGas.includes("vela")) match = true;
+                                return match;
+                            });
                         }
+                        if (matchCatGas) {
+                            inversionMercancia += monto;
+                            gastosData[catGas] = (gastosData[catGas] || 0) + monto;
+                            detalleGastosFiltrados.push({ fecha: fg, categoria: catGas, descripcion: g.Descripción || g.Descripcion || 'Compra de Stock', monto, tipo: 'STOCK' });
+                        }
+                    } else if (selectedCats.length === 0 && !qCli) {
+                        gastosOperativos += monto;
+                        gastosData[catGas] = (gastosData[catGas] || 0) + monto;
+                        detalleGastosFiltrados.push({ fecha: fg, categoria: catGas, descripcion: g.Descripción || g.Descripcion || 'Gasto Operativo', monto, tipo: 'OPERATIVO' });
                     }
-                });
-            }
+                }
+            });
 
-            // 2. Conciliación automática con la hoja Inventario:
-            // Si hay productos dados de alta en Stock con Costo > 0 que no se habían volcado en la hoja Gastos,
-            // se calcula su inversión total (Stock Actual + Unidades ya Vendidas) * Costo de Compra.
-            if (!qCli && !qVen) {
-                const unidadesVendidasPorCodigo = {};
-                (db.ventas || []).forEach(v => {
-                    if (v.esAbono || v.MetodoPago === "PAGO ABONO") return;
-                    let prods = [];
-                    try { prods = typeof v.Productos === 'string' ? JSON.parse(v.Productos || "[]") : (v.Productos || []); } catch(e){}
-                    if (Array.isArray(prods)) {
-                        prods.forEach(p => {
-                            const cod = String(p.codigo || "").trim();
-                            if (cod) unidadesVendidasPorCodigo[cod] = (unidadesVendidasPorCodigo[cod] || 0) + (parseFloat(p.cantidad) || 0);
+            // 2. CONCILIACIÓN AUTOMÁTICA DE COSTO DE STOCK:
+            // Si el usuario dio de alta productos con costo de compra en Inventario pero no estaban en la hoja Gastos,
+            // reconstruimos el costo total adquirido (Stock Actual + Unidades Vendidas Históricas) * Costo Compra
+            const unidadesVendidasPorCodigo = {};
+            (db.ventas || []).forEach(v => {
+                if (v.esAbono || v.MetodoPago === "PAGO ABONO") return;
+                let prods = []; try { prods = typeof v.Productos === 'string' ? JSON.parse(v.Productos || "[]") : (v.Productos || []); } catch(e){}
+                prods.forEach(p => {
+                    const cod = String(p.codigo || "").trim();
+                    if (cod) unidadesVendidasPorCodigo[cod] = (unidadesVendidasPorCodigo[cod] || 0) + (parseFloat(p.cantidad) || 0);
+                });
+            });
+
+            (db.inventario || []).forEach(item => {
+                const costoUnit = parseFloat(item.Costo) || 0;
+                if (costoUnit <= 0) return;
+
+                const catItem = String(item.Categoría || "General").trim();
+                const matchCat = selectedCats.length === 0 || selectedCats.includes(catItem.toLowerCase());
+                if (!matchCat) return;
+
+                let fechaItem = item.Fecha ? new Date(item.Fecha).toISOString().split('T')[0] : "";
+                const matchDateItem = (!fIn || !fechaItem || fechaItem >= fIn) && (!fFi || !fechaItem || fechaItem <= fFi);
+                if (!matchDateItem) return;
+
+                const nombreLower = String(item.Nombre || "").toLowerCase();
+                const codStr = String(item.Código || "").trim();
+
+                // Verificar si este producto ya tiene su registro automático en la hoja Gastos
+                const yaRegistradoEnGastos = (db.gastos || []).some(g => {
+                    const d = String(g.Descripción || g.Descripcion || "").toLowerCase();
+                    return (nombreLower && d.includes(nombreLower)) || (codStr && d.includes(codStr.toLowerCase()));
+                });
+
+                if (!yaRegistradoEnGastos) {
+                    const stockActual = parseFloat(item.Cantidad) || 0;
+                    const vendidosHist = unidadesVendidasPorCodigo[codStr] || 0;
+                    const totalUnidadesAdquiridas = stockActual + vendidosHist;
+                    const gastoStockCalculado = Number((totalUnidadesAdquiridas * costoUnit).toFixed(2));
+
+                    if (gastoStockCalculado > 0) {
+                        inversionMercancia += gastoStockCalculado;
+                        const labelCat = `Stock - ${catItem}`;
+                        gastosData[labelCat] = (gastosData[labelCat] || 0) + gastoStockCalculado;
+                        detalleGastosFiltrados.push({
+                            fecha: fechaItem || 'Inventario',
+                            categoria: labelCat,
+                            descripcion: `Alta Stock: ${item.Nombre} (${totalUnidadesAdquiridas} pzs x $${costoUnit})`,
+                            monto: gastoStockCalculado,
+                            tipo: 'STOCK_CONCILIADO'
                         });
                     }
-                });
-
-                (db.inventario || []).forEach(item => {
-                    const cod = String(item.Código || "").trim();
-                    if (productosConGastoExplicito.has(cod)) return; // Ya fue contabilizado en Gastos
-
-                    const costoUnit = parseFloat(item.Costo) || 0;
-                    if (costoUnit <= 0) return;
-
-                    let fItem = "";
-                    if (item.Fecha) {
-                        const dObj = new Date(item.Fecha);
-                        if (!isNaN(dObj.getTime())) fItem = dObj.toISOString().split('T')[0];
-                    }
-                    const matchDateInv = (!fIn || !fItem || fItem >= fIn) && (!fFi || !fItem || fItem <= fFi);
-                    const catItem = String(item.Categoría || "General").trim();
-                    const matchCatInv = selectedCats.length === 0 || selectedCats.includes(catItem.toLowerCase());
-
-                    if (matchDateInv && matchCatInv) {
-                        const stockAct = Math.max(0, parseFloat(item.Cantidad) || 0);
-                        const cantVendidaHist = unidadesVendidasPorCodigo[cod] || 0;
-                        const totalUnidadesAdquiridas = stockAct + cantVendidaHist;
-                        const gastoStockProducto = totalUnidadesAdquiridas * costoUnit;
-
-                        if (gastoStockProducto > 0) {
-                            inversionMercancia += gastoStockProducto;
-                            const labelCat = `Stock - ${catItem}`;
-                            gastosData[labelCat] = (gastosData[labelCat] || 0) + gastoStockProducto;
-                        }
-                    }
-                });
-            }
+                }
+            });
 
             // 3. Evaluar Ventas y Abonos
             (db.ventas || []).forEach(v => {
@@ -1837,7 +1817,7 @@
                         if (!abn.fecha) return;
                         const fa = new Date(abn.fecha).toISOString().split('T')[0];
                         const matchDateAbono = (!fIn || fa >= fIn) && (!fFi || fa <= fFi);
-                        const matchVenAbono = !qVen || (abn.vendedor || v.Vendedor || "").toLowerCase().includes(qVen);
+                        const matchVenAbono = !qVen || (abn.vendedor || "").toLowerCase().includes(qVen);
                         
                         if (matchDateAbono && matchVenAbono && matchCli && matchMet) {
                             let saleHasCategory = selectedCats.length === 0 || prods.some(p => selectedCats.includes((p.categoria || "general").toLowerCase()));
@@ -1890,12 +1870,19 @@
             const egresosTotales = gastosOperativos + inversionMercancia;
             const flujoCaja = pagosRecibidos - egresosTotales;
 
-            // Guardar estado actual para el generador de reportes BI
             ultimoCalculoBI = {
                 filtros: { fIn, fFi, qCli, qVen, qMet, selectedCats },
-                metricas: { ventasTotales, pagosRecibidos, costoMercanciaVendida, gastosOperativos, inversionMercancia, utilidadNeta, egresosTotales, flujoCaja },
+                ventasTotales,
+                pagosRecibidos,
+                costoMercanciaVendida,
+                gastosOperativos,
+                inversionMercancia,
+                egresosTotales,
+                utilidadNeta,
+                flujoCaja,
                 venData,
-                gastosData
+                gastosData,
+                detalleGastosFiltrados
             };
             
             document.getElementById("dashVentas").innerText = `$${ventasTotales.toFixed(2)}`;
@@ -1938,7 +1925,7 @@
             chartGastos = new Chart(document.getElementById('chartGastos'), {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(gastosData).length ? Object.keys(gastosData) : ['Sin egresos'],
+                    labels: Object.keys(gastosData).length ? Object.keys(gastosData) : ['Sin gastos'],
                     datasets: [{
                         data: Object.values(gastosData).length ? Object.values(gastosData) : [1],
                         backgroundColor: ['#fb6340', '#f5365c', '#ffd600', '#2dce89', '#11cdef', '#5e72e4', '#8965e0']
@@ -1962,143 +1949,397 @@
         }
 
         // =========================================================================
-        // GENERADOR DE REPORTE BI CON FILTROS ACTIVOS
+        // GENERADOR DE REPORTES CON FILTROS ACTIVOS (DASHBOARD BI Y TRAZABILIDAD)
         // =========================================================================
         function generarReporteBI() {
             renderDashboard();
             if (!ultimoCalculoBI) return;
+            const b = ultimoCalculoBI;
+            const f = b.filtros;
 
-            const { filtros, metricas, venData, gastosData } = ultimoCalculoBI;
             document.getElementById("tituloReporteModal").innerText = "Reporte Financiero BI (Filtros Activos)";
 
-            const filasVendedores = Object.entries(venData).map(([vend, monto]) => `
+            const filasVendedores = Object.entries(b.venData).map(([ven, mto]) => `
                 <tr class="border-b border-slate-100 text-xs">
-                    <td class="py-2 font-bold text-slate-700">${vend}</td>
-                    <td class="py-2 text-right font-extrabold text-argon-primary">$${monto.toFixed(2)}</td>
+                    <td class="py-2 font-bold text-slate-700">${ven}</td>
+                    <td class="py-2 text-right font-extrabold text-argon-primary">$${mto.toFixed(2)}</td>
                 </tr>
             `).join('') || `<tr><td colspan="2" class="py-3 text-center text-xs text-slate-400">Sin ventas en este filtro</td></tr>`;
 
-            const filasGastos = Object.entries(gastosData).map(([cat, monto]) => `
+            const filasGastos = b.detalleGastosFiltrados.map(g => `
                 <tr class="border-b border-slate-100 text-xs">
-                    <td class="py-2 font-bold text-slate-700">${cat}</td>
-                    <td class="py-2 text-right font-extrabold text-rose-600">$${monto.toFixed(2)}</td>
+                    <td class="py-2 text-slate-500 font-semibold">${g.fecha}</td>
+                    <td class="py-2 font-bold text-slate-700">${g.categoria}</td>
+                    <td class="py-2 text-slate-600">${g.descripcion}</td>
+                    <td class="py-2 text-right font-extrabold text-rose-600">$${g.monto.toFixed(2)}</td>
                 </tr>
-            `).join('') || `<tr><td colspan="2" class="py-3 text-center text-xs text-slate-400">Sin gastos registrados</td></tr>`;
+            `).join('') || `<tr><td colspan="4" class="py-3 text-center text-xs text-slate-400">Sin egresos registrados en este filtro</td></tr>`;
 
-            const html = `
-                <div class="border-b border-slate-200 pb-4 flex flex-wrap justify-between items-start gap-2">
+            document.getElementById("areaImprimibleReporte").innerHTML = `
+                <div class="border-b border-slate-200 pb-4 flex flex-wrap justify-between items-start gap-4">
                     <div>
-                        <h2 class="text-lg font-black text-slate-800 uppercase">SGV PRO • Corte de Inteligencia Financiera</h2>
-                        <p class="text-xs text-slate-500 font-semibold">Generado el: ${new Date().toLocaleString()} • Operador: ${usuarioActual?.Usuario || 'Admin'}</p>
+                        <h2 class="text-lg font-black text-slate-800 uppercase">SGV PRO • Corte de Inteligencia Financiera (BI)</h2>
+                        <p class="text-xs text-slate-500 font-semibold">Generado el ${new Date().toLocaleString()} por ${usuarioActual?.Usuario || 'Admin'}</p>
                     </div>
-                    <div class="text-right text-[11px] bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 font-bold text-slate-600">
-                        <div>Periodo: ${filtros.fIn || 'Inicio'} al ${filtros.fFi || 'Hoy'}</div>
-                        <div>Modalidad: ${filtros.qMet || 'Todas'} • Categorías: ${filtros.selectedCats.length ? filtros.selectedCats.join(', ').toUpperCase() : 'Todas'}</div>
+                    <div class="bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-[11px] font-bold text-slate-600">
+                        Periodo: ${f.fIn || 'Inicio'} al ${f.fFi || 'Hoy'} • Modalidad: ${f.qMet || 'Todas'}
+                        ${f.selectedCats.length ? `<br>Categorías: ${f.selectedCats.join(', ').toUpperCase()}` : ''}
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div class="bg-indigo-50/70 p-3.5 rounded-2xl border border-indigo-100">
+                    <div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-100">
                         <span class="text-[10px] font-extrabold uppercase text-indigo-400 block">Ventas Generadas</span>
-                        <b class="text-base font-black text-slate-800">$${metricas.ventasTotales.toFixed(2)}</b>
+                        <b class="text-base font-black text-slate-800">$${b.ventasTotales.toFixed(2)}</b>
                     </div>
-                    <div class="bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-100">
-                        <span class="text-[10px] font-extrabold uppercase text-emerald-600 block">Pagos Recibidos</span>
-                        <b class="text-base font-black text-emerald-700">$${metricas.pagosRecibidos.toFixed(2)}</b>
+                    <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-100">
+                        <span class="text-[10px] font-extrabold uppercase text-emerald-500 block">Pagos Recibidos</span>
+                        <b class="text-base font-black text-emerald-700">$${b.pagosRecibidos.toFixed(2)}</b>
                     </div>
-                    <div class="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200">
-                        <span class="text-[10px] font-extrabold uppercase text-amber-700 block">Gasto en Stock</span>
-                        <b class="text-base font-black text-amber-700">$${metricas.inversionMercancia.toFixed(2)}</b>
+                    <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-100">
+                        <span class="text-[10px] font-extrabold uppercase text-amber-600 block">Gasto en Stock</span>
+                        <b class="text-base font-black text-amber-700">$${b.inversionMercancia.toFixed(2)}</b>
                     </div>
-                    <div class="bg-rose-50/70 p-3.5 rounded-2xl border border-rose-200">
+                    <div class="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-100">
                         <span class="text-[10px] font-extrabold uppercase text-rose-500 block">Egresos Totales</span>
-                        <b class="text-base font-black text-rose-600">$${metricas.egresosTotales.toFixed(2)}</b>
+                        <b class="text-base font-black text-rose-700">$${b.egresosTotales.toFixed(2)}</b>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Costo Vendido</span>
+                        <b class="text-base font-black text-slate-700">$${b.costoMercanciaVendida.toFixed(2)}</b>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Gasto Operativo</span>
+                        <b class="text-base font-black text-slate-700">$${b.gastosOperativos.toFixed(2)}</b>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-cyan-50/70 border border-cyan-100">
+                        <span class="text-[10px] font-extrabold uppercase text-cyan-600 block">Utilidad Neta</span>
+                        <b class="text-base font-black text-cyan-700">$${b.utilidadNeta.toFixed(2)}</b>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-purple-50/70 border border-purple-100">
+                        <span class="text-[10px] font-extrabold uppercase text-purple-600 block">Flujo de Caja</span>
+                        <b class="text-base font-black text-purple-700">$${b.flujoCaja.toFixed(2)}</b>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-                        <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Costo de lo Vendido</span>
-                        <b class="text-sm font-black text-slate-700">$${metricas.costoMercanciaVendida.toFixed(2)}</b>
-                    </div>
-                    <div class="bg-cyan-50/70 p-3.5 rounded-2xl border border-cyan-200">
-                        <span class="text-[10px] font-extrabold uppercase text-cyan-700 block">Utilidad Neta Operativa</span>
-                        <b class="text-sm font-black ${metricas.utilidadNeta >= 0 ? 'text-cyan-700' : 'text-rose-600'}">$${metricas.utilidadNeta.toFixed(2)}</b>
-                    </div>
-                    <div class="bg-purple-50/70 p-3.5 rounded-2xl border border-purple-200">
-                        <span class="text-[10px] font-extrabold uppercase text-purple-700 block">Flujo Neto de Caja</span>
-                        <b class="text-sm font-black ${metricas.flujoCaja >= 0 ? 'text-purple-700' : 'text-rose-600'}">$${metricas.flujoCaja.toFixed(2)}</b>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="border border-slate-200 rounded-2xl p-4">
-                        <h4 class="text-xs font-extrabold uppercase text-slate-700 mb-2"><i class="fa-solid fa-user-check text-argon-primary mr-1"></i> Desglose por Vendedor</h4>
+                        <h4 class="text-xs font-extrabold uppercase text-slate-700 mb-2">Ventas por Vendedor</h4>
                         <table class="w-full">
-                            <thead><tr class="text-[10px] uppercase text-slate-400 border-b border-slate-200"><th class="text-left pb-1">Vendedor</th><th class="text-right pb-1">Total Vendido</th></tr></thead>
+                            <thead><tr class="border-b border-slate-200 text-[10px] uppercase text-slate-400"><th class="text-left pb-1">Vendedor</th><th class="text-right pb-1">Facturado</th></tr></thead>
                             <tbody>${filasVendedores}</tbody>
                         </table>
                     </div>
-                    <div class="border border-slate-200 rounded-2xl p-4">
-                        <h4 class="text-xs font-extrabold uppercase text-slate-700 mb-2"><i class="fa-solid fa-money-bill-transfer text-rose-500 mr-1"></i> Desglose de Gastos y Compras de Stock</h4>
-                        <table class="w-full">
-                            <thead><tr class="text-[10px] uppercase text-slate-400 border-b border-slate-200"><th class="text-left pb-1">Concepto / Categoría</th><th class="text-right pb-1">Importe</th></tr></thead>
-                            <tbody>${filasGastos}</tbody>
-                        </table>
+                    <div class="md:col-span-2 border border-slate-200 rounded-2xl p-4">
+                        <h4 class="text-xs font-extrabold uppercase text-slate-700 mb-2">Desglose de Gastos y Adquisición de Stock (${b.detalleGastosFiltrados.length})</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead><tr class="border-b border-slate-200 text-[10px] uppercase text-slate-400"><th class="text-left pb-1">Fecha</th><th class="text-left pb-1">Categoría</th><th class="text-left pb-1">Concepto</th><th class="text-right pb-1">Importe</th></tr></thead>
+                                <tbody>${filasGastos}</tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             `;
 
-            document.getElementById("areaImprimibleReporte").innerHTML = html;
             document.getElementById("modalReporteEjecutivo").classList.replace("hidden", "flex");
         }
 
-        async function exportarReportePDF() {
-            const area = document.getElementById("areaImprimibleReporte");
-            if (!area) return;
+        function obtenerVentasFiltradasTrazabilidad() {
+            const fIn = document.getElementById("fInicio")?.value || "";
+            const fFi = document.getElementById("fFin")?.value || "";
+            const qCli = (document.getElementById("filtroCliRep")?.value || "").toLowerCase();
+            const qVen = (document.getElementById("filtroVenRep")?.value || "").toLowerCase();
 
-            showLoader("Generando documento PDF...", 45, "Maquetando reporte ejecutivo en alta resolución...");
-            await new Promise(resolve => setTimeout(resolve, 150));
+            return (db.ventas || []).filter(v => {
+                if(!v.Fecha) return false;
+                if(v.esAbono || v.MetodoPago === "PAGO ABONO") return false;
+                const fv = new Date(v.Fecha).toISOString().split('T')[0]; 
+                const matchDate = (!fIn || fv >= fIn) && (!fFi || fv <= fFi);
+                const matchCli = !qCli || (v.ClienteNombre || "").toLowerCase().includes(qCli);
+                const matchVen = !qVen || (v.Vendedor || "").toLowerCase().includes(qVen);
+                return matchDate && matchCli && matchVen;
+            });
+        }
+
+        function calcularCostoVenta(v) {
+            let costoTotal = 0;
+            let prods = []; try { prods = typeof v.Productos === 'string' ? JSON.parse(v.Productos || "[]") : (v.Productos || []); } catch(e){}
+            if (prods.length > 0) {
+                prods.forEach(p => {
+                    const det = db.detalles.find(d => d['ID Venta'] === v['ID Venta'] && String(d.Código) === String(p.codigo));
+                    let cUnit = det ? parseFloat(det.CostoUnidad || 0) : 0;
+                    if (!cUnit) {
+                        const inv = db.inventario.find(i => String(i.Código) === String(p.codigo));
+                        if (inv) cUnit = parseFloat(inv.Costo || 0);
+                    }
+                    costoTotal += cUnit * (parseFloat(p.cantidad) || 0);
+                });
+            } else {
+                const dets = db.detalles.filter(d => d['ID Venta'] === v['ID Venta']);
+                dets.forEach(d => {
+                    let cUnit = parseFloat(d.CostoUnidad || 0);
+                    if (!cUnit) {
+                        const inv = db.inventario.find(i => String(i.Código) === String(d.Código));
+                        if (inv) cUnit = parseFloat(inv.Costo || 0);
+                    }
+                    costoTotal += cUnit * (parseFloat(d.Cantidad) || 0);
+                });
+            }
+            return costoTotal;
+        }
+
+        function abrirModalResumenTrazabilidad() {
+            const lista = obtenerVentasFiltradasTrazabilidad();
+            const fIn = document.getElementById("fInicio")?.value || "Inicio";
+            const fFi = document.getElementById("fFin")?.value || "Hoy";
+            const qCli = document.getElementById("filtroCliRep")?.value || "Todos";
+            const qVen = document.getElementById("filtroVenRep")?.value || "Todos";
+
+            document.getElementById("tituloReporteModal").innerText = "Resumen de Trazabilidad & Estado de Cobranza";
+
+            let totalRealizadas = lista.length;
+            let montoTotalRealizadas = 0;
+            let totalLiquidadas = 0;
+            let montoVentasLiquidadas = 0;
+            let gananciaVentasLiquidadas = 0;
+
+            const porVendedor = {};
+            const cuentasPendientes = [];
+            const conteoSemaforo = { AZUL: 0, VERDE: 0, AMARILLO: 0, NARANJA: 0, ROJO: 0 };
+
+            lista.forEach(v => {
+                const vendedor = v.Vendedor || 'Sistema';
+                const totalOp = parseFloat(v.Total) || 0;
+                const saldo = parseFloat(v.ClienteContacto) || 0;
+                const costoOp = calcularCostoVenta(v);
+                const utilidadOp = totalOp - costoOp;
+                const estado = evaluarEstadoCobranza(v);
+
+                montoTotalRealizadas += totalOp;
+
+                if (!porVendedor[vendedor]) {
+                    porVendedor[vendedor] = { realizadas: 0, montoRealizadas: 0, liquidadas: 0, montoLiquidadas: 0, gananciaLiquidadas: 0, pendientes: 0 };
+                }
+                porVendedor[vendedor].realizadas++;
+                porVendedor[vendedor].montoRealizadas += totalOp;
+
+                if (saldo <= 0.01) {
+                    totalLiquidadas++;
+                    montoVentasLiquidadas += totalOp;
+                    gananciaVentasLiquidadas += utilidadOp;
+                    porVendedor[vendedor].liquidadas++;
+                    porVendedor[vendedor].montoLiquidadas += totalOp;
+                    porVendedor[vendedor].gananciaLiquidadas += utilidadOp;
+                } else {
+                    porVendedor[vendedor].pendientes++;
+                    if (conteoSemaforo[estado.codigo] !== undefined) conteoSemaforo[estado.codigo]++;
+                    cuentasPendientes.push({ venta: v, estado });
+                }
+            });
+
+            const filasVendedor = Object.entries(porVendedor).map(([nom, d]) => `
+                <tr class="border-b border-slate-100 text-xs">
+                    <td class="py-2.5 font-extrabold text-slate-800">${nom}</td>
+                    <td class="py-2.5 text-center font-bold text-slate-700">${d.realizadas} <span class="text-[10px] text-slate-400">($${d.montoRealizadas.toFixed(2)})</span></td>
+                    <td class="py-2.5 text-center font-bold text-emerald-600">${d.liquidadas} <span class="text-[10px] text-emerald-500">($${d.montoLiquidadas.toFixed(2)})</span></td>
+                    <td class="py-2.5 text-center font-bold text-rose-500">${d.pendientes}</td>
+                    <td class="py-2.5 text-right font-black text-cyan-600">$${d.gananciaLiquidadas.toFixed(2)}</td>
+                </tr>
+            `).join('') || `<tr><td colspan="5" class="py-4 text-center text-xs text-slate-400">No hay ventas con los filtros actuales</td></tr>`;
+
+            const ordenPrioridad = { ROJO: 1, NARANJA: 2, AMARILLO: 3, VERDE: 4, AZUL: 5 };
+            cuentasPendientes.sort((a, b) => (ordenPrioridad[a.estado.codigo] || 9) - (ordenPrioridad[b.estado.codigo] || 9));
+
+            const filasPendientes = cuentasPendientes.map(({ venta, estado }) => {
+                const total = parseFloat(venta.Total) || 0;
+                const saldo = parseFloat(venta.ClienteContacto) || 0;
+                return `
+                <div class="p-3.5 rounded-2xl bg-white border ${estado.cardBorderClass} ${estado.leftStripeClass} flex flex-wrap justify-between items-center gap-2 shadow-2xs">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold border ${estado.badgeClass}">${estado.label}</span>
+                            <span class="text-[10px] font-bold text-slate-400">${venta['ID Venta']} • ${new Date(venta.Fecha).toLocaleDateString()}</span>
+                            <span class="text-[10px] font-bold text-indigo-500">Vend: ${venta.Vendedor || 'Sistema'}</span>
+                        </div>
+                        <p class="text-xs font-extrabold text-slate-800 uppercase mt-1">${venta.ClienteNombre}</p>
+                        <p class="text-[11px] text-slate-500 font-semibold">${estado.detalle} • Lleva abonado: <b>$${estado.pagadoReal.toFixed(2)}</b> de $${total.toFixed(2)}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[9px] font-extrabold uppercase text-rose-400 block">Saldo Pendiente</span>
+                        <b class="text-sm font-black text-rose-600">$${saldo.toFixed(2)}</b>
+                    </div>
+                </div>`;
+            }).join('') || `<p class="text-center py-6 text-xs text-emerald-600 font-extrabold bg-emerald-50 rounded-2xl border border-emerald-100">🎉 ¡Excelente! Todas las ventas de este filtro están 100% liquidadas.</p>`;
+
+            document.getElementById("areaImprimibleReporte").innerHTML = `
+                <div class="border-b border-slate-200 pb-4 flex flex-wrap justify-between items-start gap-4">
+                    <div>
+                        <h2 class="text-lg font-black text-slate-800 uppercase">Resumen de Ventas, Utilidad Liquidada & Semáforo de Cobranza</h2>
+                        <p class="text-xs text-slate-500 font-semibold">Fecha de corte: ${new Date().toLocaleString()}</p>
+                    </div>
+                    <div class="bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-[11px] font-bold text-slate-600">
+                        Fecha: ${fIn} a ${fFi} • Cliente: ${qCli} • Vendedor: ${qVen}
+                    </div>
+                </div>
+
+                <!-- KPIs Principales del Resumen -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100">
+                        <span class="text-[10px] font-extrabold uppercase text-indigo-400 block">Ventas Realizadas</span>
+                        <b class="text-lg font-black text-slate-800">${totalRealizadas}</b>
+                        <span class="text-[11px] font-bold text-indigo-600 block">$${montoTotalRealizadas.toFixed(2)}</span>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100">
+                        <span class="text-[10px] font-extrabold uppercase text-emerald-500 block">Ventas Liquidadas</span>
+                        <b class="text-lg font-black text-emerald-700">${totalLiquidadas}</b>
+                        <span class="text-[11px] font-bold text-emerald-600 block">$${montoVentasLiquidadas.toFixed(2)} cobrado</span>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-cyan-50/70 border border-cyan-100">
+                        <span class="text-[10px] font-extrabold uppercase text-cyan-600 block">Ganancia por Liquidadas</span>
+                        <b class="text-lg font-black text-cyan-700">$${gananciaVentasLiquidadas.toFixed(2)}</b>
+                        <span class="text-[11px] font-bold text-cyan-600 block">Utilidad real consolidada</span>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-rose-50/70 border border-rose-100">
+                        <span class="text-[10px] font-extrabold uppercase text-rose-400 block">Ventas por Liquidar</span>
+                        <b class="text-lg font-black text-rose-600">${cuentasPendientes.length}</b>
+                        <span class="text-[11px] font-bold text-rose-500 block">En seguimiento quincenal</span>
+                    </div>
+                </div>
+
+                <!-- Desglose por Vendedor -->
+                <div class="border border-slate-200 rounded-2xl p-4">
+                    <h4 class="text-xs font-extrabold uppercase text-slate-700 mb-3"><i class="fa-solid fa-users text-argon-primary mr-1"></i> Rendimiento Separado por Vendedor</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-[10px] uppercase text-slate-400">
+                                    <th class="text-left pb-2">Vendedor</th>
+                                    <th class="text-center pb-2">Ventas Realizadas</th>
+                                    <th class="text-center pb-2">Ventas Liquidadas</th>
+                                    <th class="text-center pb-2">Por Liquidar</th>
+                                    <th class="text-right pb-2">Ganancia (Ventas Liquidadas)</th>
+                                </tr>
+                            </thead>
+                            <tbody>${filasVendedor}</tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Semáforo de Cuentas aún no liquidadas -->
+                <div class="space-y-3">
+                    <div class="flex flex-wrap justify-between items-center gap-2">
+                        <h4 class="text-xs font-extrabold uppercase text-slate-700"><i class="fa-solid fa-traffic-light text-argon-primary mr-1"></i> Estado de Ventas Aún No Liquidadas (${cuentasPendientes.length})</h4>
+                        <div class="flex flex-wrap gap-1.5 text-[10px] font-extrabold">
+                            <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200">🔵 Adelantadas: ${conteoSemaforo.AZUL}</span>
+                            <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">🟢 En Tiempo: ${conteoSemaforo.VERDE}</span>
+                            <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-300">🟡 1 Qna Retraso: ${conteoSemaforo.AMARILLO}</span>
+                            <span class="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-800 border border-orange-300">🟠 2 Qnas Retraso: ${conteoSemaforo.NARANJA}</span>
+                            <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-300">🔴 3+ Qnas Retraso: ${conteoSemaforo.ROJO}</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2.5">${filasPendientes}</div>
+                </div>
+            `;
+
+            document.getElementById("modalReporteEjecutivo").classList.replace("hidden", "flex");
+        }
+
+        // =========================================================================
+        // EXPORTADOR PDF COMPLETO SIN RECORTES DE SCROLL (CLONADO EN ALTURA TOTAL)
+        // =========================================================================
+        async function exportarReportePDF() {
+            const areaOriginal = document.getElementById("areaImprimibleReporte");
+            if (!areaOriginal) return;
+
+            showLoader("Generando archivo PDF completo...", 25, "Desplegando todas las secciones del reporte...");
+
+            // Crear contenedor fantasma fuera de pantalla con altura 100% expandida (sin overflow ni max-height)
+            const wrapperTemp = document.createElement("div");
+            wrapperTemp.style.position = "fixed";
+            wrapperTemp.style.top = "0";
+            wrapperTemp.style.left = "-10000px";
+            wrapperTemp.style.width = "920px";
+            wrapperTemp.style.backgroundColor = "#ffffff";
+            wrapperTemp.style.zIndex = "-9999";
+            wrapperTemp.style.padding = "28px";
+
+            const clonReporte = areaOriginal.cloneNode(true);
+            clonReporte.style.maxHeight = "none";
+            clonReporte.style.height = "auto";
+            clonReporte.style.overflow = "visible";
+            clonReporte.className = "space-y-5 bg-white text-slate-800";
+
+            wrapperTemp.appendChild(clonReporte);
+            document.body.appendChild(wrapperTemp);
 
             try {
-                const canvas = await html2canvas(area, {
+                // Esperar un frame para que el DOM calcule el scrollHeight total del clon
+                await new Promise(r => setTimeout(r, 150));
+
+                updateProgress(55, "Capturando documento completo...", "Renderizando tablas y métricas en alta resolución...");
+
+                const fullWidth = wrapperTemp.scrollWidth || 920;
+                const fullHeight = wrapperTemp.scrollHeight;
+
+                const canvas = await html2canvas(wrapperTemp, {
                     scale: 2,
-                    backgroundColor: "#ffffff",
                     useCORS: true,
-                    logging: false
+                    backgroundColor: "#ffffff",
+                    width: fullWidth,
+                    height: fullHeight,
+                    windowWidth: fullWidth,
+                    windowHeight: fullHeight,
+                    scrollX: 0,
+                    scrollY: 0
                 });
 
-                updateProgress(85, "Compilando archivo PDF...", "Ajustando páginas y márgenes...");
-                const imgData = canvas.toDataURL('image/png');
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
+                updateProgress(85, "Empaquetando páginas PDF...", "Creando documento A4 multipágina...");
+                const imgData = canvas.toDataURL("image/png");
 
-                const pageWidth = pdf.internal.pageSize.getWidth();
-                const pageHeight = pdf.internal.pageSize.getHeight();
-                const margin = 10;
-                const usableWidth = pageWidth - (margin * 2);
-                const imgHeight = (canvas.height * usableWidth) / canvas.width;
+                if (window.jspdf && window.jspdf.jsPDF) {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const margin = 8;
+                    const usableWidth = pageWidth - (margin * 2);
+                    const usableHeight = pageHeight - (margin * 2);
 
-                let heightLeft = imgHeight;
-                let position = margin;
+                    const imgHeightMm = (canvas.height * usableWidth) / canvas.width;
+                    let heightLeft = imgHeightMm;
+                    let position = margin;
 
-                pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight);
-                heightLeft -= (pageHeight - margin * 2);
+                    // Primera página
+                    pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeightMm);
+                    heightLeft -= usableHeight;
 
-                while (heightLeft > 0) {
-                    position = heightLeft - imgHeight + margin;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight);
-                    heightLeft -= (pageHeight - margin * 2);
+                    // Páginas adicionales si el reporte es largo
+                    while (heightLeft > 2) {
+                        position = margin - (imgHeightMm - heightLeft);
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeightMm);
+                        heightLeft -= usableHeight;
+                    }
+
+                    pdf.save(`Reporte_SGV_PRO_${new Date().toISOString().split('T')[0]}.pdf`);
+                } else {
+                    const link = document.createElement('a');
+                    link.download = `Reporte_SGV_PRO_${Date.now()}.png`;
+                    link.href = imgData;
+                    link.click();
                 }
 
-                updateProgress(100, "¡PDF Generado!", "Iniciando descarga...");
-                pdf.save(`Reporte_SGV_PRO_${Date.now()}.pdf`);
+                updateProgress(100, "¡PDF Descargado!", "Todo el contenido fue exportado correctamente");
+                setTimeout(() => hideLoader(), 250);
+                showToast("Reporte completo descargado en PDF 📄");
+            } catch (e) {
                 hideLoader();
-                showToast("Reporte PDF descargado exitosamente 📄");
-            } catch (err) {
-                hideLoader();
-                showDialog("No se pudo generar el archivo PDF: " + err.message);
+                showDialog("No se pudo exportar el PDF: " + e.message);
+            } finally {
+                if (wrapperTemp && wrapperTemp.parentNode) {
+                    wrapperTemp.parentNode.removeChild(wrapperTemp);
+                }
             }
         }
 
@@ -2111,7 +2352,7 @@
             };
             if(!d.monto) return showDialog("Por favor ingresa el monto del movimiento."); 
             
-            showLoader("Registrando movimiento...", 35, "Guardando en hoja de Gastos...");
+            showLoader("Registrando movimiento...", 40, "Guardando egreso en Google Sheets...");
             try {
                 await safeFetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "registrarGasto", data: d }) });
                 updateProgress(85, "Actualizando métricas...", "Sincronizando Dashboard BI...");
@@ -2122,7 +2363,7 @@
                 showToast("Movimiento guardado");
             } catch (e) {
                 hideLoader();
-                if (e.name !== 'AbortError') showDialog("Error al guardar el gasto.");
+                showDialog("No se pudo registrar el gasto. Revisa tu conexión.");
             }
         }
 
@@ -2195,15 +2436,15 @@
             };
             if(!payload.usuario || !payload.password) return showDialog("Completa usuario y contraseña."); 
             
-            showLoader("Actualizando usuarios...", 40, "Sincronizando permisos...");
+            showLoader("Actualizando usuarios...", 45, "Guardando cambios de cuenta...");
             try {
                 await safeFetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "administrarUsuario", data: payload }) });
                 document.getElementById("modalAdminUsuario").classList.replace("flex", "hidden"); 
                 refresh(true);
                 showToast("Usuarios actualizados");
-            } catch(e) {
+            } catch (e) {
                 hideLoader();
-                if (e.name !== 'AbortError') showDialog("Error al actualizar usuario.");
+                showDialog("Error al actualizar usuario.");
             }
         }
 
@@ -2244,7 +2485,7 @@
         function buscarProducto() {
             const term = document.getElementById("buscarCodigoInput").value.trim();
             if(!term) return;
-            const p = db.inventario.find(i => String(i.Código).toLowerCase() === term.toLowerCase() || String(i.Nombre || "").toLowerCase().includes(term.toLowerCase()));
+            const p = db.inventario.find(i => i.Código.toString() == term || i.Nombre.toLowerCase().includes(term.toLowerCase()));
             if (p) {
                 seleccionarProductoPredictivo(p.Código);
             } else {
@@ -2253,14 +2494,16 @@
         }
 
         function modificarCantidad(codigo, n) {
-            const item = carrito.find(c => String(c.codigo) === String(codigo));
+            const item = carrito.find(c => c.codigo == codigo);
             if (!item) return;
-            const inv = db.inventario.find(i => String(i.Código) === String(codigo));
-            if (n > 0 && inv && (item.cantidad + n) > (parseFloat(inv.Cantidad) || 0)) {
-                return showDialog(`Stock máximo disponible: ${inv.Cantidad} unidades.`);
+            if (n > 0) {
+                const inv = db.inventario.find(i => String(i.Código) === String(codigo));
+                if (inv && item.cantidad + n > (parseFloat(inv.Cantidad) || 0)) {
+                    return showDialog(`Stock máximo disponible: ${inv.Cantidad} unidades.`);
+                }
             }
             item.cantidad += n;
-            if (item.cantidad <= 0) carrito = carrito.filter(c => String(c.codigo) !== String(codigo));
+            if (item.cantidad <= 0) carrito = carrito.filter(c => c.codigo != codigo);
             renderCarrito();
         }
 
@@ -2308,7 +2551,7 @@
                 return `
                 <div class="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/60 flex items-center justify-between transition-all hover:bg-white hover:shadow-xs">
                     <div class="flex items-center gap-3 min-w-0">
-                        <img src="${i.foto || 'https://placehold.co/80x80/e2e8f0/64748b?text=Item'}" class="w-11 h-11 rounded-xl object-cover border border-slate-200 shrink-0">
+                        <img src="${i.foto || 'https://placehold.co/80x80/e2e8f0/64748b?text=Item'}" class="w-11 h-11 rounded-xl object-cover border border-slate-200 shrink-0 bg-white">
                         <div class="truncate">
                             <span class="text-xs font-extrabold text-slate-800 uppercase block truncate">${i.nombre}</span>
                             <div class="flex items-center gap-2">
@@ -2344,9 +2587,9 @@
         // =========================================================================
         function setFiltroEstadoStock(estado) {
             filtroEstadoStock = estado;
-            ['TODOS', 'DISPONIBLE', 'BAJO', 'AGOTADO', 'PROMO'].forEach(id => {
-                const btn = document.getElementById(`chip-est-${id}`);
-                if (btn) btn.classList.toggle('active', id === estado);
+            ['TODOS', 'DISPONIBLE', 'BAJO', 'AGOTADO', 'PROMO'].forEach(k => {
+                const btn = document.getElementById(`chip-est-${k}`);
+                if (btn) btn.classList.toggle('active', k === estado);
             });
             renderInventario();
         }
@@ -2359,70 +2602,69 @@
         function renderInventario() {
             const inv = db.inventario || [];
             const q = (document.getElementById("filtroStock")?.value || "").toLowerCase();
-            const criterioOrden = document.getElementById("ordenStock")?.value || "nombre";
+            const orden = document.getElementById("ordenStock")?.value || "nombre";
 
-            // Actualizar contadores de los chips de estado
-            const countTodos = inv.length;
-            const countDisp = inv.filter(p => (parseFloat(p.Cantidad) || 0) > 0).length;
-            const countBajo = inv.filter(p => { const c = parseFloat(p.Cantidad) || 0; return c > 0 && c <= 3; }).length;
-            const countAgot = inv.filter(p => (parseFloat(p.Cantidad) || 0) <= 0).length;
-            const countPromo = inv.filter(p => ['Body', 'Velas', 'Gel Antibacterial', 'Jabon'].includes(p.Categoría) && (parseFloat(p.DescuentoPar) || 0) > 0).length;
+            const cTodos = inv.length;
+            const cDisp = inv.filter(p => (parseFloat(p.Cantidad) || 0) > 0).length;
+            const cBajo = inv.filter(p => { const s = parseFloat(p.Cantidad) || 0; return s > 0 && s <= 3; }).length;
+            const cAgot = inv.filter(p => (parseFloat(p.Cantidad) || 0) <= 0).length;
+            const cPromo = inv.filter(p => ['Body', 'Velas', 'Gel Antibacterial', 'Jabon'].includes(p.Categoría) && (parseFloat(p.DescuentoPar) || 0) > 0).length;
 
-            if (document.getElementById("count-est-TODOS")) document.getElementById("count-est-TODOS").innerText = `(${countTodos})`;
-            if (document.getElementById("count-est-DISPONIBLE")) document.getElementById("count-est-DISPONIBLE").innerText = `(${countDisp})`;
-            if (document.getElementById("count-est-BAJO")) document.getElementById("count-est-BAJO").innerText = `(${countBajo})`;
-            if (document.getElementById("count-est-AGOTADO")) document.getElementById("count-est-AGOTADO").innerText = `(${countAgot})`;
-            if (document.getElementById("count-est-PROMO")) document.getElementById("count-est-PROMO").innerText = `(${countPromo})`;
+            if (document.getElementById("count-est-TODOS")) document.getElementById("count-est-TODOS").innerText = `(${cTodos})`;
+            if (document.getElementById("count-est-DISPONIBLE")) document.getElementById("count-est-DISPONIBLE").innerText = `(${cDisp})`;
+            if (document.getElementById("count-est-BAJO")) document.getElementById("count-est-BAJO").innerText = `(${cBajo})`;
+            if (document.getElementById("count-est-AGOTADO")) document.getElementById("count-est-AGOTADO").innerText = `(${cAgot})`;
+            if (document.getElementById("count-est-PROMO")) document.getElementById("count-est-PROMO").innerText = `(${cPromo})`;
 
-            // Generar chips dinámicos de categorías presentes en el inventario
-            const categoriasUnicas = ['TODAS', ...new Set(inv.map(p => p.Categoría || 'General').filter(Boolean))];
-            const contCatChips = document.getElementById("contenedorChipsCategoriasStock");
-            if (contCatChips) {
-                contCatChips.innerHTML = `<span class="text-[10px] font-extrabold uppercase text-slate-400 mr-1"><i class="fa-solid fa-tags mr-1"></i>Tipo:</span>` +
-                    categoriasUnicas.map(cat => {
-                        const active = filtroCategoriaStock === cat;
-                        const safeCat = cat.replace(/'/g, "\\'");
-                        return `<button onclick="setFiltroCategoriaStock('${safeCat}')" class="stock-chip ${active ? 'active' : 'bg-slate-100 text-slate-600 border-slate-200'} px-3 py-1 rounded-xl text-[11px] font-bold border transition-all">${cat === 'TODAS' ? 'Todas las Categorías' : cat}</button>`;
-                    }).join('');
+            const conteoCats = {};
+            inv.forEach(p => {
+                const c = (p.Categoría || "General").trim();
+                conteoCats[c] = (conteoCats[c] || 0) + 1;
+            });
+
+            const contChipsCat = document.getElementById("contenedorChipsCategoriasStock");
+            if (contChipsCat) {
+                const catsUnicas = Object.keys(conteoCats).sort();
+                let htmlCats = `<span class="text-[10px] font-extrabold uppercase text-slate-400 mr-1"><i class="fa-solid fa-tags mr-1"></i>Tipo:</span>`;
+                htmlCats += `<button onclick="setFiltroCategoriaStock('TODAS')" class="stock-chip ${filtroCategoriaStock === 'TODAS' ? 'active' : ''} px-3 py-1 rounded-lg text-[11px] font-bold border border-slate-200 bg-white text-slate-600 transition-all">Todas</button>`;
+                catsUnicas.forEach(c => {
+                    const safeC = c.replace(/'/g, "\\'");
+                    const isAct = filtroCategoriaStock === c;
+                    htmlCats += `<button onclick="setFiltroCategoriaStock('${safeC}')" class="stock-chip ${isAct ? 'active' : ''} px-3 py-1 rounded-lg text-[11px] font-bold border border-slate-200 bg-white text-slate-600 transition-all">${c} <span class="opacity-70">(${conteoCats[c]})</span></button>`;
+                });
+                contChipsCat.innerHTML = htmlCats;
             }
 
-            // Aplicar filtros combinados
             let f = inv.filter(p => {
-                const matchText = String(p.Nombre || "").toLowerCase().includes(q) || 
-                                  String(p.Código || "").toLowerCase().includes(q) ||
-                                  String(p.Categoría || "").toLowerCase().includes(q);
-                if (!matchText) return false;
+                const matchTexto = String(p.Nombre || "").toLowerCase().includes(q) || 
+                                   String(p.Código || "").toLowerCase().includes(q) ||
+                                   String(p.Categoría || "").toLowerCase().includes(q);
+                if (!matchTexto) return false;
 
-                const cant = parseFloat(p.Cantidad) || 0;
-                if (filtroEstadoStock === 'DISPONIBLE' && cant <= 0) return false;
-                if (filtroEstadoStock === 'BAJO' && !(cant > 0 && cant <= 3)) return false;
-                if (filtroEstadoStock === 'AGOTADO' && cant > 0) return false;
+                const stock = parseFloat(p.Cantidad) || 0;
+                if (filtroEstadoStock === 'DISPONIBLE' && stock <= 0) return false;
+                if (filtroEstadoStock === 'BAJO' && (stock <= 0 || stock > 3)) return false;
+                if (filtroEstadoStock === 'AGOTADO' && stock > 0) return false;
                 if (filtroEstadoStock === 'PROMO' && !(['Body', 'Velas', 'Gel Antibacterial', 'Jabon'].includes(p.Categoría) && (parseFloat(p.DescuentoPar) || 0) > 0)) return false;
 
-                const catProd = p.Categoría || 'General';
-                if (filtroCategoriaStock !== 'TODAS' && catProd !== filtroCategoriaStock) return false;
+                if (filtroCategoriaStock !== 'TODAS' && (p.Categoría || 'General').trim() !== filtroCategoriaStock) return false;
 
                 return true;
             });
 
-            // Ordenamiento profesional
             f.sort((a, b) => {
-                if (criterioOrden === 'stockAsc') return (parseFloat(a.Cantidad) || 0) - (parseFloat(b.Cantidad) || 0);
-                if (criterioOrden === 'stockDesc') return (parseFloat(b.Cantidad) || 0) - (parseFloat(a.Cantidad) || 0);
-                if (criterioOrden === 'precioDesc') return (parseFloat(b.PrecioVenta) || 0) - (parseFloat(a.PrecioVenta) || 0);
-                if (criterioOrden === 'inversionDesc') {
-                    const invA = (parseFloat(a.Cantidad) || 0) * (parseFloat(a.Costo) || 0);
-                    const invB = (parseFloat(b.Cantidad) || 0) * (parseFloat(b.Costo) || 0);
-                    return invB - invA;
-                }
+                if (orden === 'stockAsc') return (parseFloat(a.Cantidad) || 0) - (parseFloat(b.Cantidad) || 0);
+                if (orden === 'stockDesc') return (parseFloat(b.Cantidad) || 0) - (parseFloat(a.Cantidad) || 0);
+                if (orden === 'precioDesc') return (parseFloat(b.PrecioVenta) || 0) - (parseFloat(a.PrecioVenta) || 0);
+                if (orden === 'inversionDesc') return ((parseFloat(b.Cantidad) || 0) * (parseFloat(b.Costo) || 0)) - ((parseFloat(a.Cantidad) || 0) * (parseFloat(a.Costo) || 0));
                 return String(a.Nombre || "").localeCompare(String(b.Nombre || ""));
             });
 
             if (f.length === 0) {
                 document.getElementById("listaInventario").innerHTML = `
-                    <div class="col-span-full bg-white p-10 rounded-3xl border border-slate-100 text-center text-slate-400 font-bold text-xs">
-                        <i class="fa-solid fa-box-open text-3xl mb-2 block opacity-40"></i>
-                        No hay productos que coincidan con los filtros seleccionados.
+                    <div class="col-span-full bg-white p-10 rounded-3xl border border-slate-100 text-center text-slate-400">
+                        <i class="fa-solid fa-box-open text-3xl mb-2 opacity-40 block"></i>
+                        <p class="font-extrabold text-xs uppercase">No hay productos que coincidan con los filtros seleccionados</p>
                     </div>`;
                 return;
             }
@@ -2434,24 +2676,24 @@
                 
                 const safeName = String(p.Nombre || "").replace(/'/g, "&apos;").replace(/"/g, "&quot;");
                 const safeCod = String(p.Código || "").replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-                const fotoUrl = p.FotoURL || 'https://placehold.co/100x100/ffffff/64748b?text=SGV';
-                const cant = Number(p.Cantidad) || 0;
-                const sinStock = cant <= 0;
-                const stockBajo = cant > 0 && cant <= 3;
+                const fotoUrl = p.FotoURL || 'https://placehold.co/100x100/e2e8f0/64748b?text=SGV';
+                const stockNum = Number(p.Cantidad) || 0;
+                const sinStock = stockNum <= 0;
+                const stockBajo = stockNum > 0 && stockNum <= 3;
                 
                 return `
-                <div class="bg-white p-4 rounded-3xl border ${sinStock ? 'border-rose-200 border-l-[6px] border-l-rose-500' : (stockBajo ? 'border-amber-200 border-l-[6px] border-l-amber-400' : 'border-slate-100')} flex items-center justify-between shadow-argon shadow-argon-hover transition-all">
+                <div class="bg-white p-4 rounded-3xl border ${sinStock ? 'border-rose-200' : (stockBajo ? 'border-amber-200' : 'border-slate-100')} flex items-center justify-between shadow-argon shadow-argon-hover transition-all">
                     <div class="flex items-center gap-3.5 min-w-0">
-                        <div class="w-14 h-14 rounded-2xl bg-white border border-slate-200 shadow-xs shrink-0 overflow-hidden flex items-center justify-center">
-                            <img src="${fotoUrl}" class="w-full h-full object-cover bg-white cursor-pointer hover:scale-105 transition-all" onclick="mostrarInfoImagen('${fotoUrl}', '${safeName}', '${safeCod}', '${p.Categoría}', ${p.DescuentoPar || 0})">
+                        <div class="w-14 h-14 rounded-2xl border border-slate-200 shadow-xs bg-white flex items-center justify-center overflow-hidden shrink-0">
+                            <img src="${fotoUrl}" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-all bg-white" onclick="mostrarInfoImagen('${fotoUrl}', '${safeName}', '${safeCod}', '${p.Categoría}', ${p.DescuentoPar || 0})">
                         </div>
                         <div class="min-w-0">
                             <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 block">${p.Categoría || 'General'} • #${p.Código}</span>
                             <p class="font-extrabold text-xs text-slate-800 uppercase truncate">${p.Nombre}</p>
-                            <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                            <div class="flex flex-wrap items-center gap-2 mt-1">
                                 <span class="text-xs font-black text-argon-primary">$${Number(p.PrecioVenta || 0).toFixed(2)}</span>
-                                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md ${sinStock ? 'bg-rose-100 text-rose-700' : (stockBajo ? 'bg-amber-100 text-amber-800' : 'bg-emerald-50 text-emerald-700')}">
-                                    ${sinStock ? 'Out of Stock (0)' : (stockBajo ? `¡Stock Bajo: ${cant}!` : `Stock: ${cant}`)}
+                                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md ${sinStock ? 'bg-rose-100 text-rose-700' : (stockBajo ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600')}">
+                                    ${sinStock ? 'Out of Stock' : `Stock: ${stockNum}`}
                                 </span>
                                 ${tagPair}
                             </div>
@@ -2484,8 +2726,8 @@
                 : '';
             
             document.getElementById("infoDetalleProducto").innerHTML = `
-                <div class="relative group cursor-pointer" onclick="abrirVisorImagen('${url}')">
-                    <img src="${url}" class="w-full h-52 object-cover rounded-2xl shadow-sm border border-slate-100">
+                <div class="relative group cursor-pointer bg-white rounded-2xl overflow-hidden" onclick="abrirVisorImagen('${url}')">
+                    <img src="${url}" class="w-full h-52 object-cover rounded-2xl shadow-sm border border-slate-100 bg-white">
                     <span class="absolute bottom-3 right-3 bg-slate-900/75 text-white px-3 py-1 rounded-lg text-[10px] font-bold"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i>Ampliar</span>
                 </div>
                 <h4 class="font-extrabold text-slate-800 uppercase text-sm mt-3">${nombre}</h4>
@@ -2501,7 +2743,7 @@
 
         function verificarExistente() {
             const c = document.getElementById("prodCodigo").value.trim();
-            const p = db.inventario.find(p => String(p.Código) == c);
+            const p = db.inventario.find(p => p.Código.toString() == c);
             if (p) {
                 showToast("Producto existente cargado");
                 document.getElementById("prodNombre").value = p.Nombre; 
@@ -2566,16 +2808,16 @@
             const nom = document.getElementById("prodNombre").value.trim();
             if(!cod || !nom) return showDialog("El código y nombre del producto son obligatorios.");
 
-            showLoader("Procesando producto...", 20, "Validando datos del artículo..."); 
+            showLoader("Validando datos de inventario...", 20, "Preparando registro y gasto de compra..."); 
             let fotoData = document.getElementById("prodFoto").value;
             
             if (fotoData && fotoData.startsWith("data:image")) {
-                updateProgress(45, "Subiendo fotografía...", "Optimizando imagen en Cloudinary CDN...");
+                updateProgress(45, "Subiendo fotografía...", "Optimizando imagen en CDN Cloudinary...");
                 try {
                     const formData = new FormData();
                     formData.append("file", fotoData);
                     formData.append("upload_preset", "fotos_sgv"); 
-                    const resCloudinary = await safeFetch("https://api.cloudinary.com/v1_1/dcerhuq5d/image/upload", { method: "POST", body: formData }).then(r => r.json());
+                    const resCloudinary = await safeFetch("https://api.cloudinary.com/v1_1/dcerhuq5d/image/upload", { method: "POST", body: formData }, 15000).then(r => r.json());
                     if (resCloudinary.secure_url) fotoData = resCloudinary.secure_url; 
                     else throw new Error("Fallo en Cloudinary");
                 } catch (e) { 
@@ -2600,37 +2842,17 @@
                 usuario: usuarioActual ? usuarioActual.Usuario : "Sistema"
             };
             
-            updateProgress(75, "Guardando en Google Sheets...", "Actualizando stock y registrando costo en BI...");
+            updateProgress(75, "Guardando en Google Sheets...", "Actualizando Stock y registrando Gasto de Compra...");
             try {
                 await safeFetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "actualizarInventario", data: d }) });
-                updateProgress(100, "¡Completado!", "Refrescando catálogo...");
+                updateProgress(100, "¡Catálogo Actualizado!", "Sincronizando cambios...");
                 showToast("Catálogo y gasto de stock actualizados ✅");
                 cerrarModal(); 
                 refresh(true);
             } catch (e) {
                 hideLoader();
-                if (e.name !== 'AbortError') showDialog("Error de red al guardar el producto.");
+                showDialog("No se pudo guardar el producto. Verifica tu conexión.");
             }
-        }
-
-        // =========================================================================
-        // HISTORIAL / TRAZABILIDAD CON SEMÁFORO Y GENERADOR DE RESUMEN EJECUTIVO
-        // =========================================================================
-        function obtenerVentasFiltradasHistorial() {
-            const fIn = document.getElementById("fInicio")?.value || "";
-            const fFi = document.getElementById("fFin")?.value || "";
-            const qCli = (document.getElementById("filtroCliRep")?.value || "").toLowerCase();
-            const qVen = (document.getElementById("filtroVenRep")?.value || "").toLowerCase();
-            
-            return (db.ventas || []).filter(v => { 
-                if(!v.Fecha) return false;
-                if(v.esAbono || v.MetodoPago === "PAGO ABONO") return false;
-                const fv = new Date(v.Fecha).toISOString().split('T')[0]; 
-                const matchDate = (!fIn || fv >= fIn) && (!fFi || fv <= fFi);
-                const matchCli = !qCli || (v.ClienteNombre || "").toLowerCase().includes(qCli);
-                const matchVen = !qVen || (v.Vendedor || "").toLowerCase().includes(qVen);
-                return matchDate && matchCli && matchVen;
-            }).reverse();
         }
 
         function renderVentas() {
@@ -2640,11 +2862,7 @@
                 return; 
             }
             
-            const filtradas = obtenerVentasFiltradasHistorial();
-            if (filtradas.length === 0) {
-                cont.innerHTML = "<p class='text-center py-10 text-slate-400 font-semibold col-span-full'>No hay ventas que coincidan con los filtros activos</p>";
-                return;
-            }
+            const filtradas = obtenerVentasFiltradasTrazabilidad().reverse();
             
             cont.innerHTML = filtradas.map(v => {
                 let itemsHtml = ""; 
@@ -2659,7 +2877,7 @@
                             let sNvo = p.stockNuevo != null ? p.stockNuevo : '?';
                             
                             return `
-                            <div class="flex justify-between items-center text-xs border-b border-slate-100 last:border-b-0 py-2">
+                            <div class="flex justify-between items-center text-xs border-b border-slate-100 last:border-b-0 py-2.5">
                                 <div>
                                     <span class="font-bold text-slate-700 uppercase">${p.nombre} <b class="text-argon-primary">x${p.cantidad}</b></span>
                                     ${descTag}
@@ -2674,228 +2892,39 @@
                 const safeId = String(v['ID Venta'] || "").replace(/'/g, "&apos;").replace(/"/g, "&quot;");
                 const saldoRestante = parseFloat(v.ClienteContacto) || 0;
                 const operacionTotal = parseFloat(v.Total) || 0;
-                const sem = evaluarEstadoCobranza(v);
+                const est = evaluarEstadoCobranza(v);
 
                 return `
-                <div class="bg-white rounded-3xl border ${sem.cardBorderClass} ${sem.leftStripeClass} shadow-argon p-5 flex flex-col justify-between shadow-argon-hover transition-all">
+                <div class="bg-white rounded-3xl border ${est.cardBorderClass} ${est.leftStripeClass} shadow-argon p-6 flex flex-col justify-between shadow-argon-hover transition-all">
                     <div>
                         <div class="flex justify-between items-start gap-2 mb-3">
                             <div>
                                 <div class="flex flex-wrap items-center gap-1.5 mb-1">
-                                    <span class="text-[10px] font-extrabold uppercase text-slate-400">${new Date(v.Fecha).toLocaleDateString()} • Vendedor: ${v.Vendedor || 'Sistema'}</span>
-                                    <span class="text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${sem.badgeClass}">
-                                        ${sem.label}
-                                    </span>
+                                    <span class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold border ${est.badgeClass}">${est.label}</span>
+                                    <span class="text-[10px] font-extrabold uppercase text-slate-400">${new Date(v.Fecha).toLocaleString()} • Vend: ${v.Vendedor || 'Sistema'}</span>
                                 </div>
-                                <h4 class="text-sm font-extrabold text-argon-primary uppercase">${v.ClienteNombre}</h4>
+                                <h4 class="text-sm font-extrabold text-argon-primary uppercase mt-0.5">${v.ClienteNombre}</h4>
+                                ${!est.liquidada ? `<p class="text-[10px] font-bold text-slate-500 mt-0.5">${est.detalle}</p>` : ''}
                             </div>
-                            <button onclick="abrirDetalleVentaGeneral('${safeId}')" class="bg-slate-100 hover:bg-indigo-50 hover:text-argon-primary text-slate-600 text-[10px] font-extrabold uppercase px-3 py-2 rounded-xl transition-all shrink-0">
-                                <i class="fa-solid fa-sliders mr-1"></i> Detalles
+                            <button onclick="abrirDetalleVentaGeneral('${safeId}')" class="bg-slate-100 hover:bg-indigo-50 hover:text-argon-primary text-slate-600 text-[10px] font-extrabold uppercase px-3.5 py-2 rounded-xl transition-all shrink-0">
+                                <i class="fa-solid fa-sliders mr-1"></i> Detalles / Editar
                             </button>
                         </div>
-                        <div class="bg-slate-50/70 rounded-2xl px-4 py-2 border border-slate-100 my-2">${itemsHtml || '<span class="text-xs text-slate-400">Operación registrada</span>'}</div>
+                        <div class="bg-slate-50/70 rounded-2xl px-4 py-2 border border-slate-100 my-2">${itemsHtml || '<span class="text-xs text-slate-400">Abono directo registrado</span>'}</div>
                     </div>
                     <div class="flex justify-between items-end pt-3 border-t border-slate-100 mt-2">
-                        <div>
-                            <button onclick="reimprimirReciboHistorial('${safeId}')" class="text-xs text-argon-primary font-extrabold hover:underline flex items-center gap-1.5">
-                                <i class="fa-solid fa-print"></i> Ver Ticket
-                            </button>
-                            <span class="text-[10px] text-slate-400 font-semibold block mt-0.5">${sem.detalle}</span>
-                        </div>
+                        <button onclick="reimprimirReciboHistorial('${safeId}')" class="text-xs text-argon-primary font-extrabold hover:underline flex items-center gap-1.5">
+                            <i class="fa-solid fa-print"></i> Ver Ticket
+                        </button>
                         <div class="text-right">
-                            <span class="text-[10px] font-bold text-slate-400 block">Total: $${operacionTotal.toFixed(2)} • Pagado: $${sem.pagadoReal.toFixed(2)}</span>
-                            <span class="text-xs font-extrabold ${saldoRestante > 0 ? 'text-rose-600' : 'text-emerald-600'}">
-                                ${saldoRestante > 0 ? `Saldo Pendiente: $${saldoRestante.toFixed(2)}` : '✓ Venta Liquidada'}
+                            <span class="text-[10px] font-bold text-slate-400 block">Total Operación: $${operacionTotal.toFixed(2)}</span>
+                            <span class="text-xs font-extrabold ${saldoRestante > 0 ? 'text-rose-500' : 'text-emerald-600'}">
+                                ${saldoRestante > 0 ? `Saldo Pendiente: $${saldoRestante.toFixed(2)}` : '✓ Liquidado'}
                             </span>
                         </div>
                     </div>
                 </div>`;
             }).join('');
-        }
-
-        function calcularCostoVenta(v) {
-            let costoVenta = 0;
-            let prods = [];
-            try { prods = typeof v.Productos === 'string' ? JSON.parse(v.Productos || "[]") : (v.Productos || []); } catch(e){}
-            if (Array.isArray(prods) && prods.length > 0) {
-                prods.forEach(p => {
-                    const det = db.detalles.find(d => d['ID Venta'] === v['ID Venta'] && String(d.Código) === String(p.codigo));
-                    let cUnit = det ? parseFloat(det.CostoUnidad || 0) : 0;
-                    if (!cUnit) {
-                        const invItem = db.inventario.find(i => String(i.Código) === String(p.codigo));
-                        if (invItem) cUnit = parseFloat(invItem.Costo || 0);
-                    }
-                    costoVenta += cUnit * (parseFloat(p.cantidad) || 0);
-                });
-            } else {
-                const dets = db.detalles.filter(d => d['ID Venta'] === v['ID Venta']);
-                dets.forEach(d => {
-                    let cUnit = parseFloat(d.CostoUnidad || 0);
-                    if (!cUnit) {
-                        const invItem = db.inventario.find(i => String(i.Código) === String(d.Código));
-                        if (invItem) cUnit = parseFloat(invItem.Costo || 0);
-                    }
-                    costoVenta += cUnit * (parseFloat(d.Cantidad) || 0);
-                });
-            }
-            return costoVenta;
-        }
-
-        function abrirModalResumenTrazabilidad() {
-            const filtradas = obtenerVentasFiltradasHistorial();
-            if (filtradas.length === 0) return showDialog("No hay ventas bajo los filtros actuales para generar el resumen.");
-
-            document.getElementById("tituloReporteModal").innerText = "Resumen de Ventas, Ganancias y Semáforo de Cobranza";
-
-            let totalNumVentas = filtradas.length;
-            let montoTotalRealizadas = 0;
-            let numVentasLiquidadas = 0;
-            let montoVentasLiquidadas = 0;
-            let gananciaVentasLiquidadas = 0;
-
-            const porVendedor = {};
-            const cuentasNoLiquidadas = [];
-
-            filtradas.forEach(v => {
-                const vend = v.Vendedor || 'Sistema';
-                const total = parseFloat(v.Total) || 0;
-                const saldo = parseFloat(v.ClienteContacto) || 0;
-                const costo = calcularCostoVenta(v);
-                const utilidad = total - costo;
-                const sem = evaluarEstadoCobranza(v);
-
-                montoTotalRealizadas += total;
-
-                if (!porVendedor[vend]) {
-                    porVendedor[vend] = {
-                        numRealizadas: 0,
-                        montoRealizadas: 0,
-                        numLiquidadas: 0,
-                        montoLiquidadas: 0,
-                        gananciaLiquidadas: 0,
-                        pendientesCobro: 0
-                    };
-                }
-
-                porVendedor[vend].numRealizadas++;
-                porVendedor[vend].montoRealizadas += total;
-
-                if (saldo <= 0.01) {
-                    numVentasLiquidadas++;
-                    montoVentasLiquidadas += total;
-                    gananciaVentasLiquidadas += utilidad;
-
-                    porVendedor[vend].numLiquidadas++;
-                    porVendedor[vend].montoLiquidadas += total;
-                    porVendedor[vend].gananciaLiquidadas += utilidad;
-                } else {
-                    porVendedor[vend].pendientesCobro += saldo;
-                    cuentasNoLiquidadas.push({ venta: v, sem });
-                }
-            });
-
-            // Ordenar cuentas no liquidadas desde mayor atraso (Rojo -> Naranja -> Amarillo -> Verde -> Azul)
-            cuentasNoLiquidadas.sort((a, b) => b.sem.quincenasAtraso - a.sem.quincenasAtraso);
-
-            const filasVendedor = Object.entries(porVendedor).map(([vend, d]) => `
-                <tr class="border-b border-slate-100 text-xs">
-                    <td class="py-2.5 font-extrabold text-slate-800">${vend}</td>
-                    <td class="py-2.5 text-center font-bold">${d.numRealizadas} ($${d.montoRealizadas.toFixed(2)})</td>
-                    <td class="py-2.5 text-center font-bold text-emerald-700">${d.numLiquidadas} ($${d.montoLiquidadas.toFixed(2)})</td>
-                    <td class="py-2.5 text-right font-black text-cyan-700">$${d.gananciaLiquidadas.toFixed(2)}</td>
-                    <td class="py-2.5 text-right font-bold text-rose-600">$${d.pendientesCobro.toFixed(2)}</td>
-                </tr>
-            `).join('');
-
-            const filasPendientes = cuentasNoLiquidadas.map(({ venta, sem }) => `
-                <div class="p-3.5 rounded-2xl border ${sem.cardBorderClass} ${sem.leftStripeClass} bg-white flex flex-wrap justify-between items-center gap-2">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${sem.badgeClass}">${sem.label}</span>
-                            <span class="text-xs font-extrabold text-slate-800 uppercase">${venta.ClienteNombre}</span>
-                            <span class="text-[10px] text-slate-400 font-bold">• Folio: ${venta['ID Venta']}</span>
-                        </div>
-                        <p class="text-[11px] text-slate-500 font-semibold mt-1">
-                            Fecha Venta: ${new Date(venta.Fecha).toLocaleDateString()} • Vendedor: <b>${venta.Vendedor || 'Sistema'}</b> • ${sem.detalle}
-                        </p>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[10px] font-bold text-slate-400 block">Pagado: $${sem.pagadoReal.toFixed(2)} de $${(parseFloat(venta.Total)||0).toFixed(2)} (${sem.porcentajePagado}%)</span>
-                        <b class="text-sm font-black text-rose-600">Deuda: $${(parseFloat(venta.ClienteContacto)||0).toFixed(2)}</b>
-                    </div>
-                </div>
-            `).join('') || `<div class="p-6 text-center text-xs font-bold text-emerald-600 bg-emerald-50 rounded-2xl">🎉 Todas las ventas de este filtro están 100% liquidadas.</div>`;
-
-            const fIn = document.getElementById("fInicio")?.value || "Inicio";
-            const fFi = document.getElementById("fFin")?.value || "Hoy";
-
-            const html = `
-                <div class="border-b border-slate-200 pb-4 flex flex-wrap justify-between items-center gap-2">
-                    <div>
-                        <h2 class="text-lg font-black text-slate-800 uppercase">Resumen de Trazabilidad y Estado de Cobranza</h2>
-                        <p class="text-xs text-slate-500 font-semibold">Periodo filtrado: ${fIn} a ${fFi} • Fecha de corte: ${new Date().toLocaleString()}</p>
-                    </div>
-                </div>
-
-                <!-- KPIs Globales del Resumen -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                        <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Ventas Realizadas</span>
-                        <b class="text-lg font-black text-slate-800">${totalNumVentas} ops</b>
-                        <span class="text-[11px] font-bold text-argon-primary block">$${montoTotalRealizadas.toFixed(2)}</span>
-                    </div>
-                    <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200">
-                        <span class="text-[10px] font-extrabold uppercase text-emerald-700 block">Ventas Liquidadas</span>
-                        <b class="text-lg font-black text-emerald-700">${numVentasLiquidadas} ops</b>
-                        <span class="text-[11px] font-bold text-emerald-600 block">$${montoVentasLiquidadas.toFixed(2)}</span>
-                    </div>
-                    <div class="bg-cyan-50/80 p-4 rounded-2xl border border-cyan-200">
-                        <span class="text-[10px] font-extrabold uppercase text-cyan-700 block">Ganancia (Liquidadas)</span>
-                        <b class="text-lg font-black text-cyan-700">$${gananciaVentasLiquidadas.toFixed(2)}</b>
-                        <span class="text-[10px] font-bold text-cyan-600 block">Utilidad real liberada</span>
-                    </div>
-                    <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200">
-                        <span class="text-[10px] font-extrabold uppercase text-rose-600 block">Ventas por Liquidar</span>
-                        <b class="text-lg font-black text-rose-600">${cuentasNoLiquidadas.length} cuentas</b>
-                        <span class="text-[10px] font-bold text-rose-500 block">En seguimiento quincenal</span>
-                    </div>
-                </div>
-
-                <!-- Tabla Separada por Vendedor -->
-                <div class="border border-slate-200 rounded-2xl p-4 overflow-x-auto">
-                    <h4 class="text-xs font-extrabold uppercase text-slate-700 mb-3"><i class="fa-solid fa-users text-argon-primary mr-1"></i> Rendimiento Separado por Vendedor</h4>
-                    <table class="w-full min-w-[520px]">
-                        <thead>
-                            <tr class="text-[10px] uppercase text-slate-400 border-b border-slate-200">
-                                <th class="text-left pb-2">Vendedor</th>
-                                <th class="text-center pb-2">Ventas Realizadas</th>
-                                <th class="text-center pb-2">Ventas Liquidadas</th>
-                                <th class="text-right pb-2">Ganancia (Liquidadas)</th>
-                                <th class="text-right pb-2">Saldo por Cobrar</th>
-                            </tr>
-                        </thead>
-                        <tbody>${filasVendedor}</tbody>
-                    </table>
-                </div>
-
-                <!-- Semáforo de Cuentas Aún No Liquidadas -->
-                <div class="space-y-2.5">
-                    <div class="flex flex-wrap justify-between items-center gap-2">
-                        <h4 class="text-xs font-extrabold uppercase text-slate-700"><i class="fa-solid fa-traffic-light text-amber-500 mr-1"></i> Auditoría de Ventas No Liquidadas (Comparativa a la Fecha Actual)</h4>
-                        <div class="flex flex-wrap gap-1 text-[9px] font-extrabold">
-                            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700">🔵 +1 Qna Adelantado</span>
-                            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">🟢 En Tiempo</span>
-                            <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-800">🟡 1 Qna Retraso</span>
-                            <span class="px-2 py-0.5 rounded bg-orange-50 text-orange-800">🟠 2 Qnas Retraso</span>
-                            <span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700">🔴 3+ Qnas Retraso</span>
-                        </div>
-                    </div>
-                    <div class="space-y-2">${filasPendientes}</div>
-                </div>
-            `;
-
-            document.getElementById("areaImprimibleReporte").innerHTML = html;
-            document.getElementById("modalReporteEjecutivo").classList.replace("hidden", "flex");
         }
 
         function abrirDetalleVentaGeneral(idVenta) {
@@ -2905,14 +2934,15 @@
             
             let prods = []; try { prods = typeof v.Productos === 'string' ? JSON.parse(v.Productos || "[]") : v.Productos; } catch(e){}
             let mObj = {}; try { mObj = typeof v.MetodoPago === 'string' ? JSON.parse(v.MetodoPago || "{}") : v.MetodoPago; } catch(e){}
-            const sem = evaluarEstadoCobranza(v);
+            const est = evaluarEstadoCobranza(v);
             
             let htmlInfo = `
                 <div class="bg-slate-50 p-4 rounded-2xl text-xs space-y-1.5 mb-3 border border-slate-200/60">
-                    <div class="flex justify-between items-center"><span class="text-slate-400 font-bold">Estado Quincenal:</span><span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${sem.badgeClass}">${sem.label} (${sem.detalle})</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-400 font-bold">Estado de Cobranza:</span><span class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold border ${est.badgeClass}">${est.label} (${est.detalle})</span></div>
                     <div class="flex justify-between"><span class="text-slate-400 font-bold">Folio:</span><b class="text-slate-700">${v['ID Venta']}</b></div>
                     <div class="flex justify-between"><span class="text-slate-400 font-bold">Comprador:</span><b class="text-slate-700">${v.ClienteNombre}</b></div>
                     <div class="flex justify-between"><span class="text-slate-400 font-bold">Total Venta:</span><b class="text-argon-primary">$${(parseFloat(v.Total) || 0).toFixed(2)}</b></div>
+                    <div class="flex justify-between"><span class="text-slate-400 font-bold">Abonado a la Fecha:</span><b class="text-emerald-600">$${est.pagadoReal.toFixed(2)}</b></div>
                     <div class="flex justify-between"><span class="text-slate-400 font-bold">Deuda Actual:</span><b class="text-rose-600">$${(parseFloat(v.ClienteContacto) || 0).toFixed(2)}</b></div>
                 </div>`;
             
@@ -2983,7 +3013,7 @@
 
         function guardarEdicionVenta() {
             if(!ventaEdicionActual) return; 
-            showLoader("Recalculando saldos...", 30, "Compensando diferencias de stock en servidor...");
+            showLoader("Recalculando saldos e inventario...", 35, "Ajustando existencias y cronograma...");
             
             try {
                 const v = ventaEdicionActual; 
@@ -3038,12 +3068,10 @@
                 
                 const payload = { idVenta: v['ID Venta'], saldoPendiente: nSaldo, totalOperacion: nTotal, productos: prods, metodoObj: mObj };
                 
-                updateProgress(70, "Guardando cambios...", "Sincronizando con Google Sheets...");
                 safeFetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "editarVenta", data: payload }) })
                 .then(res => res.json())
                 .then(json => {
                     if(json.status === "success") { 
-                        updateProgress(100, "¡Venta actualizada!", "Refrescando historial...");
                         document.getElementById("modalDetalleVenta").classList.replace("flex", "hidden"); 
                         showToast("Venta actualizada ✅"); 
                         refresh(true); 
@@ -3053,7 +3081,7 @@
                     }
                 }).catch(err => { 
                     hideLoader(); 
-                    if (err.name !== 'AbortError') showDialog("Error de red: " + err.message); 
+                    showDialog("Error de red: " + err.message); 
                 });
             } catch(e) { 
                 hideLoader(); 
@@ -3069,11 +3097,11 @@
             if (!cl) return showDialog("Ingresa el nombre del comprador para registrar la operación."); 
             if (carrito.length === 0) return showDialog("Añade al menos un producto al carrito."); 
             
-            showLoader("Validando carrito...", 20, "Calculando promociones y saldos...");
+            showLoader("Validando carrito y promociones...", 20, "Preparando registro de venta...");
             calcularDescuentosGlobales(carrito);
 
             const pd = carrito.map(i => {
-                const inv = db.inventario.find(p => String(p.Código) == String(i.codigo));
+                const inv = db.inventario.find(p => p.Código.toString() == i.codigo.toString());
                 let baseSub = i.precio * i.cantidad;
                 let subDescontado = baseSub - (i.descuentoParAplicado || 0);
                 let totalConRecargo = metodoVenta === 'pagos' ? subDescontado * (1 + (i.recargo/100)) : subDescontado;
@@ -3098,7 +3126,7 @@
             const sPendiente = Math.max(0, tv - ab);
             const metObj = { 
                 tipo: metodoVenta.toUpperCase(), 
-                abonos: [{fecha: new Date().toISOString(), monto: ab, vendedor: usuarioActual.Usuario}], 
+                abonos: [{fecha: new Date(), monto: ab, vendedor: usuarioActual.Usuario}], 
                 fechasProyectadas: (metodoVenta === 'pagos' && sPendiente > 0) ? generarFechasPagoProyectadas(new Date(), plazoQuincenas, sPendiente) : [], 
                 quincenas: plazoQuincenas 
             };
@@ -3112,14 +3140,16 @@
                 saldoPendiente: sPendiente, 
                 metodo: metodoVenta.toUpperCase(), 
                 metodoObj: metObj, 
-                fechaOriginal: new Date().toISOString() 
+                fechaOriginal: new Date() 
             };
             
             try {
-                updateProgress(55, "Registrando venta...", "Guardando en Google Sheets y descontando stock...");
+                updateProgress(50, "Sincronizando con Google Sheets...", "Descontando stock y guardando folio...");
                 const r = await safeFetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "registrarVenta", data: data }) }).then(res => res.json());
-                updateProgress(85, "Generando recibo...", "Creando comprobante digital...");
-                await generarReciboImagen({...data, idVenta: r.idVenta}); 
+                
+                updateProgress(85, "Generando Ticket Digital...", "Renderizando comprobante de venta...");
+                await generarReciboImagen({...data, idVenta: r.idVenta});
+                
                 carrito = []; 
                 renderCarrito(); 
                 document.getElementById("clienteNombre").value = ""; 
@@ -3127,44 +3157,44 @@
                 refresh(false);
             } catch (e) {
                 hideLoader();
-                if (e.name !== 'AbortError') showDialog("Ocurrió un problema de conexión al registrar la venta.");
+                showDialog("Hubo un problema al procesar la venta. Verifica tu conexión.");
             }
         }
 
         // =========================================================================
-        // REGISTRO DE ABONO CON PROGRESO REAL POR ETAPAS Y GENERACIÓN INMEDIATA DE RECIBO
+        // GENERACIÓN INSTANTÁNEA DE RECIBO DE ABONO CON BARRA DE PROGRESO REAL
         // =========================================================================
         async function ejecutarAbonoSeleccionado() { 
             const m = parseFloat(document.getElementById("montoAbonoManual").value); 
-            if(!m || m <= 0 || m > (cuentaParaAbonar.sal + 0.01)) {
-                return showDialog("Ingresa un importe válido que no supere el saldo deudor."); 
-            }
+            if(!m || m <= 0 || m > (cuentaParaAbonar.sal + 0.05)) return showDialog("Ingresa un importe válido que no supere el saldo deudor."); 
             
-            // Cerrar modal de captura y abrir progreso inmediatamente para respuesta instantánea
             document.getElementById("modalAbonarAhora").classList.replace("flex", "hidden");
-            showLoader("Validando abono...", 20, `Aplicando pago de $${m.toFixed(2)} a ${cuentaParaAbonar.nom}`);
+            showLoader("Aplicando abono a la cuenta...", 20, `Cliente: ${cuentaParaAbonar.nom} • Abono: $${m.toFixed(2)}`);
 
-            const nuevoSaldo = Math.max(0, cuentaParaAbonar.sal - m);
-            const ventaOriginal = db.ventas.find(v => String(v['ID Venta']).trim() === String(cuentaParaAbonar.id).trim());
+            const nuevoSaldo = Math.max(0, Number((cuentaParaAbonar.sal - m).toFixed(2)));
+            const ventaOriginal = db.ventas.find(x => String(x['ID Venta']).trim() === String(cuentaParaAbonar.id).trim());
             let prodsOriginales = [];
-            let mObjActualizado = { abonos: [], fechasProyectadas: [] };
+            let mObjActualizado = { tipo: 'PAGOS', abonos: [] };
 
             if (ventaOriginal) {
                 try { prodsOriginales = typeof ventaOriginal.Productos === 'string' ? JSON.parse(ventaOriginal.Productos || "[]") : (ventaOriginal.Productos || []); } catch(e){}
                 try { mObjActualizado = typeof ventaOriginal.MetodoPago === 'string' ? JSON.parse(ventaOriginal.MetodoPago || "{}") : (ventaOriginal.MetodoPago || {}); } catch(e){}
+                if (!Array.isArray(mObjActualizado.abonos)) mObjActualizado.abonos = [];
+                mObjActualizado.abonos.push({
+                    fecha: new Date().toISOString(),
+                    monto: m,
+                    vendedor: usuarioActual ? usuarioActual.Usuario : "Sistema"
+                });
+                ventaOriginal.ClienteContacto = nuevoSaldo;
+                ventaOriginal.MetodoPago = JSON.stringify(mObjActualizado);
             }
-            if (!Array.isArray(mObjActualizado.abonos)) mObjActualizado.abonos = [];
-            mObjActualizado.abonos.push({
-                fecha: new Date().toISOString(),
-                monto: m,
-                vendedor: usuarioActual ? usuarioActual.Usuario : "Sistema"
-            });
 
             const d = { 
                 vendedor: usuarioActual.Usuario, 
                 cliente: cuentaParaAbonar.nom, 
                 idVenta: cuentaParaAbonar.id.toString().trim(), 
                 pagoActual: m, 
+                saldoAnterior: cuentaParaAbonar.sal,
                 saldoPendiente: nuevoSaldo, 
                 totalOperacion: cuentaParaAbonar.tot,
                 productos: prodsOriginales,
@@ -3174,17 +3204,20 @@
             }; 
 
             try {
-                updateProgress(55, "Sincronizando abono...", "Guardando pago en Google Sheets...");
+                updateProgress(55, "Guardando abono en Google Sheets...", "Actualizando saldo e historial de pagos...");
                 await safeFetch(gasUrl, { method: "POST", body: JSON.stringify({ action: "registrarVenta", data: d }) });
+
                 document.getElementById("montoAbonoManual").value = "";
-                
-                updateProgress(85, "Generando recibo de abono...", "Renderizando comprobante actualizado...");
+                renderListaPendientes();
+
+                updateProgress(85, "¡Abono registrado! Creando recibo...", "Generando comprobante digital de abono...");
                 await generarReciboImagen(d);
+
                 showToast("Abono registrado y recibo generado ✅");
-                refresh(false); 
-            } catch (e) {
+                refresh(false);
+            } catch (err) {
                 hideLoader();
-                if (e.name !== 'AbortError') showDialog("Error de red al procesar el abono. Verifica tu conexión.");
+                showDialog("El servidor tardó en responder, pero puedes verificar el estado en Cuentas Pendientes.");
             }
         }
 
@@ -3211,10 +3244,12 @@
         }
 
         function refresh(mostrarCarga = false) { 
-            if (mostrarCarga) showLoader("Actualizando datos...", 35, "Descargando cambios recientes...");
+            if (mostrarCarga) {
+                showLoader("Sincronizando base de datos...", 35, "Descargando últimos movimientos de Google Sheets...");
+            }
             safeFetch(`${gasUrl}?action=obtenerDatos`)
                 .then(r => {
-                    if (mostrarCarga) updateProgress(75, "Procesando datos...", "Sincronizando vistas...");
+                    if (mostrarCarga) updateProgress(75, "Procesando datos...", "Actualizando tablas y gráficas...");
                     return r.text();
                 })
                 .then(text => {
@@ -3227,161 +3262,188 @@
                     if(document.getElementById("tab-usuarios").classList.contains("active")) renderUsuarios(); 
                     if(modoOperacion === 'pago') renderListaPendientes();
                     if(mostrarCarga) {
-                        updateProgress(100, "¡Sincronizado!", "Listo");
-                        setTimeout(() => hideLoader(), 180);
+                        updateProgress(100, "¡Sincronizado!", "Todo al día");
+                        setTimeout(() => hideLoader(), 200);
+                        showToast("Datos sincronizados con la nube");
                     }
                 })
                 .catch(() => { if(mostrarCarga) hideLoader(); }); 
         }
 
-        function reimprimirReciboHistorial(idVenta) {
-            showLoader("Generando comprobante...", 45, "Preparando formato de ticket...");
+        async function reimprimirReciboHistorial(idVenta) {
+            showLoader("Generando comprobante...", 40, `Preparando ticket del folio ${idVenta}...`);
             const v = db.ventas.find(x => x['ID Venta'] === idVenta); 
             if (!v) { hideLoader(); return; }
             
             let prods = []; try { prods = typeof v.Productos === 'string' ? JSON.parse(v.Productos || "[]") : v.Productos; } catch(e){} 
             let mObj = {}; try { mObj = typeof v.MetodoPago === 'string' ? JSON.parse(v.MetodoPago || "{}") : v.MetodoPago; } catch(e){}
             
-            generarReciboImagen({
-                idVenta: v['ID Venta'],
-                fechaPersonalizada: v.Fecha,
-                cliente: v.ClienteNombre,
-                vendedor: v.Vendedor,
-                productos: prods,
-                totalOperacion: parseFloat(v.Total) || 0,
-                pagoActual: (parseFloat(v.Total) || 0) - (parseFloat(v.ClienteContacto) || 0),
-                saldoPendiente: parseFloat(v.ClienteContacto) || 0,
-                metodoObj: mObj
-            });
+            const ticket = document.getElementById("canvasRecibo");
+            let items = (prods && prods.length > 0) ? prods.map(p => { 
+                let subtotal = p.totalCalculado !== undefined ? p.totalCalculado : (((parseFloat(p.precioFinal) || parseFloat(p.precio) || 0) * p.cantidad) - (p.descuentoParAplicado || 0));
+                let descTag = p.descuentoParAplicado > 0 ? `<br><i style="color:#059669; font-size:8px; font-weight:bold;">(Ahorro Pares: -$${p.descuentoParAplicado})</i>` : ``;
+                return `<div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:5px;"><div style="display:flex; flex-direction:column;"><span>${p.cantidad}x ${p.nombre.substring(0,18)}</span>${descTag}</div><span>$${Number(subtotal).toFixed(2)}</span></div>`; 
+            }).join('') : `<div style="font-size:10px;">COMPROBANTE DE OPERACIÓN</div>`;
+            
+            let historialHtml = "";
+            if(mObj.abonos && mObj.abonos.length > 0) {
+                historialHtml += `<div style="border-top:1px dashed #ccc; padding-top:5px; margin-top:5px;"><p style="font-size:8px; font-weight:bold; text-transform:uppercase;">Historial de Pagos:</p>`;
+                mObj.abonos.forEach(a => { 
+                    historialHtml += `<div style="display:flex; justify-content:space-between; font-size:9px;"><span>${new Date(a.fecha).toLocaleDateString()}</span><span>$${(parseFloat(a.monto) || 0).toFixed(2)}</span></div>`; 
+                }); 
+                historialHtml += `</div>`;
+            }
+            if(mObj.fechasProyectadas && mObj.fechasProyectadas.length > 0 && v.ClienteContacto > 0) {
+                historialHtml += `<div style="border-top:1px dashed #ccc; padding-top:5px; margin-top:5px;"><p style="font-size:8px; font-weight:bold; text-transform:uppercase;">Plan de Pagos:</p>`;
+                mObj.fechasProyectadas.forEach((fp,i) => { 
+                    historialHtml += `<div style="display:flex; justify-content:space-between; font-size:9px;"><span>Q${i+1} - ${new Date(fp.fecha).toLocaleDateString()}</span><span>$${(parseFloat(fp.monto) || 0).toFixed(2)}</span></div>`; 
+                }); 
+                historialHtml += `</div>`;
+            }
+
+            ticket.innerHTML = `
+                <div style="text-align:center; font-weight:900; border-bottom:2px dashed #000; padding-bottom:10px; margin-bottom:10px; font-size:14px;">*** SGV PRO ***</div>
+                <div style="font-size:10px; margin-bottom:10px;"><b>FECHA:</b> ${new Date(v.Fecha).toLocaleString()}<br><b>FOLIO:</b> ${v['ID Venta']}<br><b>CLIENTE:</b> ${v.ClienteNombre}</div>
+                <div style="border-bottom:1px dashed #ccc; padding-bottom:5px; margin-bottom:5px;">${items}</div>
+                <div style="font-weight:900; text-align:right; font-size:12px;">TOTAL: $${(parseFloat(v.Total) || 0).toFixed(2)}<br>SALDO PENDIENTE: $${(parseFloat(v.ClienteContacto) || 0).toFixed(2)}</div>
+                ${historialHtml}
+            `;
+            
+            await renderizarTicketCanvas(ticket);
         }
 
         async function generarReciboImagen(d) {
-            updateProgress(85, "Renderizando recibo digital...", "Construyendo imagen del comprobante...");
+            updateProgress(88, "Renderizando recibo digital...", "Construyendo imagen de alta nitidez...");
             const ticket = document.getElementById("canvasRecibo");
             
             let items = (d.productos && d.productos.length > 0) ? d.productos.map(p => { 
                 let subtotal = p.totalCalculado !== undefined ? p.totalCalculado : (((parseFloat(p.precioFinal) || parseFloat(p.precio) || 0) * p.cantidad) - (p.descuentoParAplicado || 0));
                 let descTag = p.descuentoParAplicado > 0 ? `<br><i style="color:#059669; font-size:8px; font-weight:bold;">(Ahorro Pares: -$${p.descuentoParAplicado})</i>` : ``;
-                return `<div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:5px;"><div style="display:flex; flex-direction:column;"><span>${p.cantidad}x ${String(p.nombre || "").substring(0,20)}</span>${descTag}</div><span>$${Number(subtotal).toFixed(2)}</span></div>`; 
-            }).join('') : `<div style="font-size:10px; font-weight:bold; text-align:center; padding:6px 0;">COMPROBANTE DE ABONO A CUENTA</div>`;
+                return `<div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:5px;"><div style="display:flex; flex-direction:column;"><span>${p.cantidad}x ${p.nombre.substring(0,18)}</span>${descTag}</div><span>$${Number(subtotal).toFixed(2)}</span></div>`; 
+            }).join('') : `<div style="font-size:11px; font-weight:bold; text-align:center; padding:6px 0;">COMPROBANTE DE ABONO A CUENTA</div>`;
             
+            let resumenMontosHtml = "";
+            if (d.esAbono) {
+                const sAnt = d.saldoAnterior !== undefined ? parseFloat(d.saldoAnterior) : ((parseFloat(d.saldoPendiente) || 0) + (parseFloat(d.pagoActual) || 0));
+                resumenMontosHtml = `
+                    <div style="font-size:11px; text-align:right; line-height:1.5;">
+                        TOTAL OPERACIÓN: $${(parseFloat(d.totalOperacion) || 0).toFixed(2)}<br>
+                        SALDO ANTERIOR: $${sAnt.toFixed(2)}<br>
+                        <b style="font-size:13px;">ABONO HOY: $${(parseFloat(d.pagoActual) || 0).toFixed(2)}</b><br>
+                        <b>NUEVO SALDO: $${(parseFloat(d.saldoPendiente) || 0).toFixed(2)}</b>
+                    </div>
+                `;
+            } else {
+                resumenMontosHtml = `
+                    <div style="font-weight:900; text-align:right; font-size:12px;">
+                        TOTAL: $${(parseFloat(d.totalOperacion) || 0).toFixed(2)}<br>
+                        PAGADO HOY: $${(parseFloat(d.pagoActual) || 0).toFixed(2)}<br>
+                        SALDO RESTANTE: $${(parseFloat(d.saldoPendiente) || 0).toFixed(2)}
+                    </div>
+                `;
+            }
+
             let historialAbonosHtml = "";
             if (d.metodoObj && Array.isArray(d.metodoObj.abonos) && d.metodoObj.abonos.length > 0) {
-                historialAbonosHtml = `<div style="border-top:1px dashed #ccc; padding-top:8px; margin-top:8px;"><p style="font-size:8px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Historial de Abonos:</p>`;
+                historialAbonosHtml = `<div style="border-top:1px dashed #ccc; padding-top:8px; margin-top:8px;"><p style="font-size:8px; font-weight:bold; text-transform:uppercase;">Pagos Registrados:</p>`;
                 d.metodoObj.abonos.forEach((ab, idx) => {
-                    historialAbonosHtml += `<div style="display:flex; justify-content:space-between; font-size:9px;"><span>#${idx+1} (${new Date(ab.fecha).toLocaleDateString()})</span><span>+$${(parseFloat(ab.monto) || 0).toFixed(2)}</span></div>`;
+                    historialAbonosHtml += `<div style="display:flex; justify-content:space-between; font-size:9px;"><span>#${idx+1} (${new Date(ab.fecha).toLocaleDateString()})</span><span>$${(parseFloat(ab.monto) || 0).toFixed(2)}</span></div>`;
                 });
                 historialAbonosHtml += `</div>`;
             }
 
             let fechasHtml = "";
             if (d.metodoObj && d.metodoObj.fechasProyectadas && d.metodoObj.fechasProyectadas.length > 0 && (parseFloat(d.saldoPendiente) || 0) > 0) {
-                fechasHtml = `<div style="border-top:1px dashed #ccc; padding-top:8px; margin-top:8px;"><p style="font-size:8px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Calendario Quincenal:</p>`;
+                fechasHtml = `<div style="border-top:1px dashed #ccc; padding-top:8px; margin-top:8px;"><p style="font-size:8px; font-weight:bold; text-transform:uppercase;">Plan Quincenal:</p>`;
                 d.metodoObj.fechasProyectadas.forEach((fp, i) => { 
                     fechasHtml += `<div style="display:flex; justify-content:space-between; font-size:9px;"><span>Q${i+1} - ${new Date(fp.fecha).toLocaleDateString()}</span><span>$${(parseFloat(fp.monto) || 0).toFixed(2)}</span></div>`; 
                 }); 
                 fechasHtml += `</div>`;
             }
-
-            const fechaMostrar = d.fechaPersonalizada ? new Date(d.fechaPersonalizada).toLocaleString() : new Date().toLocaleString();
-            const etiquetaTipo = d.esAbono ? "RECIBO DE ABONO" : "TICKET DE VENTA";
             
             ticket.innerHTML = `
-                <div style="text-align:center; font-weight:900; border-bottom:2px dashed #000; padding-bottom:8px; margin-bottom:10px;">
-                    <div style="font-size:15px;">*** SGV PRO ***</div>
-                    <div style="font-size:9px; margin-top:2px;">${etiquetaTipo}</div>
-                </div>
-                <div style="font-size:10px; margin-bottom:10px; line-height:1.4;">
-                    <b>FECHA:</b> ${fechaMostrar}<br>
-                    <b>FOLIO:</b> ${d.idVenta || 'N/A'}<br>
-                    <b>CLIENTE:</b> ${d.cliente}<br>
-                    <b>ATENDIÓ:</b> ${d.vendedor || (usuarioActual ? usuarioActual.Usuario : 'Sistema')}
-                </div>
+                <div style="text-align:center; font-weight:900; border-bottom:2px dashed #000; padding-bottom:10px; margin-bottom:10px; font-size:14px;">*** SGV PRO ***<br><span style="font-size:10px; font-weight:bold;">${d.esAbono ? 'RECIBO DE ABONO' : 'TICKET DE VENTA'}</span></div>
+                <div style="font-size:10px; margin-bottom:10px;"><b>FECHA:</b> ${new Date().toLocaleString()}<br><b>FOLIO:</b> ${d.idVenta || 'N/A'}<br><b>CLIENTE:</b> ${d.cliente}<br><b>ATENDIÓ:</b> ${d.vendedor || 'Sistema'}</div>
                 <div style="border-bottom:1px dashed #ccc; padding-bottom:8px; margin-bottom:8px;">${items}</div>
-                <div style="font-weight:900; text-align:right; font-size:11px; line-height:1.5;">
-                    TOTAL OPERACIÓN: $${(parseFloat(d.totalOperacion) || 0).toFixed(2)}<br>
-                    ${d.esAbono ? `ABONADO HOY: $${(parseFloat(d.pagoActual) || 0).toFixed(2)}<br>` : `PAGADO: $${(parseFloat(d.pagoActual) || 0).toFixed(2)}<br>`}
-                    <span style="font-size:13px;">SALDO RESTANTE: $${(parseFloat(d.saldoPendiente) || 0).toFixed(2)}</span>
-                </div>
+                ${resumenMontosHtml}
                 ${historialAbonosHtml}
                 ${fechasHtml}
-                <div style="text-align:center; font-size:8px; margin-top:12px; padding-top:8px; border-top:1px dashed #ccc;">
-                    ¡Gracias por su preferencia!
-                </div>
+                <div style="text-align:center; font-size:9px; margin-top:12px; padding-top:8px; border-top:1px dashed #000;">¡Gracias por su preferencia!</div>
             `;
             
-            await new Promise(resolve => setTimeout(resolve, 120));
+            await renderizarTicketCanvas(ticket);
+        }
+
+        async function renderizarTicketCanvas(ticketElement) {
             try {
-                const c = await html2canvas(ticket, { scale: 2, useCORS: true, logging: false });
-                updateProgress(100, "¡Recibo listo!", "Mostrando comprobante...");
-                document.getElementById("imgReciboFinal").src = c.toDataURL(); 
-                document.getElementById("modalRecibo").classList.replace("hidden", "flex"); 
+                await new Promise(r => setTimeout(r, 80));
+                const canvas = await html2canvas(ticketElement, {
+                    scale: 2,
+                    backgroundColor: "#ffffff",
+                    logging: false
+                });
+                document.getElementById("imgReciboFinal").src = canvas.toDataURL("image/png");
+                const modalRec = document.getElementById("modalRecibo");
+                modalRec.classList.remove("hidden");
+                modalRec.classList.add("flex");
+                updateProgress(100, "¡Recibo Listo!", "Comprobante generado");
+                setTimeout(() => hideLoader(), 150);
+            } catch (e) {
                 hideLoader();
-            } catch (err) {
-                hideLoader();
-                showDialog("El pago se registró pero no se pudo renderizar la vista previa del ticket.");
+                showDialog("El pago fue registrado, pero no se pudo renderizar la vista previa del ticket.");
             }
         }
 
         // =========================================================================
-        // RENDER DE CUENTAS PENDIENTES EN "REGISTRAR ABONO" CON CONTORNO POR SEMÁFORO
+        // TARJETAS DE REGISTRO DE ABONO CON CONTORNO DE COLOR, INSIGNIA Y BARRA
         // =========================================================================
         function renderListaPendientes() { 
             const cont = document.getElementById("listaPendientes"); 
             const q = (document.getElementById("inputBusquedaPendiente")?.value || "").toLowerCase(); 
-            const pendientes = (db.ventas || []).filter(v => 
-                (parseFloat(v.ClienteContacto) || 0) > 0.01 && 
-                (String(v.ClienteNombre || "").toLowerCase().includes(q) || String(v['ID Venta'] || "").toLowerCase().includes(q))
-            ); 
+            const p = (db.ventas || []).filter(v => (parseFloat(v.ClienteContacto) || 0) > 0.01 && (
+                String(v.ClienteNombre || "").toLowerCase().includes(q) ||
+                String(v['ID Venta'] || "").toLowerCase().includes(q)
+            )); 
             
-            if(pendientes.length === 0) {
+            if(p.length === 0) {
                 cont.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-semibold bg-white rounded-3xl border border-slate-100">No hay cuentas pendientes por cobrar</div>`;
                 return;
             }
 
-            // Enriquecer cada cuenta con su semáforo quincenal y ordenar por prioridad de cobro (Rojo primero)
-            const enriquecidas = pendientes.map(v => ({
-                v,
-                sem: evaluarEstadoCobranza(v)
-            })).sort((a, b) => b.sem.quincenasAtraso - a.sem.quincenasAtraso);
+            const ordenPrioridad = { ROJO: 1, NARANJA: 2, AMARILLO: 3, VERDE: 4, AZUL: 5 };
+            const enriquecidas = p.map(v => ({ v, est: evaluarEstadoCobranza(v) }));
+            enriquecidas.sort((a, b) => (ordenPrioridad[a.est.codigo] || 9) - (ordenPrioridad[b.est.codigo] || 9));
 
-            cont.innerHTML = enriquecidas.map(({ v, sem }) => {
+            cont.innerHTML = enriquecidas.map(({ v, est }) => {
                 const safeId = String(v['ID Venta'] || "").replace(/'/g, "&apos;").replace(/"/g, "&quot;");
                 const safeName = String(v.ClienteNombre || "").replace(/'/g, "&apos;").replace(/"/g, "&quot;");
                 const saldo = parseFloat(v.ClienteContacto) || 0;
                 const total = parseFloat(v.Total) || 0;
 
                 return `
-                <div onclick="abrirAbonoDirecto('${safeId}', ${saldo}, '${safeName}', ${total})" class="bg-white p-5 rounded-3xl border-2 ${sem.cardBorderClass} ${sem.leftStripeClass} shadow-argon flex flex-col justify-between cursor-pointer shadow-argon-hover transition-all">
-                    <div>
-                        <div class="flex justify-between items-start gap-2 mb-2.5">
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${sem.badgeClass} flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full ${sem.dotColor}"></span>
-                                ${sem.label}
+                <div onclick="abrirAbonoDirecto('${safeId}', ${saldo}, '${safeName}', ${total})" class="bg-white p-5 rounded-3xl border-2 ${est.cardBorderClass} ${est.leftStripeClass} shadow-argon flex flex-col justify-between cursor-pointer shadow-argon-hover transition-all gap-3">
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="min-w-0">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold border ${est.badgeClass} mb-1.5">
+                                <span class="w-2 h-2 rounded-full ${est.dotColor}"></span>
+                                ${est.label}
                             </span>
-                            <span class="text-[10px] text-slate-400 font-bold">#${v['ID Venta']}</span>
+                            <p class="text-sm font-extrabold text-slate-800 uppercase truncate">${v.ClienteNombre}</p>
+                            <p class="text-[10px] text-slate-400 font-bold">Folio: ${v['ID Venta']} • ${new Date(v.Fecha).toLocaleDateString()}</p>
                         </div>
-
-                        <div class="flex items-center justify-between gap-3">
-                            <div>
-                                <p class="text-sm font-extrabold text-slate-800 uppercase">${v.ClienteNombre}</p>
-                                <p class="text-[11px] text-slate-500 font-semibold mt-0.5">${sem.detalle} • Vend: ${v.Vendedor || 'Sistema'}</p>
-                            </div>
-                            <div class="text-right shrink-0">
-                                <span class="text-[9px] font-extrabold uppercase text-rose-400 block">Saldo Deudor</span>
-                                <b class="text-lg font-black text-rose-600">$${saldo.toFixed(2)}</b>
-                            </div>
+                        <div class="text-right shrink-0">
+                            <span class="text-[9px] font-extrabold uppercase text-rose-400 block">Saldo Deudor</span>
+                            <b class="text-lg font-black text-rose-600">$${saldo.toFixed(2)}</b>
                         </div>
                     </div>
 
-                    <!-- Barra de Progreso de Liquidación del Cliente -->
-                    <div class="mt-3.5 pt-2.5 border-t border-slate-100">
-                        <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
-                            <span>Abonado: $${sem.pagadoReal.toFixed(2)} de $${total.toFixed(2)}</span>
-                            <span class="text-slate-600 font-extrabold">${sem.porcentajePagado}%</span>
+                    <div>
+                        <div class="flex justify-between text-[10px] font-bold text-slate-500 mb-1">
+                            <span>${est.detalle}</span>
+                            <span>Pagado: $${est.pagadoReal.toFixed(2)} / $${total.toFixed(2)} (${est.porcentajePagado}%)</span>
                         </div>
-                        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full ${sem.dotColor} rounded-full transition-all" style="width: ${sem.porcentajePagado}%"></div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div class="${est.dotColor} h-full rounded-full transition-all" style="width: ${est.porcentajePagado}%"></div>
                         </div>
                     </div>
                 </div>`;
@@ -3393,16 +3455,15 @@
         function abrirAbonoDirecto(id, sal, nom, tot) { 
             cuentaParaAbonar = { id, sal, nom, tot }; 
             const v = db.ventas.find(x => String(x['ID Venta']) === String(id));
-            const sem = v ? evaluarEstadoCobranza(v) : null;
-            const badgeSem = sem ? `<span class="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold border ${sem.badgeClass} mb-2">${sem.label} • ${sem.detalle}</span>` : '';
+            const est = v ? evaluarEstadoCobranza(v) : null;
 
             document.getElementById("infoCuentaSeleccionada").innerHTML = `
                 <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-argon-primary flex items-center justify-center mx-auto mb-2 text-lg">
                     <i class="fa-solid fa-hand-holding-dollar"></i>
                 </div>
-                ${badgeSem}
+                ${est ? `<span class="inline-block px-3 py-1 rounded-lg text-[10px] font-extrabold border ${est.badgeClass} mb-2">${est.label} • ${est.detalle}</span>` : ''}
                 <p class="font-extrabold text-slate-800 uppercase text-sm">${nom}</p>
-                <p class="text-[10px] text-slate-400 font-bold mb-3">Folio: ${id} • Total Venta: $${Number(tot).toFixed(2)}</p>
+                <p class="text-[10px] text-slate-400 font-bold mb-3">Folio: ${id} • Total Venta: $${tot.toFixed(2)}</p>
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/70">
                     <p class="text-[10px] uppercase font-extrabold text-slate-400">Saldo Pendiente Actual</p>
                     <b class="text-3xl font-black text-rose-600">$${sal.toFixed(2)}</b>
